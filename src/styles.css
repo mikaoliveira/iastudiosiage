@@ -1,0 +1,712 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark-theme, .dark-mode, [data-theme="dark"], [data-theme="dark"] *));
+
+@import "@angular/material/prebuilt-themes/azure-blue.css";
+
+@theme {
+  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+
+  --color-siage-primary: var(--siage-primary);
+  --color-siage-background: var(--siage-background);
+  --color-siage-surface: var(--siage-surface);
+  --color-siage-card: var(--siage-card);
+  --color-siage-secondary: var(--siage-secondary);
+  --color-siage-border: var(--siage-border);
+  --color-siage-text-primary: var(--siage-text-primary);
+  --color-siage-text-secondary: var(--siage-text-secondary);
+  --color-siage-success: var(--siage-success);
+  --color-siage-warning: var(--siage-warning);
+  --color-siage-info: var(--siage-info);
+  --color-siage-destructive: var(--siage-destructive);
+
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-destructive: var(--destructive);
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-border: var(--border);
+}
+
+:root {
+  /* Tokens Semânticos Oficiais SIAGE Design System - Tema Claro */
+  --primary: #0D68D4;
+  --secondary: #DDDDDE;
+  --success: #3C8004;
+  --warning: #856A00;
+  --info: #006885;
+  --destructive: #D20D68;
+  --background: #F8FAFC;
+  --card: #FFFFFF;
+  --border: rgba(13, 104, 212, 0.12);
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+
+  /* Aliases do sistema para manter o design original limpo e harmonioso */
+  --siage-primary: #0D68D4;
+  --siage-secondary: #0F172A;
+  --siage-success: var(--success);
+  --siage-warning: var(--warning);
+  --siage-info: var(--info);
+  --siage-destructive: var(--destructive);
+  --siage-background: #F8FAFC;
+  --siage-surface: #FFFFFF;
+  --siage-surface-rgb: 255, 255, 255;
+  --siage-card: #FFFFFF;
+  --siage-border: rgba(13, 104, 212, 0.12);
+  --siage-text-primary: #1E293B;
+  --siage-text-secondary: #64748B;
+
+  /* Fundos OPACOS para toasts (sem transparência) */
+  --toast-success-bg: #EEF7E6;
+  --toast-info-bg: #E6F4F8;
+  --toast-warning-bg: #FAF5E4;
+  --toast-destructive-bg: #FCE8F0;
+
+  --success-tint: var(--toast-success-bg);
+  --warning-tint: var(--toast-warning-bg);
+  --info-tint: var(--toast-info-bg);
+  --destructive-tint: var(--toast-destructive-bg);
+
+  --siage-primary-rgb: 13, 104, 212;
+  --primary-tint-8: rgba(13, 104, 212, 0.08);
+  --primary-tint-10: rgba(13, 104, 212, 0.10);
+  --primary-tint-15: rgba(13, 104, 212, 0.15);
+
+  --mat-sys-primary: var(--siage-primary);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-on-surface: var(--siage-text-primary);
+  --mat-sys-on-surface-variant: var(--siage-text-secondary);
+  --mat-sys-surface: var(--siage-surface);
+  --mat-sys-surface-container: var(--siage-surface);
+  --mat-sys-outline: rgba(13, 104, 212, 0.25);
+  --mat-sys-outline-variant: var(--siage-border);
+  --mat-sys-error: var(--destructive);
+  --mat-form-field-error-text-color: var(--destructive);
+
+  --siage-button-disabled-bg: rgba(30, 41, 59, 0.12);
+  --siage-button-disabled-text: rgba(30, 41, 59, 0.38);
+
+  --mat-sys-corner-large: 12px;
+  --mat-sys-corner-small: 8px;
+  --mat-form-field-outlined-container-shape: 8px;
+  --mat-form-field-filled-container-shape: 8px;
+  --mat-sys-level3: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+  --mat-sys-level2: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+  --mat-sys-level1: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"], .dark-theme, .dark-mode {
+  /* Tokens Semânticos Oficiais SIAGE Design System - Tema Escuro */
+  --primary: #FD4D8C;
+  --secondary: #24304A;
+  --success: #68D40D;
+  --warning: #B28F00;
+  --info: #3DD5FF;
+  --destructive: #FF7A66;
+  --background: #0B0F19;
+  --card: #151D30;
+  --border: rgba(255, 255, 255, 0.08);
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+
+  /* Aliases do sistema para manter o design original limpo e harmonioso */
+  --siage-primary: #fd4d8c;
+  --siage-secondary: #0A0D14;
+  --siage-success: var(--success);
+  --siage-warning: var(--warning);
+  --siage-info: var(--info);
+  --siage-destructive: var(--destructive);
+  --siage-background: #0B0F19;
+  --siage-surface: #151D30;
+  --siage-surface-rgb: 21, 29, 48;
+  --siage-card: #29292c;
+  --siage-border: rgba(255, 255, 255, 0.08);
+  --siage-text-primary: #F8FAFC;
+  --siage-text-secondary: #94A3B8;
+
+  /* Fundos OPACOS para toasts (sem transparência) no tema escuro */
+  --toast-success-bg: #142909;
+  --toast-info-bg: #0B2533;
+  --toast-warning-bg: #2C2203;
+  --toast-destructive-bg: #33141B;
+
+  --success-tint: var(--toast-success-bg);
+  --warning-tint: var(--toast-warning-bg);
+  --info-tint: var(--toast-info-bg);
+  --destructive-tint: var(--toast-destructive-bg);
+
+  --mat-sys-primary: var(--primary);
+  --mat-sys-on-primary: #111112;
+  --mat-sys-on-surface: var(--siage-text-primary);
+  --mat-sys-on-surface-variant: var(--siage-text-secondary);
+  --mat-sys-surface: var(--siage-surface);
+  --mat-sys-surface-container: var(--siage-surface);
+  --mat-sys-outline: rgba(255, 255, 255, 0.2);
+  --mat-sys-outline-variant: var(--siage-border);
+  --mat-sys-error: var(--destructive);
+  --mat-form-field-error-text-color: var(--destructive);
+
+  --primary-tint-8: rgba(253, 77, 140, 0.15);
+  --primary-tint-10: rgba(253, 77, 140, 0.20);
+  --primary-tint-15: rgba(253, 77, 140, 0.25);
+
+  --siage-button-disabled-bg: rgba(248, 250, 252, 0.12);
+  --siage-button-disabled-text: rgba(248, 250, 252, 0.38);
+
+  --mat-sys-level3: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  --mat-sys-level2: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+  --mat-sys-level1: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--siage-background);
+  color: var(--siage-text-primary);
+  font-family: var(--font-sans);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Header & Footer surface colors */
+#app-header, header#app-header {
+  background-color: var(--siage-surface);
+  border-bottom-color: var(--siage-border);
+}
+
+#app-footer, footer#app-footer {
+  background-color: var(--siage-surface);
+  border-top-color: var(--siage-border);
+}
+
+.siage-brand-title {
+  color: #000000;
+}
+
+.siage-brand-subtitle {
+  color: #3775EA;
+}
+
+[data-theme="dark"] .siage-brand-title,
+.dark .siage-brand-title,
+.dark-theme .siage-brand-title,
+.dark-mode .siage-brand-title {
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .siage-brand-subtitle,
+.dark .siage-brand-subtitle,
+.dark-theme .siage-brand-subtitle,
+.dark-mode .siage-brand-subtitle {
+  color: #589DF6 !important;
+}
+
+/* Material styles overrides to blend perfectly with our tokens */
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-text-field-wrapper {
+  border-radius: 8px !important;
+}
+
+/* Standard focus ring and custom designs */
+input:focus {
+  outline: none;
+}
+
+/* Theme-aware overrides for specific Material Components */
+.mat-mdc-toolbar, mat-toolbar {
+  background-color: rgba(var(--siage-surface-rgb), 0.8) !important;
+  color: var(--siage-text-primary) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.mat-mdc-checkbox .mdc-label {
+  color: var(--siage-text-primary) !important;
+  transition: color 0.2s ease;
+}
+
+/* ==========================================================================
+   Design System: Padrão Global de Campos de Formulário (SIAGE-RH V2)
+   Estrutura: LABEL FIXA ACIMA -> INPUT COM PLACEHOLDER -> MENSAGEM DE ERRO ABAIXO
+   ========================================================================== */
+.form-field-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Reusable form field label to align inputs and accommodate icons perfectly */
+.siage-field-label,
+.form-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: inherit;
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 600;
+  line-height: 1.25rem;
+  color: var(--siage-text-primary);
+  margin-bottom: 0.375rem; /* 6px de respiro acima do input */
+  user-select: none;
+  transition: color 0.15s ease-in-out;
+}
+
+.siage-field-label .required-marker,
+.form-label .required-marker,
+.siage-field-label .text-red-500,
+.form-label .text-red-500 {
+  color: var(--mat-sys-error, #dc2626) !important;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+/* Garante que o mat-form-field ocupe toda a largura no container */
+.form-field-group > mat-form-field {
+  width: 100%;
+}
+
+/* Reserva de espaço permanente para o subscript (mensagens de erro/apoio) sem empurrar elementos */
+.mat-mdc-form-field-subscript-wrapper {
+  box-sizing: border-box;
+}
+
+mat-form-field[subscriptSizing="fixed"] .mat-mdc-form-field-subscript-wrapper {
+  min-height: 1.35rem;
+  margin-top: 0.15rem;
+}
+
+/* Campos compactos de autenticação para ajuste vertical perfeito em laptops/desktops */
+.compact-auth-field .mat-mdc-text-field-wrapper {
+  height: 42px !important;
+  border-radius: 8px !important;
+}
+
+.compact-auth-field .mat-mdc-form-field-infix {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  min-height: 42px !important;
+}
+
+.compact-auth-field .mat-mdc-input-element {
+  font-size: 0.8125rem !important; /* 13px */
+  line-height: 1.25rem !important;
+}
+
+.compact-auth-field .mat-mdc-form-field-subscript-wrapper {
+  min-height: 18px !important;
+  height: 18px !important;
+  margin-top: 1px !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+}
+
+.compact-auth-field .mat-mdc-form-field-error {
+  font-size: 0.6875rem !important; /* 11px */
+  line-height: 1.15 !important;
+  display: block !important;
+}
+
+/* Material Form Field & Input Override to adapt dynamically to the theme */
+.mat-mdc-form-field-label, .mdc-floating-label, .mat-mdc-floating-label {
+  color: var(--mat-sys-on-surface-variant, var(--siage-text-secondary)) !important;
+}
+
+.mat-focused:not(.mat-form-field-invalid) .mat-mdc-form-field-label, 
+.mat-focused:not(.mat-form-field-invalid) .mdc-floating-label {
+  color: var(--mat-sys-primary, var(--siage-primary)) !important;
+}
+
+.mat-mdc-input-element, input.mat-mdc-input-element {
+  color: var(--mat-sys-on-surface) !important;
+  caret-color: var(--siage-primary) !important;
+}
+
+.mat-mdc-input-element::placeholder {
+  color: var(--siage-text-secondary) !important;
+  opacity: 0.65;
+  font-family: inherit;
+}
+
+/* Outlined borders transition and theming */
+.mdc-notched-outline__leading,
+.mdc-notched-outline__notch,
+.mdc-notched-outline__trailing {
+  border-color: var(--siage-border) !important;
+  transition: border-color 0.2s ease;
+}
+
+.mdc-notched-outline__leading {
+  border-right: none !important;
+}
+
+.mdc-notched-outline__notch {
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.mdc-notched-outline__trailing {
+  border-left: none !important;
+}
+
+.mat-mdc-text-field-wrapper:hover:not(.mdc-text-field--invalid) .mdc-notched-outline__leading,
+.mat-mdc-text-field-wrapper:hover:not(.mdc-text-field--invalid) .mdc-notched-outline__notch,
+.mat-mdc-text-field-wrapper:hover:not(.mdc-text-field--invalid) .mdc-notched-outline__trailing {
+  border-color: var(--siage-primary) !important;
+}
+
+.mat-focused:not(.mat-form-field-invalid) .mdc-notched-outline__leading,
+.mat-focused:not(.mat-form-field-invalid) .mdc-notched-outline__notch,
+.mat-focused:not(.mat-form-field-invalid) .mdc-notched-outline__trailing {
+  border-color: var(--siage-primary) !important;
+}
+
+/* Material Form Field Invalid State Overrides (Red outline, red label, red caret) */
+.mat-form-field-invalid .mat-mdc-form-field-label,
+.mat-form-field-invalid .mdc-floating-label,
+.mat-form-field-invalid.mat-focused .mat-mdc-form-field-label,
+.mat-form-field-invalid.mat-focused .mdc-floating-label,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-floating-label,
+.mdc-text-field--invalid .mdc-floating-label {
+  color: var(--mat-sys-error, #dc2626) !important;
+}
+
+.mat-form-field-invalid .mdc-notched-outline__leading,
+.mat-form-field-invalid .mdc-notched-outline__notch,
+.mat-form-field-invalid .mdc-notched-outline__trailing,
+.mat-form-field-invalid.mat-focused .mdc-notched-outline__leading,
+.mat-form-field-invalid.mat-focused .mdc-notched-outline__notch,
+.mat-form-field-invalid.mat-focused .mdc-notched-outline__trailing,
+.mat-form-field-invalid .mat-mdc-text-field-wrapper:hover .mdc-notched-outline__leading,
+.mat-form-field-invalid .mat-mdc-text-field-wrapper:hover .mdc-notched-outline__notch,
+.mat-form-field-invalid .mat-mdc-text-field-wrapper:hover .mdc-notched-outline__trailing,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__trailing,
+.mdc-text-field--invalid .mdc-notched-outline__leading,
+.mdc-text-field--invalid .mdc-notched-outline__notch,
+.mdc-text-field--invalid .mdc-notched-outline__trailing {
+  border-color: var(--mat-sys-error, #dc2626) !important;
+}
+
+.mat-form-field-invalid .mat-mdc-input-element,
+.mdc-text-field--invalid .mat-mdc-input-element {
+  caret-color: var(--mat-sys-error, #dc2626) !important;
+}
+
+.mat-mdc-form-field-error {
+  color: var(--mat-sys-error, #dc2626) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+  display: block !important;
+}
+
+/* Padrão visual do SIAGE RH V2 para campos de formulário desabilitados */
+.mat-mdc-form-field.mat-form-field-disabled .mat-mdc-text-field-wrapper,
+.mat-form-field-disabled .mat-mdc-text-field-wrapper,
+.mdc-text-field--disabled {
+  background-color: #f1f5f9 !important;
+  cursor: not-allowed !important;
+  opacity: 0.9 !important;
+}
+
+[data-theme="dark"] .mat-mdc-form-field.mat-form-field-disabled .mat-mdc-text-field-wrapper,
+[data-theme="dark"] .mat-form-field-disabled .mat-mdc-text-field-wrapper,
+[data-theme="dark"] .mdc-text-field--disabled {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  cursor: not-allowed !important;
+}
+
+.mat-mdc-form-field.mat-form-field-disabled .mat-mdc-select-trigger,
+.mat-mdc-form-field.mat-form-field-disabled input {
+  cursor: not-allowed !important;
+}
+
+/* Direct custom support for button[matButton="filled"] matching Material standard spec */
+button[matButton="filled"]:not(:disabled), [matButton="filled"]:not(:disabled) {
+  background-color: var(--mat-sys-primary) !important;
+  color: var(--mat-sys-on-primary) !important;
+}
+
+button[matButton="filled"], [matButton="filled"] {
+  border-radius: 8px !important;
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+button[matButton="filled"]:hover:not(:disabled), [matButton="filled"]:hover:not(:disabled) {
+  opacity: 0.9 !important;
+}
+
+mat-sidenav-container,
+.mat-drawer-container {
+  background-color: var(--siage-background) !important;
+}
+
+.mat-mdc-card, mat-card {
+  background-color: var(--siage-card) !important;
+  color: var(--siage-text-primary) !important;
+  border-color: var(--siage-border) !important;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Ensure all Angular Material components resolve font-family correctly to our defined token */
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-outlined-button,
+.mat-mdc-form-field,
+.mat-mdc-input-element,
+.mat-mdc-select,
+.mat-mdc-option,
+.mat-mdc-dialog-container,
+.mat-mdc-tab,
+.mat-mdc-tab-link,
+.mat-mdc-tooltip,
+.mat-mdc-chip,
+.mat-mdc-snack-bar-container {
+  font-family: var(--font-sans);
+}
+
+/* Suppress browser native password reveal icon */
+input[type="password"]::-ms-reveal {
+  display: none;
+}
+
+/* Erros em campos de formulário (Design System SIAGE) */
+mat-error,
+.mat-mdc-form-field-error {
+  color: #dc2626 !important;
+  display: flex !important;
+  align-items: center !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25 !important;
+  font-weight: 500 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+html.dark-mode mat-error,
+html.dark-mode .mat-mdc-form-field-error,
+.dark-theme mat-error,
+.dark-mode mat-error,
+[data-theme="dark"] mat-error,
+.dark-theme .mat-mdc-form-field-error,
+.dark-mode .mat-mdc-form-field-error,
+[data-theme="dark"] .mat-mdc-form-field-error {
+  color: #f87171 !important;
+}
+
+/* Reserva permanente de espaço estrutural para erro / apoio (Design System SIAGE) */
+.mat-mdc-form-field-subscript-wrapper {
+  box-sizing: border-box !important;
+  min-height: 1.35rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+  overflow: visible !important;
+}
+
+.mat-mdc-form-field-subscript-wrapper .mat-mdc-form-field-error-wrapper {
+  box-sizing: border-box;
+  min-height: 1.25rem !important;
+  display: flex;
+  align-items: center;
+  overflow: visible !important;
+}
+
+/* Responsive Corporate Layout Guard: prevent root horizontal scroll */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Subtle, ergonomic scrollbars for corporate data tables */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+}
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
+}
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.55);
+}
+
+/* Standardized SIAGE Dialog & Backdrop Styling */
+.cdk-overlay-pane {
+  max-width: calc(100vw - 2rem) !important;
+  box-sizing: border-box !important;
+}
+
+.mat-mdc-dialog-container {
+  max-width: 100% !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: var(--siage-surface) !important;
+  color: var(--siage-text-primary) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid var(--siage-border) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+[data-theme="dark"] .mat-mdc-dialog-container .mdc-dialog__surface,
+.dark-theme .mat-mdc-dialog-container .mdc-dialog__surface,
+.dark-mode .mat-mdc-dialog-container .mdc-dialog__surface {
+  box-shadow: none !important;
+}
+
+/* Overlay do Modal: Preto 50%, SEM blur, cobrindo toda a tela (inclusive header e sidebar) */
+.cdk-overlay-container {
+  z-index: 1000 !important;
+}
+
+.cdk-overlay-backdrop,
+.cdk-overlay-dark-backdrop {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  z-index: 1000 !important;
+}
+
+.cdk-global-overlay-wrapper {
+  z-index: 1001 !important;
+}
+
+/* Mobile: Apresentação em Bottom Sheet */
+@media (max-width: 639px) {
+  .cdk-overlay-pane:has(app-modal, app-siage-dialog, app-confirmacao-dialog, app-resultado-dialog) {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    max-width: 100vw !important;
+    width: 100vw !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+  
+  .cdk-overlay-pane:has(app-modal, app-siage-dialog, app-confirmacao-dialog, app-resultado-dialog) .mat-mdc-dialog-container .mdc-dialog__surface {
+    border-radius: 16px 16px 0 0 !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+}
+
+/* ========================================================
+   ESTADO ATIVO DO MENU LATERAL (EXATO SIAGE PONTO DIGITAL)
+   ======================================================== */
+.siage-menu-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  height: 2.75rem;
+  border-radius: 8px;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  text-align: left;
+  user-select: none;
+  font-family: var(--font-sans);
+}
+
+.siage-menu-btn:focus-visible {
+  outline: 2px solid #064794;
+  outline-offset: 1px;
+}
+
+/* Item Inativo: neutro */
+.siage-menu-btn:not(.is-active) {
+  color: var(--siage-text-secondary);
+  background: transparent;
+  box-shadow: none;
+}
+.siage-menu-btn:not(.is-active) mat-icon {
+  color: var(--siage-text-secondary);
+}
+.siage-menu-btn:not(.is-active):hover {
+  color: var(--siage-text-primary);
+  background: rgba(0, 0, 0, 0.04);
+}
+.siage-menu-btn:not(.is-active):hover mat-icon {
+  color: var(--siage-text-primary);
+}
+.dark .siage-menu-btn:not(.is-active):hover,
+[data-theme="dark"] .siage-menu-btn:not(.is-active):hover,
+.dark-theme .siage-menu-btn:not(.is-active):hover,
+.dark-mode .siage-menu-btn:not(.is-active):hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Item Ativo: Bloco azul escuro inteiro (Padrão exato Ponto Digital) */
+.siage-menu-btn.is-active {
+  background: linear-gradient(135deg, #064794 0%, #022859 100%) !important;
+  color: #FFFFFF !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+  font-weight: 600;
+}
+
+.siage-menu-btn.is-active mat-icon,
+.siage-menu-btn.is-active span {
+  color: #FFFFFF !important;
+}
+
+/* Modal de Visualização de Anexo (PDF e Imagens) - Dimensões proporcionais e centralizadas */
+.siage-pdf-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface,
+.siage-pdf-dialog-panel .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  border-radius: 0.75rem !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Controlled Slide Toggle: pointer-events none to let transparent overlay button handle clicks */
+.controlled-sec-toggle,
+.controlled-sec-toggle * {
+  pointer-events: none !important;
+}
+
+
+

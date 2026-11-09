@@ -1,0 +1,250 @@
+<!-- Barrinha Fixa Superior Branca (adaptável ao modo noturno) -->
+<header class="fixed top-0 left-0 right-0 z-40 h-14 sm:h-16 bg-white dark:bg-[#151D30] border-b border-siage-border/40 shadow-xs transition-colors duration-200" id="app-header">
+  <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-10 h-full flex items-center justify-between">
+    <!-- Logo do RH na ponta esquerda -->
+    <a routerLink="/" (click)="scrollToTop()" class="flex items-center cursor-pointer" id="header-logo-rh">
+      <img 
+        [src]="isDark() ? 'logo-siage-rh-dark.png' : 'logo-siage-rh-light.png'" 
+        alt="SIAGE-RH" 
+        class="h-8 sm:h-10 md:h-11 w-auto object-contain" 
+        referrerpolicy="no-referrer" 
+      />
+    </a>
+
+    <!-- Botão "Início" + Alternador de Tema na outra ponta (direita) -->
+    <div class="flex items-center gap-1 sm:gap-3 md:gap-5">
+      <button 
+        type="button"
+        (click)="scrollToTop()" 
+        class="text-xs sm:text-sm font-sans font-medium text-siage-text-primary hover:text-siage-primary transition-colors px-2.5 py-1.5 rounded-lg hover:bg-siage-surface cursor-pointer bg-transparent border-none"
+        id="nav-inicio"
+      >
+        Início
+      </button>
+
+      <!-- Botão de alternar tema -->
+      <button 
+        type="button" 
+        (click)="toggleTheme()" 
+        class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-siage-surface hover:bg-siage-primary/10 border border-siage-border text-siage-primary transition-all cursor-pointer shadow-xs ml-1"
+        [attr.aria-label]="isDark() ? 'Alternar para tema claro' : 'Alternar para tema escuro'"
+        [title]="isDark() ? 'Alternar para tema claro' : 'Alternar para tema escuro'"
+        id="theme-toggle-button"
+      >
+        <mat-icon class="text-base sm:text-lg">
+          {{ isDark() ? 'light_mode' : 'dark_mode' }}
+        </mat-icon>
+      </button>
+    </div>
+  </div>
+</header>
+
+@if (isEsqueciSenha()) {
+  <!-- Tela Exclusiva e em Foco para Redefinição de Senha -->
+  <main class="min-h-screen flex flex-col justify-between pt-14 sm:pt-16 bg-gradient-to-br from-siage-background via-siage-background to-siage-primary/5">
+    <div class="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12 w-full">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+} @else {
+  <!-- Conteúdo Principal (Hero / Landing) com espaçamento para compensar header fixo -->
+  <main class="min-h-screen flex flex-col relative pt-14 sm:pt-16">
+
+    <!-- Seção Hero: Tela 100% dedicada ao Login e Identidade Institucional (ajustada para caber inteiramente na viewport inicial) -->
+    <section class="min-h-0 lg:h-[calc(100vh-4rem)] flex flex-col justify-between px-4 sm:px-6 md:px-8 lg:px-10 xl:px-16 2xl:px-24 py-2 sm:py-3 lg:py-3 bg-gradient-to-br from-siage-background via-siage-background to-siage-primary/5 border-b border-siage-border/40" id="hero-section">
+      
+      <div class="flex-1 flex items-center max-w-7xl mx-auto w-full my-auto">
+        <div class="w-full py-1 sm:py-2">
+          
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-12 items-center w-full">
+            
+            <!-- Coluna Esquerda: Exclusiva para Desktop/Telas Grandes (lg:col-span-6 xl:col-span-6) -->
+            <div class="hidden lg:flex lg:col-span-6 xl:col-span-6 flex-col items-start text-left max-w-xl mx-0 w-full">
+              
+              <!-- Bloco Tipográfico Institucional Mantendo a Dimensão da Logo Anterior -->
+              <div class="mb-2 lg:mb-3">
+                <span class="siage-brand-title block font-poppins font-black text-3xl sm:text-4xl lg:text-5xl xl:text-6xl tracking-tight leading-none">
+                  SIAGE
+                </span>
+                <span class="siage-brand-subtitle block font-poppins font-bold text-lg sm:text-xl lg:text-2xl xl:text-3xl tracking-tight leading-tight mt-1">
+                  Gestão de Recursos Humanos
+                </span>
+              </div>
+              
+              <!-- Frase e Apresentação Responsivas -->
+              <p class="text-xs sm:text-sm lg:text-base font-sans text-siage-text-secondary leading-relaxed mb-3 lg:mb-4 max-w-lg">
+                Gestão de Recursos Humanos da rede estadual de ensino da Paraíba. Gerencie informações funcionais, acompanhe processos e realize suas atividades em um único sistema.
+              </p>
+
+              <!-- Indicador de segurança e perfil de acesso -->
+              <div class="flex items-center gap-2.5 py-2 px-3.5 bg-siage-surface border border-siage-border/60 rounded-xl shadow-xs w-full max-w-lg text-left">
+                <span class="material-icons text-siage-primary text-lg lg:text-xl flex-shrink-0">verified_user</span>
+                <span class="text-xs lg:text-sm text-siage-text-secondary leading-normal">
+                  Área restrita para servidores públicos da SEE-PB com perfil <strong>Administrador</strong> ou <strong>Servidor</strong>.
+                </span>
+              </div>
+            </div>
+
+            <!-- Coluna do Formulário de Acesso (Login) (lg:col-span-6 xl:col-span-6) -->
+            <div class="lg:col-span-6 xl:col-span-6 flex flex-col items-center lg:items-end w-full">
+              <!-- Rotas dinâmicas do card central -->
+              <router-outlet></router-outlet>
+
+              <!-- Informações complementares no mobile (posicionadas abaixo do formulário de acesso para não empurrar a tela) -->
+              <div class="lg:hidden mt-3 max-w-[520px] w-full px-2 text-center space-y-2">
+                <p class="text-xs font-sans text-siage-text-secondary leading-snug">
+                  Gestão de Recursos Humanos da rede estadual de ensino da Paraíba.
+                </p>
+                <div class="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 bg-siage-surface/90 border border-siage-border/50 rounded-lg shadow-2xs text-left">
+                  <span class="material-icons text-siage-primary text-sm flex-shrink-0">verified_user</span>
+                  <span class="text-[11px] text-siage-text-secondary leading-tight">
+                    Área restrita para servidores públicos da SEE-PB.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicador elegante de rolagem para conhecer as funcionalidades -->
+      <div class="w-full flex justify-center pb-1 pt-0.5">
+        <a href="#funcionalidades" class="inline-flex flex-col items-center gap-0.5 text-xs font-sans font-medium text-siage-text-secondary hover:text-siage-primary transition-colors duration-200 group cursor-pointer">
+          <span class="tracking-wide text-[11px] sm:text-xs">Conheça as funcionalidades</span>
+          <mat-icon class="text-base animate-bounce group-hover:translate-y-0.5 transition-transform text-siage-primary">expand_more</mat-icon>
+        </a>
+      </div>
+    </section>
+
+    <!-- Seção de Funcionalidades -->
+    <section class="py-12 sm:py-16 md:py-20 bg-[var(--primary-tint-8)] border-b border-siage-border/40" id="funcionalidades">
+      <div class="max-w-7xl mx-auto px-4 sm:px-8 md:px-16 lg:px-24">
+        
+        <!-- Cabeçalho de Seção -->
+        <div class="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-poppins font-bold tracking-tight text-siage-primary mb-3 sm:mb-4">
+            Gestão de RH em um só lugar
+          </h2>
+          <p class="text-sm sm:text-base md:text-lg font-sans text-siage-text-primary leading-relaxed">
+            Conheça os módulos do SIAGE-RH e as funcionalidades disponíveis para gestão, consulta e acompanhamento dos processos de Recursos Humanos.
+          </p>
+        </div>
+
+        <!-- Grid com os módulos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+          
+          <!-- Card 1: Quadro Funcional -->
+          <div class="bg-siage-surface border border-siage-border rounded-xl p-5 sm:p-6 md:p-8 hover:shadow-md transition-all duration-200 flex flex-col items-start group">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[var(--primary-tint-10)] flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-105 transition-transform">
+              <span class="material-icons text-siage-primary text-xl sm:text-2xl">account_tree</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-sans font-bold text-siage-text-primary mb-2 sm:mb-3">Quadro Funcional</h3>
+            <p class="text-xs sm:text-sm font-sans text-siage-text-secondary leading-relaxed">
+              Consulte e acompanhe a composição do quadro funcional, a lotação e a distribuição dos profissionais nas unidades escolares.
+            </p>
+          </div>
+
+          <!-- Card 2: Férias -->
+          <div class="bg-siage-surface border border-siage-border rounded-xl p-5 sm:p-6 md:p-8 hover:shadow-md transition-all duration-200 flex flex-col items-start group">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[var(--primary-tint-15)] flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-105 transition-transform">
+              <span class="material-icons text-siage-primary text-xl sm:text-2xl">beach_access</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-sans font-bold text-siage-text-primary mb-2 sm:mb-3">Férias</h3>
+            <p class="text-xs sm:text-sm font-sans text-siage-text-secondary leading-relaxed">
+              Registre, consulte e acompanhe as férias dos profissionais da rede estadual de ensino.
+            </p>
+          </div>
+
+          <!-- Card 3: Avaliação de Desempenho -->
+          <div class="bg-siage-surface border border-siage-border rounded-xl p-5 sm:p-6 md:p-8 hover:shadow-md transition-all duration-200 flex flex-col items-start group">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[var(--primary-tint-15)] flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-105 transition-transform">
+              <span class="material-icons text-siage-primary text-xl sm:text-2xl">bar_chart</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-sans font-bold text-siage-text-primary mb-2 sm:mb-3">Avaliação de Desempenho</h3>
+            <p class="text-xs sm:text-sm font-sans text-siage-text-secondary leading-relaxed">
+              Acompanhe o ciclo avaliativo e realize as atividades relacionadas ao PGDI, aos Termos de Avaliação e ao Parecer Conclusivo.
+            </p>
+          </div>
+
+          <!-- Card 4: Readaptação -->
+          <div class="bg-siage-surface border border-siage-border rounded-xl p-5 sm:p-6 md:p-8 hover:shadow-md transition-all duration-200 flex flex-col items-start group">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[var(--primary-tint-10)] flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-105 transition-transform">
+              <span class="material-icons text-siage-primary text-xl sm:text-2xl">health_and_safety</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-sans font-bold text-siage-text-primary mb-2 sm:mb-3">Readaptação</h3>
+            <p class="text-xs sm:text-sm font-sans text-siage-text-secondary leading-relaxed">
+              Consulte e acompanhe as readaptações funcionais e suas documentações, conforme suas responsabilidades no processo.
+            </p>
+          </div>
+
+          <!-- Card 5: Profissionais -->
+          <div class="bg-siage-surface border border-siage-border rounded-xl p-5 sm:p-6 md:p-8 hover:shadow-md transition-all duration-200 flex flex-col items-start group">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[var(--primary-tint-10)] flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-105 transition-transform">
+              <span class="material-icons text-siage-primary text-xl sm:text-2xl">group</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-sans font-bold text-siage-text-primary mb-2 sm:mb-3">Profissionais</h3>
+            <p class="text-xs sm:text-sm font-sans text-siage-text-secondary leading-relaxed">
+              Consulte e gerencie informações cadastrais e funcionais dos profissionais da rede estadual de ensino.
+            </p>
+          </div>
+
+          <!-- Card 6: Configurações -->
+          <div class="bg-siage-surface border border-siage-border rounded-xl p-5 sm:p-6 md:p-8 hover:shadow-md transition-all duration-200 flex flex-col items-start group">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[var(--primary-tint-15)] flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-105 transition-transform">
+              <span class="material-icons text-siage-primary text-xl sm:text-2xl">settings</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-sans font-bold text-siage-text-primary mb-2 sm:mb-3">Configurações</h3>
+            <p class="text-xs sm:text-sm font-sans text-siage-text-secondary leading-relaxed">
+              Gerencie as tabelas de referência e os parâmetros utilizados nos módulos do SIAGE-RH.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+}
+
+<!-- Rodapé Institucional Branco Compacto (adaptável ao modo noturno) -->
+<footer class="bg-white dark:bg-[#151D30] text-siage-text-primary border-t border-siage-border/40 px-4 sm:px-8 md:px-16 lg:px-24 py-4 sm:py-5 transition-colors duration-200" id="app-footer">
+  <div class="max-w-7xl mx-auto">
+    
+    <!-- Linha Superior: Logo do Governo da Paraíba à esquerda e Botões com labels à direita -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
+      
+      <!-- Logo do Governo da Paraíba (sem a logo do RH) na esquerda -->
+      <div class="flex items-center">
+        <img 
+          [src]="isDark() ? 'logo-see-dark.png' : 'logo-see-light.png'" 
+          alt="Governo da Paraíba - Secretaria de Estado da Educação" 
+          class="h-7 sm:h-8 w-auto object-contain" 
+          referrerpolicy="no-referrer" 
+        />
+      </div>
+
+      <!-- Link: Governo da Paraíba -->
+      <nav class="flex flex-wrap items-center justify-center md:justify-end gap-3 sm:gap-6 text-xs sm:text-sm font-sans font-medium text-siage-text-secondary">
+        <a 
+          href="https://paraiba.pb.gov.br" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="hover:text-siage-primary transition-colors cursor-pointer"
+        >
+          Governo da Paraíba
+        </a>
+      </nav>
+
+    </div>
+
+    <!-- Traço abaixo dessas informações -->
+    <hr class="my-3 sm:my-3.5 border-siage-border/40" />
+
+    <!-- Abaixo do traço: © 2026 SIAGE. Secretaria de Estado da Educação da Paraíba. Centralizado -->
+    <div class="text-center text-[11px] sm:text-xs text-siage-text-secondary">
+      <p>© 2026 SIAGE. Secretaria de Estado da Educação da Paraíba.</p>
+    </div>
+
+  </div>
+</footer>

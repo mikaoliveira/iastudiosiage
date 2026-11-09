@@ -1,0 +1,76 @@
+# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+# Env variables
+.env*
+!.env.example
+.npmrc
+**/.npmrc
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Compiled output
+dist/
+/tmp
+/temp/
+/out-tsc
+/bazel-out
+/coverage/
+/build/
+
+# Node
+node_modules/
+**/node_modules/
+bun.lock
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Angular and tool caches
+.angular/cache/
+.cache/
+.eslintcache
+.stylelintcache
+
+# Temporary and backup files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.orig
+*~
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+__screenshots__/
+
+# System files
+.DS_Store
+Thumbs.db

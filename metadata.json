@@ -1,0 +1,8 @@
+{
+  "name": "RH 2.0 ATUALIZADO",
+  "description": "Página de Login e Landing pública do SIAGE-RH da Secretaria de Estado da Educação da Paraíba (SEE-PB)",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
