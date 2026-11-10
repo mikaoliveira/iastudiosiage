@@ -22,7 +22,9 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {NgxExtendedPdfViewerModule} from 'ngx-extended-pdf-viewer';
+import {SBadgeComponent, SButtonComponent, SCardComponent, SFieldComponent, SIconButtonComponent, SInputComponent, SPageHeaderComponent, SSelectComponent, SToastService} from '@siage/siage-ui';
 
 import {SiageDatePickerComponent} from './siage-date-picker';
 import {SiagePaginatorComponent} from './siage-paginator';
@@ -658,7 +660,7 @@ export class SecretariaGeralService {
         cargo: 'Analista de Gestão Governamental',
         situacaoFuncional: 'Em exercício',
         atoGovernamental: {
-          numero: 'Ato Governamental nº 1.420/2024',
+          numero: '1.420/2024',
           dataPublicacao: '15/01/2024',
           documento: {
             id: 'doc-ato-1',
@@ -1625,7 +1627,9 @@ export class HistoricoAtosModal {
     MatTableModule,
     MatTooltipModule,
     MatDialogModule,
-    SiagePaginatorComponent
+    SiagePaginatorComponent,
+    SBadgeComponent,
+    SIconButtonComponent
   ],
   styles: [`
     :host {
@@ -1637,9 +1641,17 @@ export class HistoricoAtosModal {
       box-sizing: border-box;
       overflow: hidden;
     }
+    @media (max-width: 639px) {
+      :host .sg-busca-local {
+        overflow-y: auto;
+      }
+      :host .sg-resultados {
+        flex: 0 0 260px;
+      }
+    }
   `],
   template: `
-    <div class="relative w-full h-full bg-siage-surface text-siage-text-primary font-sans flex flex-col text-left box-border overflow-hidden" role="dialog" aria-modal="true" aria-label="Buscar Servidor">
+    <div class="relative w-full h-full bg-siage-surface text-siage-text-primary font-sans flex flex-col text-left box-border overflow-hidden" [class.sg-busca-local]="data.visualSecretariaGeral" role="dialog" aria-modal="true" aria-label="Buscar Servidor">
       <!-- Cabeçalho -->
       <div class="w-full px-6 py-3.5 border-b border-siage-border/40 bg-siage-surface flex items-center justify-between gap-3 box-border shrink-0">
         <h2 class="text-base sm:text-lg font-poppins font-bold text-siage-text-primary tracking-tight leading-snug">
@@ -1728,7 +1740,7 @@ export class HistoricoAtosModal {
       </div>
 
       <!-- Tabela de Servidores com altura calculada para exibir os 5 registros sem rolagem -->
-      <div class="w-full flex-1 min-h-0 px-6 py-3 font-sans box-border flex flex-col overflow-hidden">
+      <div class="w-full flex-1 min-h-0 px-6 py-3 font-sans box-border flex flex-col overflow-hidden" [class.sg-resultados]="data.visualSecretariaGeral">
         <div class="border border-siage-border rounded-lg overflow-hidden bg-siage-surface flex flex-col flex-1 min-h-0 shadow-xs">
           <div class="flex-1 min-h-0 overflow-y-auto">
             <table class="w-full text-left font-sans text-xs border-collapse">
@@ -1750,22 +1762,33 @@ export class HistoricoAtosModal {
                     <td class="py-2.5 px-3 text-xs sm:text-sm text-siage-text-primary">{{ servidor.situacaoFuncional }}</td>
                     <td class="py-2.5 px-3 text-right">
                       @if (servidor.situacaoFuncional === 'Em exercício') {
-                        <button 
-                          type="button" 
-                          (click)="selecionarServidor(servidor)"
-                          aria-label="Adicionar"
-                          matTooltip="Adicionar"
-                          class="w-7 h-7 inline-flex items-center justify-center rounded-lg text-siage-primary hover:bg-siage-primary/10 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                        >
-                          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">add</mat-icon>
-                        </button>
+                        @if (data.visualSecretariaGeral) {
+                          <s-icon-button icon="add" label="Adicionar" size="md" variant="primary" text
+                            matTooltip="Adicionar" (click)="selecionarServidor(servidor)" />
+                        } @else {
+                          <button 
+                            type="button" 
+                            (click)="selecionarServidor(servidor)"
+                            aria-label="Adicionar"
+                            matTooltip="Adicionar"
+                            class="w-7 h-7 inline-flex items-center justify-center rounded-lg text-siage-primary hover:bg-siage-primary/10 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
+                          >
+                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">add</mat-icon>
+                          </button>
+                        }
                       } @else {
-                        <span 
-                          class="text-[11px] text-siage-text-secondary/60 italic"
-                          matTooltip="Apenas servidores com situação 'Em exercício' podem ser designados como Chefe Imediato."
-                        >
-                          Indisponível
-                        </span>
+                        @if (data.visualSecretariaGeral) {
+                          <span matTooltip="Apenas servidores com situação 'Em exercício' podem ser designados como Chefe Imediato.">
+                            <s-badge tone="secondary">Indisponível</s-badge>
+                          </span>
+                        } @else {
+                          <span
+                            class="text-[11px] text-siage-text-secondary/60 italic"
+                            matTooltip="Apenas servidores com situação 'Em exercício' podem ser designados como Chefe Imediato."
+                          >
+                            Indisponível
+                          </span>
+                        }
                       }
                     </td>
                   </tr>
@@ -1809,7 +1832,7 @@ export class HistoricoAtosModal {
 })
 export class BuscaServidorModal {
   readonly dialogRef = inject(MatDialogRef<BuscaServidorModal>);
-  readonly data = inject<{utbCodigo: string; utbDescricao: string}>(MAT_DIALOG_DATA);
+  readonly data = inject<{utbCodigo: string; utbDescricao: string; visualSecretariaGeral?: boolean}>(MAT_DIALOG_DATA);
   private readonly service = inject(SecretariaGeralService);
 
   readonly filtroForm = new FormGroup({
@@ -2425,6 +2448,7 @@ export class AnexarNormativaExtincaoModal {
 @Component({
   selector: 'app-secretaria-geral-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [SToastService],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -2438,7 +2462,15 @@ export class AnexarNormativaExtincaoModal {
     MatSlideToggleModule,
     MatDialogModule,
     MatAutocompleteModule,
+    MatSnackBarModule,
     SiagePaginatorComponent,
+    SBadgeComponent,
+    SButtonComponent,
+    SCardComponent,
+    SFieldComponent,
+    SIconButtonComponent,
+    SPageHeaderComponent,
+    SSelectComponent,
     AcessoRestritoComponent
   ],
   styles: [`
@@ -2454,85 +2486,32 @@ export class AnexarNormativaExtincaoModal {
     } @else {
       <div class="flex flex-col gap-6 font-sans">
         
-        <!-- Breadcrumb: Início > Configurações > Hierarquia de Unidades e Cargos > Configurar Secretaria Geral -->
-        <div class="flex flex-col gap-2">
-          <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-sans font-medium tracking-wide text-siage-text-secondary/70">
-            <span 
-              (click)="goHome()" 
-              (keydown.enter)="goHome()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Início
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goConfiguracoes()" 
-              (keydown.enter)="goConfiguracoes()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurações
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goHierarquia()" 
-              (keydown.enter)="goHierarquia()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Hierarquia de Unidades e Cargos
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span class="text-siage-primary font-semibold" aria-current="page">Configurar Secretaria Geral</span>
-          </nav>
-
-          <!-- Título com Botão Voltar, Descrição e Botão Adicionar -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <button 
-                  mat-icon-button 
-                  (click)="goHierarquia()" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                  title="Voltar para Hierarquia de Unidades e Cargos"
-                >
-                  <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-                </button>
-                <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                  Configurar Secretaria Geral
-                </h1>
-              </div>
-
-              <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-2xl">
-                Gerencie o nível superior da estrutura organizacional do SIAGE-RH, a vinculação de chefia e suas normativas.
-              </p>
-            </div>
-
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <s-page-header
+            class="min-w-0 flex-1"
+            [breadcrumbs]="breadcrumbs"
+            title="Configurar Secretaria Geral"
+            description="Gerencie o nível superior da estrutura organizacional do SIAGE-RH, a vinculação de chefia e suas normativas."
+            showBack
+            (back)="goHierarquia()"
+          />
             <!-- Botão Adicionar (com tooltip e bloqueio caso já exista Secretaria Geral ativa) -->
-            <div class="shrink-0 pl-8 sm:pl-0">
-              <button 
-                type="button" 
+            <div class="shrink-0">
+              <s-button
+                variant="primary"
+                icon="add"
                 (click)="onAdicionar()"
                 [disabled]="hasActiveSecGeral() || !permissionService.canCreate()"
                 [matTooltip]="getAdicionarTooltip()"
-                [class.opacity-50]="hasActiveSecGeral() || !permissionService.canCreate()"
-                [class.cursor-not-allowed]="hasActiveSecGeral() || !permissionService.canCreate()"
-                class="inline-flex items-center justify-center gap-2 h-10 px-5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40 disabled:hover:bg-siage-primary"
               >
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">add</mat-icon>
-                <span>Adicionar</span>
-              </button>
+                Adicionar
+              </s-button>
             </div>
-          </div>
         </div>
 
         <!-- Card de Filtros (Padrão Professores / SIAGE-RH V2) -->
-        <div class="bg-siage-surface border border-siage-border rounded-lg p-5 shadow-xs flex flex-col gap-4">
-          <form [formGroup]="filtroForm" (ngSubmit)="canBuscar() && onBuscar()" class="flex flex-col gap-4">
+        <s-card [padding]="0" [elevation]="0">
+          <form [formGroup]="filtroForm" (ngSubmit)="canBuscar() && onBuscar()" class="p-5 flex flex-col gap-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
               
               <!-- Filtro: Nome (limitado a 200 caracteres conforme RF001) -->
@@ -2593,40 +2572,26 @@ export class AnexarNormativaExtincaoModal {
               </div>
 
               <!-- Filtro: Status (Todos, Ativo, Inativo) -->
-              <div class="form-field-group">
-                <label for="filter-status" class="siage-field-label">Status</label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="status" id="filter-status" class="text-sm">
-                    <mat-option value="TODOS">Todos</mat-option>
-                    <mat-option value="ATIVO">Ativo</mat-option>
-                    <mat-option value="INATIVO">Inativo</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
+              <s-field label="Status" controlId="filter-status">
+                <s-select formControlName="status" [options]="statusOptions" [clearable]="false" />
+              </s-field>
             </div>
 
             <!-- Botões Buscar e Limpar -->
-            <div class="flex items-center justify-end gap-3 pt-4 border-t border-siage-border/40">
-              <button 
-                type="button" 
-                (click)="onLimpar()"
-                class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-siage-primary/5 hover:border-siage-primary/30 active:scale-[0.99] transition-all cursor-pointer"
-              >
-                Limpar
-              </button>
-              
-              <button 
-                type="submit" 
+            <div class="flex items-center justify-start sm:justify-end gap-3 pt-4 border-t border-siage-border/40">
+              <s-button variant="secondary" outlined (click)="onLimpar()">Limpar</s-button>
+              <s-button
+                type="submit"
+                variant="primary"
+                icon="search"
                 [disabled]="!canBuscar()"
                 [matTooltip]="!canBuscar() ? 'Informe o Nome ou a Unidade de Trabalho (UTB) para realizar a busca' : 'Executar busca'"
-                class="inline-flex items-center justify-center gap-1.5 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-siage-primary"
               >
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">search</mat-icon>
-                <span>Buscar</span>
-              </button>
+                Buscar
+              </s-button>
             </div>
           </form>
-        </div>
+        </s-card>
 
         <!-- Tabela de Listagem / Estados -->
         <div class="border border-siage-border rounded-lg overflow-hidden bg-siage-surface shadow-xs">
@@ -2792,44 +2757,25 @@ export class AnexarNormativaExtincaoModal {
                         {{ item.dataCriacao }}
                       </td>
                       <td class="text-center py-3.5 px-3 w-28">
-                        <span 
-                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-sans font-medium transition-colors"
-                          [class]="item.status === 'ATIVO' 
-                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' 
-                            : 'bg-slate-100 text-slate-600 dark:bg-slate-800/60 dark:text-slate-400 border border-slate-300/40 dark:border-slate-700/50'"
-                        >
+                        <s-badge [tone]="item.status === 'ATIVO' ? 'success' : 'secondary'">
                           {{ item.status === 'ATIVO' ? 'Ativo' : 'Inativo' }}
-                        </span>
+                        </s-badge>
                       </td>
                       <td class="text-center py-3.5 px-3 w-44">
-                        <div class="flex items-center justify-center gap-1 mx-auto">
+                        <div class="inline-grid grid-cols-[repeat(3,40px)] items-center gap-1">
                           <!-- Visualizar -->
-                          <button 
-                            type="button"
-                            (click)="onVisualizar(item)" 
-                            matTooltip="Visualizar" 
-                            aria-label="Visualizar Secretaria Geral"
-                            class="w-10 h-10 inline-flex items-center justify-center rounded-lg text-siage-text-secondary hover:text-siage-primary hover:bg-siage-primary/8 dark:hover:bg-siage-primary/12 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                          >
-                            <mat-icon style="font-size: 20px; width: 20px; height: 20px;">visibility</mat-icon>
-                          </button>
+                          <s-icon-button class="col-start-1" icon="visibility" label="Visualizar Secretaria Geral" size="md"
+                            matTooltip="Visualizar" (click)="onVisualizar(item)" />
 
                           <!-- Editar (se permitido e se ativo) -->
                           @if (permissionService.canCreate() && item.status === 'ATIVO') {
-                            <button 
-                              type="button"
-                              (click)="onEditar(item)" 
-                              matTooltip="Editar" 
-                              aria-label="Editar Secretaria Geral"
-                              class="w-10 h-10 inline-flex items-center justify-center rounded-lg text-siage-text-secondary hover:text-siage-primary hover:bg-siage-primary/8 dark:hover:bg-siage-primary/12 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                            >
-                              <mat-icon style="font-size: 20px; width: 20px; height: 20px;">edit</mat-icon>
-                            </button>
+                            <s-icon-button class="col-start-2" icon="edit" label="Editar Secretaria Geral" size="md"
+                              matTooltip="Editar" (click)="onEditar(item)" />
                           }
 
                           <!-- Ativar / Inativar Slide Toggle (Padrão Professores) -->
                           @if (permissionService.canCreate()) {
-                            <div class="relative w-10 h-10 inline-flex items-center justify-center">
+                            <div class="relative col-start-3 w-10 h-10 inline-flex items-center justify-center">
                               <!-- Switch visual MatSlideToggle rigorosamente controlado pelo modelo -->
                               <div class="controlled-sec-toggle flex items-center justify-center select-none" aria-hidden="true">
                                 <mat-slide-toggle 
@@ -2876,13 +2822,24 @@ export class AnexarNormativaExtincaoModal {
 export class SecretariaGeralList {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
-  private readonly toastService = inject(ToastService);
+  private readonly toastService = inject(SToastService);
   readonly service = inject(SecretariaGeralService);
   readonly permissionService = inject(PermissionService);
   readonly simulatorService = inject(SimulatorService);
 
   readonly hasAccess = computed(() => this.permissionService.hasAccess() && this.simulatorService.currentScenario() !== 'access_denied');
   readonly hasActiveSecGeral = computed(() => this.service.hasActiveSecGeral());
+  readonly breadcrumbs = [
+    {label: 'Início', routerLink: '/inicio'},
+    {label: 'Configurações', routerLink: '/configuracoes'},
+    {label: 'Hierarquia de Unidades e Cargos', routerLink: '/configuracoes/hierarquia'},
+    {label: 'Configurar Secretaria Geral'}
+  ];
+  readonly statusOptions = [
+    {label: 'Todos', value: 'TODOS'},
+    {label: 'Ativo', value: 'ATIVO'},
+    {label: 'Inativo', value: 'INATIVO'}
+  ];
 
   readonly isCarregando = computed(() => this.simulatorService.currentScenario() === 'loading');
   readonly isErro = computed(() => this.simulatorService.currentScenario() === 'error');
@@ -3209,6 +3166,7 @@ export class SecretariaGeralList {
 @Component({
   selector: 'app-secretaria-geral-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [SToastService],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -3220,85 +3178,28 @@ export class SecretariaGeralList {
     MatSelectModule,
     MatAutocompleteModule,
     MatDialogModule,
+    MatSnackBarModule,
     SiageDatePickerComponent,
     SiagePaginatorComponent,
+    SButtonComponent,
+    SFieldComponent,
+    SInputComponent,
+    SPageHeaderComponent,
     AcessoRestritoComponent
   ],
   template: `
     @if (!hasAccess()) {
       <app-acesso-restrito backUrl="/configuracoes/hierarquia/secretaria-geral" />
     } @else {
-      <div class="flex flex-col gap-6 font-sans">
+      <div class="flex flex-col gap-6 font-sans pb-20">
         
-        <!-- Breadcrumb: Início > Configurações > Hierarquia de Unidades e Cargos > Configurar Secretaria Geral > [Cadastrar | Editar] -->
-        <div class="flex flex-col gap-2">
-          <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-sans font-medium tracking-wide text-siage-text-secondary/70">
-            <span 
-              (click)="goHome()" 
-              (keydown.enter)="goHome()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Início
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goConfiguracoes()" 
-              (keydown.enter)="goConfiguracoes()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurações
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goHierarquia()" 
-              (keydown.enter)="goHierarquia()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Hierarquia de Unidades e Cargos
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goBack()" 
-              (keydown.enter)="goBack()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurar Secretaria Geral
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span class="text-siage-primary font-semibold" aria-current="page">{{ isEditMode() ? 'Editar' : 'Cadastrar' }}</span>
-          </nav>
-
-          <!-- Título com Botão Voltar -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <button 
-                  mat-icon-button 
-                  (click)="onCancelar()" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                  title="Voltar para a listagem"
-                >
-                  <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-                </button>
-                <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                  {{ isEditMode() ? 'Editar Secretaria Geral' : 'Adicionar Secretaria Geral' }}
-                </h1>
-              </div>
-
-              <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-2xl">
-                {{ isEditMode() ? 'Atualize as informações, chefia e normativas da Secretaria Geral.' : 'Preencha os campos obrigatórios para estruturar a Secretaria Geral.' }}
-              </p>
-            </div>
-          </div>
-        </div>
+        <s-page-header
+          [breadcrumbs]="breadcrumbs()"
+          [title]="isEditMode() ? 'Editar Secretaria Geral' : 'Adicionar Secretaria Geral'"
+          [description]="isEditMode() ? 'Atualize as informações, chefia e normativas da Secretaria Geral.' : 'Preencha os campos obrigatórios para estruturar a Secretaria Geral.'"
+          showBack
+          (back)="onCancelar()"
+        />
 
         <!-- FORMULÁRIO ORGANIZADO EM SEÇÕES -->
         <form [formGroup]="form" class="flex flex-col gap-6">
@@ -3315,27 +3216,16 @@ export class SecretariaGeralList {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
               <!-- Nome da Secretaria Geral -->
               <div class="md:col-span-2 form-field-group">
-                <label for="form-nome" class="siage-field-label">
-                  Nome da Secretaria Geral <span class="required-marker">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="form-nome"
-                    formControlName="nome" 
-                    maxlength="200"
-                    placeholder="Ex: Secretaria Geral de Governo e Articulação Institucional"
-                  >
-                  <mat-hint align="end" class="text-xs text-siage-text-secondary">
-                    {{ (form.get('nome')?.value || '').length }} / 200
-                  </mat-hint>
-                  @if (form.get('nome')?.hasError('required') && form.get('nome')?.touched) {
-                    <mat-error>O Nome da Secretaria Geral é obrigatório.</mat-error>
-                  }
-                  @if (form.get('nome')?.hasError('duplicado')) {
-                    <mat-error>Já existe uma Secretaria Geral cadastrada com este nome.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field
+                  label="Nome da Secretaria Geral"
+                  controlId="form-nome"
+                  required
+                  [showCharCounter]="!form.controls.nome.invalid || !form.controls.nome.touched"
+                  [maxlength]="200"
+                  [error]="form.controls.nome.hasError('duplicado') ? 'Já existe uma Secretaria Geral cadastrada com este nome.' : form.controls.nome.hasError('required') && form.controls.nome.touched ? 'O Nome da Secretaria Geral é obrigatório.' : ''"
+                >
+                  <s-input formControlName="nome" [maxlength]="200" placeholder="Ex: Secretaria Geral de Governo e Articulação Institucional" />
+                </s-field>
               </div>
 
               <!-- Unidade de Trabalho (UTB) -->
@@ -3485,23 +3375,10 @@ export class SecretariaGeralList {
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Número do Ato -->
                     <div class="form-field-group">
-                      <label for="form-ato-numero" class="siage-field-label">
-                        Número do Ato Governamental <span class="required-marker">*</span>
-                      </label>
-                      <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                        <input 
-                          matInput 
-                          id="form-ato-numero"
-                          [formControl]="atoNumeroControl" 
-                          maxlength="20"
-                          placeholder="Ex: Ato nº 1.420/2024"
-                        >
-                        @if (atoNumeroControl.hasError('required') && atoNumeroControl.touched) {
-                          <mat-error>O Número do Ato Governamental é obrigatório.</mat-error>
-                        } @else if (atoNumeroControl.hasError('maxlength') && atoNumeroControl.touched) {
-                          <mat-error>O Número do Ato Governamental deve ter no máximo 20 caracteres.</mat-error>
-                        }
-                      </mat-form-field>
+                      <s-field label="Número do Ato Governamental" controlId="form-ato-numero" required
+                        [error]="atoNumeroControl.touched && atoNumeroControl.hasError('required') ? 'O Número do Ato Governamental é obrigatório.' : atoNumeroControl.touched && atoNumeroControl.hasError('maxlength') ? 'O Número do Ato Governamental deve ter no máximo 20 caracteres.' : ''">
+                        <s-input [formControl]="atoNumeroControl" [maxlength]="20" placeholder="Ex: Ato nº 1.420/2024" />
+                      </s-field>
                     </div>
 
                     <!-- Data da Publicação -->
@@ -3711,46 +3588,18 @@ export class SecretariaGeralList {
               } @else {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div class="md:col-span-3 form-field-group">
-                    <label for="form-norm-criacao-nome" class="siage-field-label">
-                      Nome da Normativa de Criação <span class="required-marker">*</span>
-                    </label>
-                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                      <input 
-                        matInput 
-                        id="form-norm-criacao-nome"
-                        [formControl]="normCriacaoNomeControl" 
-                        maxlength="100"
-                        placeholder="Ex: Decreto Estadual nº 42.150/2023 - Estrutura Organizacional"
-                      >
-                      <mat-hint align="end" class="text-xs text-siage-text-secondary">
-                        {{ (normCriacaoNomeControl.value || '').length }} / 100
-                      </mat-hint>
-                      @if (normCriacaoNomeControl.hasError('required') && normCriacaoNomeControl.touched) {
-                        <mat-error>O Nome da Normativa de Criação é obrigatório.</mat-error>
-                      } @else if (normCriacaoNomeControl.hasError('maxlength') && normCriacaoNomeControl.touched) {
-                        <mat-error>O Nome da Normativa de Criação deve ter no máximo 100 caracteres.</mat-error>
-                      }
-                    </mat-form-field>
+                    <s-field label="Nome da Normativa de Criação" controlId="form-norm-criacao-nome" required
+                      [showCharCounter]="!normCriacaoNomeControl.invalid || !normCriacaoNomeControl.touched" [maxlength]="100"
+                      [error]="normCriacaoNomeControl.touched && normCriacaoNomeControl.hasError('required') ? 'O Nome da Normativa de Criação é obrigatório.' : normCriacaoNomeControl.touched && normCriacaoNomeControl.hasError('maxlength') ? 'O Nome da Normativa de Criação deve ter no máximo 100 caracteres.' : ''">
+                      <s-input [formControl]="normCriacaoNomeControl" [maxlength]="100" placeholder="Ex: Decreto Estadual nº 42.150/2023 - Estrutura Organizacional" />
+                    </s-field>
                   </div>
 
                   <div class="form-field-group">
-                    <label for="form-norm-criacao-numero" class="siage-field-label">
-                      Número da Normativa <span class="required-marker">*</span>
-                    </label>
-                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                      <input 
-                        matInput 
-                        id="form-norm-criacao-numero"
-                        [formControl]="normCriacaoNumeroControl" 
-                        maxlength="20"
-                        placeholder="Ex: 42.150"
-                      >
-                      @if (normCriacaoNumeroControl.hasError('required') && normCriacaoNumeroControl.touched) {
-                        <mat-error>O Número da Normativa de Criação é obrigatório.</mat-error>
-                      } @else if (normCriacaoNumeroControl.hasError('maxlength') && normCriacaoNumeroControl.touched) {
-                        <mat-error>O Número da Normativa de Criação deve ter no máximo 20 caracteres.</mat-error>
-                      }
-                    </mat-form-field>
+                    <s-field label="Número da Normativa" controlId="form-norm-criacao-numero" required
+                      [error]="normCriacaoNumeroControl.touched && normCriacaoNumeroControl.hasError('required') ? 'O Número da Normativa de Criação é obrigatório.' : normCriacaoNumeroControl.touched && normCriacaoNumeroControl.hasError('maxlength') ? 'O Número da Normativa de Criação deve ter no máximo 20 caracteres.' : ''">
+                      <s-input [formControl]="normCriacaoNumeroControl" [maxlength]="20" placeholder="Ex: 42.150" />
+                    </s-field>
                   </div>
 
                   <div class="form-field-group">
@@ -3951,46 +3800,18 @@ export class SecretariaGeralList {
                 <!-- CENÁRIO 2: FORMULÁRIO EXPANDIDO (após clicar em Adicionar Normativa) -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border border-siage-border/60 rounded-lg p-4 bg-slate-50/50 dark:bg-slate-900/30">
                   <div class="md:col-span-3 form-field-group">
-                    <label for="form-norm-ext-nome" class="siage-field-label">
-                      Nome da Normativa de Extinção <span class="required-marker">*</span>
-                    </label>
-                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                      <input 
-                        matInput 
-                        id="form-norm-ext-nome"
-                        [formControl]="normExtincaoNomeControl" 
-                        maxlength="100"
-                        placeholder="Ex: Lei Complementar nº 184/2023 - Extinção da Secretaria"
-                      >
-                      <mat-hint align="end" class="text-xs text-siage-text-secondary">
-                        {{ (normExtincaoNomeControl.value || '').length }} / 100
-                      </mat-hint>
-                      @if (normExtincaoNomeControl.hasError('required') && normExtincaoNomeControl.touched) {
-                        <mat-error>O Nome da Normativa de Extinção é obrigatório.</mat-error>
-                      } @else if (normExtincaoNomeControl.hasError('maxlength') && normExtincaoNomeControl.touched) {
-                        <mat-error>O Nome da Normativa de Extinção deve ter no máximo 100 caracteres.</mat-error>
-                      }
-                    </mat-form-field>
+                    <s-field label="Nome da Normativa de Extinção" controlId="form-norm-ext-nome" required
+                      [showCharCounter]="!normExtincaoNomeControl.invalid || !normExtincaoNomeControl.touched" [maxlength]="100"
+                      [error]="normExtincaoNomeControl.touched && normExtincaoNomeControl.hasError('required') ? 'O Nome da Normativa de Extinção é obrigatório.' : normExtincaoNomeControl.touched && normExtincaoNomeControl.hasError('maxlength') ? 'O Nome da Normativa de Extinção deve ter no máximo 100 caracteres.' : ''">
+                      <s-input [formControl]="normExtincaoNomeControl" [maxlength]="100" placeholder="Ex: Lei Complementar nº 184/2023 - Extinção da Secretaria" />
+                    </s-field>
                   </div>
 
                   <div class="form-field-group">
-                    <label for="form-norm-ext-numero" class="siage-field-label">
-                      Número da Normativa <span class="required-marker">*</span>
-                    </label>
-                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                      <input 
-                        matInput 
-                        id="form-norm-ext-numero"
-                        [formControl]="normExtincaoNumeroControl" 
-                        maxlength="20"
-                        placeholder="Ex: 184"
-                      >
-                      @if (normExtincaoNumeroControl.hasError('required') && normExtincaoNumeroControl.touched) {
-                        <mat-error>O Número da Normativa de Extinção é obrigatório.</mat-error>
-                      } @else if (normExtincaoNumeroControl.hasError('maxlength') && normExtincaoNumeroControl.touched) {
-                        <mat-error>O Número da Normativa de Extinção deve ter no máximo 20 caracteres.</mat-error>
-                      }
-                    </mat-form-field>
+                    <s-field label="Número da Normativa" controlId="form-norm-ext-numero" required
+                      [error]="normExtincaoNumeroControl.touched && normExtincaoNumeroControl.hasError('required') ? 'O Número da Normativa de Extinção é obrigatório.' : normExtincaoNumeroControl.touched && normExtincaoNumeroControl.hasError('maxlength') ? 'O Número da Normativa de Extinção deve ter no máximo 20 caracteres.' : ''">
+                      <s-input [formControl]="normExtincaoNumeroControl" [maxlength]="20" placeholder="Ex: 184" />
+                    </s-field>
                   </div>
 
                   <div class="form-field-group">
@@ -4202,24 +4023,14 @@ export class SecretariaGeralList {
 
                 <!-- Botões Buscar e Limpar -->
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-siage-border/40">
-                  <button 
-                    type="button" 
-                    (click)="onLimparSubordinadas()"
-                    class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-siage-primary/5 hover:border-siage-primary/30 active:scale-[0.99] transition-all cursor-pointer"
-                  >
-                    Limpar
-                  </button>
-                  
-                  <button 
-                    type="button" 
+                  <s-button variant="secondary" outlined (click)="onLimparSubordinadas()">Limpar</s-button>
+                  <s-button variant="primary" icon="search"
                     (click)="canBuscarSubordinadas() && onBuscarSubordinadas()"
                     [disabled]="!canBuscarSubordinadas()"
                     [matTooltip]="!canBuscarSubordinadas() ? 'Informe o Nome ou a Unidade de Trabalho (UTB) para realizar a busca' : 'Executar busca'"
-                    class="inline-flex items-center justify-center gap-1.5 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-siage-primary"
                   >
-                    <mat-icon style="font-size: 18px; width: 18px; height: 18px;">search</mat-icon>
-                    <span>Buscar</span>
-                  </button>
+                    Buscar
+                  </s-button>
                 </div>
               </div>
 
@@ -4265,28 +4076,17 @@ export class SecretariaGeralList {
 
           <!-- RODAPÉ DE AÇÕES DO FORMULÁRIO -->
           <div class="flex items-center justify-end gap-3 pt-4 border-t border-siage-border/40">
-            <button 
-              type="button" 
-              (click)="onCancelar()" 
-              class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer"
-            >
-              Cancelar
-            </button>
-
-            <button 
-              type="button" 
-              (click)="onSalvar()" 
+            <s-button variant="secondary" outlined (click)="onCancelar()">Cancelar</s-button>
+            <s-button
+              variant="primary"
+              [icon]="isEditMode() ? 'check' : 'save'"
+              (click)="onSalvar()"
               [disabled]="isSaving()"
-              class="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              [loading]="isSaving()"
+              loadingText="Salvando..."
             >
-              @if (isSaving()) {
-                <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                <span>Salvando...</span>
-              } @else {
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">{{ isEditMode() ? 'check' : 'save' }}</mat-icon>
-                <span>{{ isEditMode() ? 'Atualizar' : 'Salvar' }}</span>
-              }
-            </button>
+              {{ isEditMode() ? 'Atualizar' : 'Salvar' }}
+            </s-button>
           </div>
         </form>
       </div>
@@ -4298,11 +4098,18 @@ export class SecretariaGeralForm {
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly modalService = inject(ModalService);
-  private readonly toastService = inject(ToastService);
+  private readonly toastService = inject(SToastService);
   readonly service = inject(SecretariaGeralService);
   readonly permissionService = inject(PermissionService);
 
   readonly isEditMode = signal(false);
+  readonly breadcrumbs = computed(() => [
+    {label: 'Início', routerLink: '/inicio'},
+    {label: 'Configurações', routerLink: '/configuracoes'},
+    {label: 'Hierarquia de Unidades e Cargos', routerLink: '/configuracoes/hierarquia'},
+    {label: 'Configurar Secretaria Geral', routerLink: '/configuracoes/hierarquia/secretaria-geral'},
+    {label: this.isEditMode() ? 'Editar' : 'Cadastrar'}
+  ]);
   readonly isSaving = signal(false);
   readonly hasPersistedNormativaExtincao = signal(false);
   itemId: string | null = null;
@@ -4781,7 +4588,8 @@ export class SecretariaGeralForm {
       autoFocus: false,
       data: {
         utbCodigo,
-        utbDescricao: utb?.descricaoCompleta || utbCodigo
+        utbDescricao: utb?.descricaoCompleta || utbCodigo,
+        visualSecretariaGeral: true
       }
     });
 
@@ -5384,6 +5192,7 @@ export const secretariaGeralFormDeactivateGuard: CanDeactivateFn<SecretariaGeral
 @Component({
   selector: 'app-secretaria-geral-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [SToastService],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -5394,7 +5203,10 @@ export const secretariaGeralFormDeactivateGuard: CanDeactivateFn<SecretariaGeral
     MatAutocompleteModule,
     MatTooltipModule,
     MatDialogModule,
+    MatSnackBarModule,
     SiagePaginatorComponent,
+    SButtonComponent,
+    SPageHeaderComponent,
     AcessoRestritoComponent
   ],
   template: `
@@ -5403,88 +5215,19 @@ export const secretariaGeralFormDeactivateGuard: CanDeactivateFn<SecretariaGeral
     } @else {
       <div class="flex flex-col gap-6 font-sans">
         
-        <!-- Breadcrumb: Início > Configurações > Hierarquia de Unidades e Cargos > Configurar Secretaria Geral > Visualizar -->
-        <div class="flex flex-col gap-2">
-          <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-sans font-medium tracking-wide text-siage-text-secondary/70">
-            <span 
-              (click)="goHome()" 
-              (keydown.enter)="goHome()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Início
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goConfiguracoes()" 
-              (keydown.enter)="goConfiguracoes()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurações
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goHierarquia()" 
-              (keydown.enter)="goHierarquia()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Hierarquia de Unidades e Cargos
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goBack()" 
-              (keydown.enter)="goBack()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurar Secretaria Geral
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span class="text-siage-primary font-semibold" aria-current="page">Visualizar</span>
-          </nav>
-
-          <!-- Título com Botão Voltar e Botão Editar -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <button 
-                  mat-icon-button 
-                  (click)="goBack()" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                  title="Voltar para a listagem"
-                >
-                  <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-                </button>
-                <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                  Visualizar Secretaria Geral
-                </h1>
-              </div>
-
-              <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-2xl">
-                Consulte as informações, dados de chefia, normativas e unidades subordinadas da Secretaria Geral.
-              </p>
-            </div>
-
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <s-page-header
+            class="min-w-0 flex-1"
+            [breadcrumbs]="breadcrumbs"
+            title="Visualizar Secretaria Geral"
+            description="Consulte as informações, dados de chefia, normativas e unidades subordinadas da Secretaria Geral."
+            showBack
+            (back)="goBack()"
+          />
             <!-- Ação Editar -->
             @if (permissionService.canCreate()) {
-              <div class="shrink-0 pl-8 sm:pl-0">
-                <button 
-                  type="button" 
-                  (click)="onEditar()"
-                  class="inline-flex items-center justify-center gap-2 h-10 px-5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                >
-                  <mat-icon style="font-size: 18px; width: 18px; height: 18px;">edit</mat-icon>
-                  <span>Editar</span>
-                </button>
-              </div>
+              <s-button class="shrink-0" variant="primary" icon="edit" (click)="onEditar()">Editar</s-button>
             }
-          </div>
         </div>
 
         @if (item(); as sec) {
@@ -5725,24 +5468,14 @@ export const secretariaGeralFormDeactivateGuard: CanDeactivateFn<SecretariaGeral
 
                 <!-- Botões Buscar e Limpar -->
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-siage-border/40">
-                  <button 
-                    type="button" 
-                    (click)="onLimpar()"
-                    class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-siage-primary/5 hover:border-siage-primary/30 active:scale-[0.99] transition-all cursor-pointer"
-                  >
-                    Limpar
-                  </button>
-                  
-                  <button 
-                    type="button" 
+                  <s-button variant="secondary" outlined (click)="onLimpar()">Limpar</s-button>
+                  <s-button variant="primary" icon="search"
                     (click)="canBuscar() && onBuscar()"
                     [disabled]="!canBuscar()"
                     [matTooltip]="!canBuscar() ? 'Informe o Nome ou a Unidade de Trabalho (UTB) para realizar a busca' : 'Executar busca'"
-                    class="inline-flex items-center justify-center gap-1.5 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-siage-primary"
                   >
-                    <mat-icon style="font-size: 18px; width: 18px; height: 18px;">search</mat-icon>
-                    <span>Buscar</span>
-                  </button>
+                    Buscar
+                  </s-button>
                 </div>
               </div>
 
@@ -5935,11 +5668,18 @@ export class SecretariaGeralView {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
-  private readonly toastService = inject(ToastService);
+  private readonly toastService = inject(SToastService);
   readonly service = inject(SecretariaGeralService);
   readonly permissionService = inject(PermissionService);
 
   readonly hasAccess = computed(() => this.permissionService.hasAccess());
+  readonly breadcrumbs = [
+    {label: 'Início', routerLink: '/inicio'},
+    {label: 'Configurações', routerLink: '/configuracoes'},
+    {label: 'Hierarquia de Unidades e Cargos', routerLink: '/configuracoes/hierarquia'},
+    {label: 'Configurar Secretaria Geral', routerLink: '/configuracoes/hierarquia/secretaria-geral'},
+    {label: 'Visualizar'}
+  ];
   readonly item = signal<SecretariaGeralItem | undefined>(undefined);
   readonly formatarDataParaExibicao = formatarDataParaExibicao;
 

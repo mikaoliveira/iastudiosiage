@@ -9,6 +9,7 @@ import {Router} from '@angular/router';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {SButtonComponent, SCardComponent, SIconComponent, SPageHeaderComponent} from '@siage/siage-ui';
 
 import {PermissionService} from './permission';
 import {AcessoRestritoComponent} from './acesso-restrito';
@@ -212,79 +213,42 @@ export class EstruturaHierarquicaModal {
     MatIconModule,
     MatButtonModule,
     MatDialogModule,
+    SButtonComponent,
+    SCardComponent,
+    SIconComponent,
+    SPageHeaderComponent,
     AcessoRestritoComponent
   ],
+  styles: [`
+    .hierarquia-card:hover s-card {
+      border-color: color-mix(in srgb, var(--siage-primary) 40%, transparent);
+    }
+  `],
   template: `
     @if (!hasAccess()) {
       <app-acesso-restrito backUrl="/inicio" />
     } @else {
       <div class="flex flex-col gap-6 font-sans pb-10">
         
-        <!-- Breadcrumb: Início > Configurações > Hierarquia de Unidades e Cargos -->
-        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-sans font-medium tracking-wide text-siage-text-secondary/70">
-          <span 
-            (click)="goHome()" 
-            (keydown.enter)="goHome()" 
-            tabindex="0" 
-            role="button"
-            class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <s-page-header
+            class="min-w-0 flex-1"
+            [breadcrumbs]="breadcrumbs"
+            title="Hierarquia de Unidades e Cargos"
+            description="Gerencie as configurações de hierarquia e consulte a estrutura de subordinação das unidades."
+            showBack
+            (back)="goConfiguracoes()"
+          />
+          <s-button
+            class="shrink-0"
+            variant="secondary"
+            outlined
+            icon="account_tree"
+            (click)="onVisualizarHierarquia()"
+            title="Visualizar a estrutura organizacional e relações de subordinação das unidades"
           >
-            Início
-          </span>
-          <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-          <span 
-            (click)="goConfiguracoes()" 
-            (keydown.enter)="goConfiguracoes()" 
-            tabindex="0" 
-            role="button"
-            class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-          >
-            Configurações
-          </span>
-          <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-          <span class="text-siage-primary font-semibold" aria-current="page">
-            Hierarquia de Unidades e Cargos
-          </span>
-        </nav>
-
-        <!-- Cabeçalho da Página: Título com Seta Voltar, Descrição e Botão Secundário "Visualizar hierarquia" -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-2 sm:gap-3">
-              <button 
-                mat-icon-button 
-                type="button"
-                (click)="goConfiguracoes()" 
-                class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                title="Voltar para Configurações"
-                aria-label="Voltar para Configurações"
-              >
-                <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-              </button>
-              
-              <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                Hierarquia de Unidades e Cargos
-              </h1>
-            </div>
-            
-            <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-2xl">
-              Gerencie as configurações de hierarquia e consulte a estrutura de subordinação das unidades.
-            </p>
-          </div>
-
-          <!-- Botão Secundário Visualizar Hierarquia acompanhado de ícone de organograma -->
-          <div class="pl-8 sm:pl-0 shrink-0">
-            <button 
-              type="button"
-              (click)="onVisualizarHierarquia()"
-              class="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-lg border border-siage-border bg-siage-surface hover:bg-siage-primary/5 hover:border-siage-primary/40 text-siage-text-primary hover:text-siage-primary font-sans font-semibold text-sm transition-all shadow-xs active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-              title="Visualizar a estrutura organizacional e relações de subordinação das unidades"
-              aria-label="Visualizar hierarquia"
-            >
-              <mat-icon style="font-size: 20px; width: 20px; height: 20px;" class="text-siage-primary">account_tree</mat-icon>
-              <span>Visualizar hierarquia</span>
-            </button>
-          </div>
+            Visualizar hierarquia
+          </s-button>
         </div>
 
         <!-- Grade de Cards de Configuração (Padrão das telas de configurações existentes) -->
@@ -296,42 +260,45 @@ export class EstruturaHierarquicaModal {
               tabindex="0"
               role="button"
               [attr.aria-label]="'Acessar ' + card.title"
-              class="group bg-siage-surface border border-siage-border hover:border-siage-primary/40 hover:shadow-md active:scale-[0.99] rounded-xl cursor-pointer transition-all duration-200 p-5 flex flex-col justify-between h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/30"
+              class="hierarquia-card group hover:shadow-md active:scale-[0.99] rounded-xl cursor-pointer transition-all duration-200 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/30"
             >
-              <!-- Topo do Card: Ícone, Título e Descrição curta -->
-              <div class="flex flex-col gap-3">
-                
-                <div class="flex items-center justify-between">
-                  <!-- Ícone destacado -->
-                  <div class="w-12 h-12 rounded-xl bg-siage-primary/10 text-siage-primary flex items-center justify-center shrink-0 group-hover:bg-siage-primary/15 group-hover:scale-105 transition-all duration-200">
-                    <mat-icon style="font-size: 24px; width: 24px; height: 24px;">{{ card.icon }}</mat-icon>
+              <s-card [padding]="0" [elevation]="0" class="h-full transition-colors duration-200">
+                <div class="p-5 flex flex-col justify-between h-full">
+                  <!-- Topo do Card: Ícone, Título e Descrição curta -->
+                  <div class="flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                      <!-- Ícone destacado -->
+                      <div class="w-12 h-12 rounded-xl bg-siage-primary/10 text-siage-primary flex items-center justify-center shrink-0 group-hover:bg-siage-primary/15 group-hover:scale-105 transition-all duration-200">
+                        <s-icon [name]="card.icon" size="md" />
+                      </div>
+
+                      @if (card.badge) {
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                          {{ card.badge }}
+                        </span>
+                      }
+                    </div>
+
+                    <!-- Título -->
+                    <h2 class="text-base font-poppins font-semibold text-siage-text-primary tracking-tight leading-snug group-hover:text-siage-primary transition-colors">
+                      {{ card.title }}
+                    </h2>
+
+                    <!-- Descrição curta -->
+                    <p class="text-xs sm:text-sm text-siage-text-secondary leading-relaxed line-clamp-3">
+                      {{ card.description }}
+                    </p>
                   </div>
 
-                  @if (card.badge) {
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
-                      {{ card.badge }}
+                  <!-- Rodapé do Card com Ação Acessar -->
+                  <div class="mt-5 pt-3.5 border-t border-siage-border/50 flex items-center justify-between">
+                    <span class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-siage-primary group-hover:text-siage-primary/80 transition-colors">
+                      <span>Acessar</span>
+                      <s-icon name="arrow_forward" size="xs" class="group-hover:translate-x-1 transition-transform duration-150" />
                     </span>
-                  }
+                  </div>
                 </div>
-
-                <!-- Título -->
-                <h2 class="text-base font-poppins font-semibold text-siage-text-primary tracking-tight leading-snug group-hover:text-siage-primary transition-colors">
-                  {{ card.title }}
-                </h2>
-
-                <!-- Descrição curta -->
-                <p class="text-xs sm:text-sm text-siage-text-secondary leading-relaxed line-clamp-3">
-                  {{ card.description }}
-                </p>
-              </div>
-
-              <!-- Rodapé do Card com Ação Acessar -->
-              <div class="pt-4 mt-4 border-t border-siage-border/40 flex items-center justify-between">
-                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-siage-primary group-hover:text-siage-primary/80 transition-colors">
-                  <span>Acessar</span>
-                  <mat-icon style="font-size: 14px; width: 14px; height: 14px;" class="group-hover:translate-x-1 transition-transform duration-150">arrow_forward</mat-icon>
-                </span>
-              </div>
+              </s-card>
             </div>
           }
         </div>
@@ -348,18 +315,24 @@ export class HierarquiaComponent {
 
   readonly hasAccess = computed(() => this.permissionService.hasAccess());
 
+  readonly breadcrumbs = [
+    {label: 'Início', routerLink: '/inicio'},
+    {label: 'Configurações', routerLink: '/configuracoes'},
+    {label: 'Hierarquia de Unidades e Cargos'}
+  ];
+
   readonly cards: CardConfigHierarquia[] = [
     {
       id: 'sec_geral',
       title: 'Configurar Secretaria Geral',
       description: 'Gerencie as secretarias gerais que compõem o nível superior da estrutura organizacional.',
-      icon: 'domain'
+      icon: 'account_balance'
     },
     {
       id: 'sec_executiva',
       title: 'Configurar Secretaria Executiva',
       description: 'Gerencie as secretarias executivas subordinadas à Secretaria Geral.',
-      icon: 'corporate_fare'
+      icon: 'apartment'
     },
     {
       id: 'ger_executiva',
@@ -371,7 +344,7 @@ export class HierarquiaComponent {
       id: 'ger_regional',
       title: 'Configurar Gerência Regional',
       description: 'Gerencie as gerências regionais vinculadas à Secretaria Geral.',
-      icon: 'location_city'
+      icon: 'map'
     },
     {
       id: 'subgerencia',
