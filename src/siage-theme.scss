@@ -1,0 +1,5 @@
+@use '@siage/siage-ui/styles/theme' as siage;
+
+:root {
+  @include siage.theme($base-styles: false);
+}

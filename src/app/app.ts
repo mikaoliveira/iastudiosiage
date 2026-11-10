@@ -46,11 +46,10 @@ export class App implements OnInit {
     this.isDark.set(dark);
     if (!isPlatformBrowser(this.platformId)) return;
     
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
     if (dark) {
-      document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('dark', 'dark-theme', 'dark-mode');
     } else {
-      document.documentElement.removeAttribute('data-theme');
       document.documentElement.classList.remove('dark', 'dark-theme', 'dark-mode');
     }
   }
