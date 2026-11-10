@@ -2,14 +2,10 @@ import {Component, inject, signal, computed, OnInit} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatButtonModule} from '@angular/material/button';
+import {SButtonComponent, SCardComponent, SCheckboxComponent, SFieldComponent, SInputComponent, SToastService} from '@siage/siage-ui';
 import {App} from './app';
 import {AuthSessionService, USUARIOS_TESTE} from './auth-session';
-import {ToastService} from './toast';
 
 // Validação oficial de CPF (11 dígitos, dígitos verificadores e rejeição de sequências repetidas)
 export function isValidCPF(cpfRaw: string): boolean {
@@ -62,88 +58,58 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    MatFormFieldModule,
-    MatInputModule,
     MatIconModule,
-    MatCheckboxModule,
-    MatButtonModule
+    SButtonComponent,
+    SCardComponent,
+    SCheckboxComponent,
+    SFieldComponent,
+    SInputComponent
   ],
   template: `
-    <div class="w-full max-w-[520px] bg-siage-surface border border-siage-border rounded-xl shadow-lg p-8 sm:p-9 lg:p-10 transition-all duration-300 relative">
+    <s-card class="login-card" [padding]="24" [elevation]="2">
       
       <!-- Título e Subtítulo -->
-      <div class="text-center mb-5 sm:mb-6">
-        <h1 class="text-xl sm:text-2xl font-poppins font-bold tracking-tight text-siage-text-primary">Acesse o SIAGE-RH</h1>
-        <p class="text-xs sm:text-sm text-siage-text-secondary mt-1">Informe seu CPF e senha para acessar o sistema.</p>
+      <div class="login-heading">
+        <h1>Acesse o SIAGE-RH</h1>
+        <p>Informe seu CPF e senha para acessar o sistema.</p>
       </div>
 
       <!-- Formulário -->
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-3.5 sm:gap-4">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
         
         <!-- Campo CPF -->
-        <div class="form-field-group">
-          <label class="form-label" for="login-cpf-input">
-            CPF <span class="required-marker">*</span>
-          </label>
-          <mat-form-field appearance="outline" class="w-full compact-auth-field" subscriptSizing="fixed">
-            <input 
-              matInput 
-              formControlName="cpf" 
-              placeholder="000.000.000-00"
-              (input)="onCpfInput($event)"
-              (blur)="onCpfBlur()"
-              maxlength="14"
-              id="login-cpf-input"
-            />
-            @if (loginForm.controls.cpf.touched && loginForm.controls.cpf.hasError('required')) {
-              <mat-error id="login-cpf-required-error">CPF é obrigatório.</mat-error>
-            } @else if (loginForm.controls.cpf.touched && loginForm.controls.cpf.hasError('cpfInvalid')) {
-              <mat-error id="login-cpf-invalid-error">CPF é inválido.</mat-error>
-            }
-          </mat-form-field>
-        </div>
+        <s-field label="CPF" required controlId="login-cpf-input" [validationErrors]="{}"
+          [error]="loginForm.controls.cpf.touched ? (loginForm.controls.cpf.hasError('required') ? 'CPF é obrigatório.' : loginForm.controls.cpf.hasError('cpfInvalid') ? 'CPF é inválido.' : '') : ''">
+          <s-input
+            formControlName="cpf"
+            placeholder="000.000.000-00"
+            autocomplete="on"
+            (input)="onCpfInput($event)"
+            (focusout)="onCpfBlur()"
+            maxlength="14"
+          />
+        </s-field>
 
         <!-- Campo Senha -->
-        <div class="form-field-group">
-          <label class="form-label" for="login-password-input">
-            Senha <span class="required-marker">*</span>
-          </label>
-          <mat-form-field appearance="outline" class="w-full compact-auth-field" subscriptSizing="fixed">
-            <input 
-              matInput 
-              [type]="hidePassword() ? 'password' : 'text'" 
-              formControlName="password"
-              placeholder="Digite sua senha"
-              (input)="onPasswordInput()"
-              (blur)="onPasswordBlur()"
-              maxlength="16"
-              id="login-password-input"
-            />
-            <button 
-              type="button" 
-              matSuffix 
-              (click)="hidePassword.set(!hidePassword())" 
-              class="text-siage-text-secondary hover:text-siage-primary transition-colors pr-2 cursor-pointer"
-              aria-label="Alternar visibilidade da senha"
-            >
-              <span class="material-icons text-xl">{{ hidePassword() ? 'visibility_off' : 'visibility' }}</span>
-            </button>
-            @if (loginForm.controls.password.touched && loginForm.controls.password.hasError('required')) {
-              <mat-error id="login-password-required-error">Senha é obrigatória.</mat-error>
-            } @else if (loginForm.controls.password.touched && loginForm.controls.password.hasError('passwordLength')) {
-              <mat-error id="login-password-length-error">A senha deve conter de 8 a 16 caracteres.</mat-error>
-            }
-          </mat-form-field>
-        </div>
+        <s-field label="Senha" required controlId="login-password-input" [validationErrors]="{}"
+          [error]="loginForm.controls.password.touched ? (loginForm.controls.password.hasError('required') ? 'Senha é obrigatória.' : loginForm.controls.password.hasError('passwordLength') ? 'A senha deve conter de 8 a 16 caracteres.' : '') : ''">
+          <s-input
+            type="password"
+            formControlName="password"
+            placeholder="Digite sua senha"
+            autocomplete="on"
+            (input)="onPasswordInput()"
+            (focusout)="onPasswordBlur()"
+            maxlength="16"
+          />
+        </s-field>
 
         <!-- Linha: Lembrar + Esqueceu Senha -->
-        <div class="flex flex-wrap items-center justify-between gap-2 mt-0 mb-0.5">
-          <mat-checkbox formControlName="rememberMe" color="primary" class="text-sm text-siage-text-secondary">
-            <span class="text-xs font-sans">Lembrar de mim</span>
-          </mat-checkbox>
+        <div class="login-options">
+          <s-checkbox formControlName="rememberMe" label="Lembrar de mim" />
           <a 
             routerLink="/login/esqueci-senha" 
-            class="text-xs font-sans font-semibold text-siage-primary hover:underline"
+            class="login-link"
             id="forgot-password-link"
           >
             Esqueceu a senha?
@@ -151,25 +117,20 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
         </div>
 
         <!-- Botão Entrar (habilitado apenas quando os 2 campos estiverem preenchidos) -->
-        <button 
+        <s-button
           type="submit" 
+          variant="primary"
+          fullWidth
           [disabled]="isLoginButtonDisabled()"
-          class="w-full py-3 sm:py-3.5 font-sans font-bold tracking-wide text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-siage-primary hover:bg-siage-primary/95 text-white rounded-xl shadow-sm transition-all duration-200 flex items-center justify-center gap-2 mt-1"
+          [loading]="isLoading()"
+          loadingText="Entrando..."
           id="login-submit-button"
         >
-          @if (isLoading()) {
-            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span>Entrando...</span>
-          } @else {
-            <span>Entrar no sistema</span>
-          }
-        </button>
+          Entrar no sistema
+        </s-button>
 
       </form>
-    </div>
+    </s-card>
 
     <!-- ========================================== -->
     <!-- SIMULADOR DE CENÁRIOS ULTRA-DISCRETO (FIXO NO CANTO INFERIOR) -->
@@ -195,7 +156,7 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
               <span class="material-icons text-sm text-siage-primary" style="font-size: 15px; width: 15px; height: 15px;">science</span>
               <span>Simulador de Cenários — Login</span>
             </div>
-            <button 
+            <button
               type="button" 
               (click)="showSimulator.set(false)" 
               class="text-siage-text-secondary hover:text-siage-text-primary p-0.5 rounded cursor-pointer"
@@ -212,7 +173,7 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
                 Toasts de aviso (simulação):
               </span>
               <div class="flex flex-col gap-1.5">
-                <button 
+                <button
                   type="button" 
                   (click)="simularCenario('cpf-invalido')" 
                   class="w-full text-left px-2.5 py-1.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/20 transition-colors cursor-pointer text-[11px] font-medium flex items-center justify-between"
@@ -223,7 +184,7 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
                   <mat-icon style="font-size: 14px; width: 14px; height: 14px;">arrow_forward</mat-icon>
                 </button>
 
-                <button 
+                <button
                   type="button" 
                   (click)="simularCenario('credenciais-invalidas')" 
                   class="w-full text-left px-2.5 py-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 transition-colors cursor-pointer text-[11px] font-medium flex items-center justify-between"
@@ -233,7 +194,7 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
                   <mat-icon style="font-size: 14px; width: 14px; height: 14px;">arrow_forward</mat-icon>
                 </button>
 
-                <button 
+                <button
                   type="button" 
                   (click)="simularCenario('sem-acesso')" 
                   class="w-full text-left px-2.5 py-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 transition-colors cursor-pointer text-[11px] font-medium flex items-center justify-between"
@@ -243,7 +204,7 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
                   <mat-icon style="font-size: 14px; width: 14px; height: 14px;">arrow_forward</mat-icon>
                 </button>
 
-                <button 
+                <button
                   type="button" 
                   (click)="simularCenario('usuario-inativo')" 
                   class="w-full text-left px-2.5 py-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 transition-colors cursor-pointer text-[11px] font-medium flex items-center justify-between"
@@ -254,7 +215,7 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
                   <mat-icon style="font-size: 14px; width: 14px; height: 14px;">arrow_forward</mat-icon>
                 </button>
 
-                <button 
+                <button
                   type="button" 
                   (click)="simularCenario('servico-indisponivel')" 
                   class="w-full text-left px-2.5 py-1.5 rounded bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 transition-colors cursor-pointer text-[11px] font-medium flex items-center justify-between"
@@ -272,7 +233,7 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
                 Acessos válidos (sucesso):
               </span>
               <div class="flex flex-col gap-1.5">
-                <button 
+                <button
                   type="button" 
                   (click)="simularCenario('sucesso-individual')" 
                   class="w-full text-left px-2.5 py-1.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 transition-colors cursor-pointer text-[11px] font-medium flex items-center justify-between"
@@ -281,7 +242,7 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
                   <mat-icon style="font-size: 14px; width: 14px; height: 14px;">arrow_forward</mat-icon>
                 </button>
 
-                <button 
+                <button
                   type="button" 
                   (click)="simularCenario('sucesso-multiplo')" 
                   class="w-full text-left px-2.5 py-1.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 transition-colors cursor-pointer text-[11px] font-medium flex items-center justify-between"
@@ -290,7 +251,7 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
                   <mat-icon style="font-size: 14px; width: 14px; height: 14px;">arrow_forward</mat-icon>
                 </button>
 
-                <button 
+                <button
                   type="button" 
                   (click)="simularCenario('primeiro-acesso')" 
                   class="w-full text-left px-2.5 py-1.5 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/20 transition-colors cursor-pointer text-[11px] font-medium flex items-center justify-between"
@@ -308,6 +269,52 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      width: 100%;
+      max-width: 440px;
+      font-family: var(--font-ui);
+      color: var(--text-primary);
+    }
+    .login-card { width: 100%; }
+    .login-heading {
+      text-align: center;
+      margin-bottom: var(--space-16);
+    }
+    .login-heading h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-h4);
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+    .login-heading p {
+      margin-top: var(--space-4);
+      font-size: var(--text-body);
+      color: var(--text-secondary);
+    }
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-12);
+    }
+    .login-options {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-8);
+    }
+    .login-link {
+      font-size: var(--text-body);
+      font-weight: 500;
+      color: var(--primary);
+      text-decoration: underline;
+    }
+    .login-link:hover { color: var(--primary-hover); }
+    .login-link:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
     @keyframes fadeIn {
       from {
         opacity: 0;
@@ -327,9 +334,8 @@ export class Login implements OnInit {
   readonly app = inject(App);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthSessionService);
-  private readonly toastService = inject(ToastService);
+  private readonly toastService = inject(SToastService);
 
-  readonly hidePassword = signal(true);
   readonly isLoading = signal(false);
   readonly showSimulator = signal(false);
 

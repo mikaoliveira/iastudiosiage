@@ -4,6 +4,7 @@ import {toSignal} from '@angular/core/rxjs-interop';
 import {filter, map} from 'rxjs/operators';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
+import {SIconButtonComponent} from '@siage/siage-ui';
 import {App} from './app';
 
 @Component({
@@ -13,7 +14,8 @@ import {App} from './app';
     RouterOutlet,
     RouterLink,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    SIconButtonComponent
   ],
   templateUrl: './public-layout.html'
 })

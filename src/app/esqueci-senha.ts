@@ -7,18 +7,19 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef
 } from '@angular/core';
-import {ReactiveFormsModule, FormControl, AbstractControl} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule, FormControl, AbstractControl} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
+import {SButtonComponent, SCardComponent, SFieldComponent, SInputComponent, SToastService} from '@siage/siage-ui';
 import {ErrorStateMatcher} from '@angular/material/core';
 import {CommonModule} from '@angular/common';
 import {App} from './app';
-import {ToastService} from './toast';
 import {isValidCPF} from './login';
 import {AuthSessionService, USUARIOS_TESTE} from './auth-session';
+import {ToastService} from './toast';
 
 export class ImmediateErrorMatcher implements ErrorStateMatcher {
   constructor(private hasError: () => boolean) {}
@@ -44,18 +45,23 @@ export interface ModalConfig {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     RouterLink,
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    SButtonComponent,
+    SCardComponent,
+    SFieldComponent,
+    SInputComponent
   ],
   template: `
-    <div class="w-full max-w-[460px] flex flex-col items-center">
+    <div class="w-full max-w-[440px] flex flex-col items-center">
       
       <!-- Card Principal 100% Coeso com a tela de Login -->
-      <div class="w-full bg-siage-surface border border-siage-border rounded-xl shadow-lg p-4 sm:p-6 lg:p-7 xl:p-8 transition-all duration-300 relative">
+      <s-card class="w-full relative" [padding]="24" [elevation]="2">
         
         <!-- Stepper Visual com 3 Etapas -->
         <div class="mb-4 pb-3.5 border-b border-siage-border">
@@ -163,46 +169,24 @@ export interface ModalConfig {
             <form (submit)="onStep1Submit($event)" class="flex flex-col gap-4">
               
               <!-- Campo CPF com Label Fixa Acima -->
-              <div class="form-field-group">
-                <label class="form-label" for="forgot-cpf-input">
-                  CPF <span class="required-marker">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    [errorStateMatcher]="identificacaoMatcher"
-                    type="text"
-                    [value]="identificacaoInput()"
-                    (input)="onCpfInput($event)"
-                    (blur)="onCpfBlur()"
-                    placeholder="000.000.000-00"
-                    maxlength="14"
-                    id="forgot-cpf-input"
-                  />
-                  @if (identificacaoErro()) {
-                    <mat-error>{{ identificacaoErro() }}</mat-error>
-                  }
-                </mat-form-field>
-              </div>
+              <s-field label="CPF" required controlId="forgot-cpf-input" [validationErrors]="{}" [error]="identificacaoErro()">
+                <s-input [ngModel]="identificacaoInput()" [ngModelOptions]="{standalone: true}"
+                  (input)="onCpfInput($event)" (focusout)="onCpfBlur()"
+                  placeholder="000.000.000-00" maxlength="14" autocomplete="on" />
+              </s-field>
 
               <!-- Botão Continuar -->
               <div class="flex flex-col gap-3 pt-1">
-                <button
+                <s-button
                   type="submit"
                   [disabled]="!isIdentificacaoValida() || isLoadingAuth()"
-                  class="w-full py-3 sm:py-3.5 lg:py-4 font-sans font-bold tracking-wide text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-siage-primary hover:bg-siage-primary/95 text-white rounded-xl shadow-sm transition-all duration-200 flex items-center justify-center gap-2"
+                  [loading]="isLoadingAuth()"
+                  loadingText="Verificando..."
+                  fullWidth
                   id="step1-continue-button"
                 >
-                  @if (isLoadingAuth()) {
-                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Verificando...</span>
-                  } @else {
-                    <span>Continuar</span>
-                  }
-                </button>
+                  Continuar
+                </s-button>
 
                 <!-- Voltar ao login -->
                 <a 
@@ -299,22 +283,16 @@ export interface ModalConfig {
 
               <!-- Botão Validar código -->
               <div class="flex flex-col gap-3 pt-1">
-                <button
+                <s-button
                   type="submit"
                   [disabled]="(codigoControl.value || codigoInput()).length !== 6 || isValidatingCode() || tentativasRestantes() <= 0"
-                  class="w-full py-3 sm:py-3.5 lg:py-4 font-sans font-bold tracking-wide text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-siage-primary hover:bg-siage-primary/95 text-white rounded-xl shadow-sm transition-all duration-200 flex items-center justify-center gap-2"
+                  [loading]="isValidatingCode()"
+                  loadingText="Validando..."
+                  fullWidth
                   id="step2-validate-button"
                 >
-                  @if (isValidatingCode()) {
-                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Validando...</span>
-                  } @else {
-                    <span>Validar código</span>
-                  }
-                </button>
+                  Validar código
+                </s-button>
 
                 <!-- Ações Secundárias -->
                 <div class="flex items-center justify-between pt-1 text-xs font-sans">
@@ -362,72 +340,18 @@ export interface ModalConfig {
             <form (submit)="onStep3Submit($event)" class="flex flex-col gap-3">
               
               <!-- Campo 1: Crie uma nova senha -->
-              <div class="form-field-group">
-                <label class="form-label" for="step3-new-password">
-                  Crie uma nova senha <span class="required-marker">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    [errorStateMatcher]="novaSenhaMatcher"
-                    [type]="hidePassword1() ? 'password' : 'text'"
-                    [value]="novaSenha()"
-                    (input)="onNovaSenhaChange($event)"
-                    (keydown)="onPasswordKeyDown($event)"
-                    (blur)="onNovaSenhaBlur()"
-                    placeholder="Digite a nova senha"
-                    maxlength="16"
-                    autocomplete="new-password"
-                    id="step3-new-password"
-                  />
-                  <button 
-                    type="button" 
-                    matSuffix 
-                    (click)="hidePassword1.set(!hidePassword1())" 
-                    class="text-siage-text-secondary hover:text-siage-primary transition-colors pr-2 cursor-pointer"
-                    aria-label="Alternar visibilidade da nova senha"
-                  >
-                    <span class="material-icons text-xl">{{ hidePassword1() ? 'visibility_off' : 'visibility' }}</span>
-                  </button>
-                  @if (senhaBlurError()) {
-                    <mat-error>{{ senhaBlurError() }}</mat-error>
-                  }
-                </mat-form-field>
-              </div>
+              <s-field label="Crie uma nova senha" required controlId="step3-new-password" [validationErrors]="{}" [error]="senhaBlurError()">
+                <s-input type="password" [ngModel]="novaSenha()" [ngModelOptions]="{standalone: true}"
+                  (input)="onNovaSenhaChange($event)" (keydown)="onPasswordKeyDown($event)" (focusout)="onNovaSenhaBlur()"
+                  placeholder="Digite a nova senha" maxlength="16" autocomplete="new-password" />
+              </s-field>
 
               <!-- Campo 2: Confirme a nova senha -->
-              <div class="form-field-group">
-                <label class="form-label" for="step3-confirm-password">
-                  Confirme a nova senha <span class="required-marker">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    [errorStateMatcher]="confirmaSenhaMatcher"
-                    [type]="hidePassword2() ? 'password' : 'text'"
-                    [value]="confirmaSenha()"
-                    (input)="onConfirmaSenhaChange($event)"
-                    (keydown)="onPasswordKeyDown($event)"
-                    (blur)="onConfirmaSenhaBlur()"
-                    placeholder="Digite novamente a nova senha"
-                    maxlength="16"
-                    autocomplete="new-password"
-                    id="step3-confirm-password"
-                  />
-                  <button 
-                    type="button" 
-                    matSuffix 
-                    (click)="hidePassword2.set(!hidePassword2())" 
-                    class="text-siage-text-secondary hover:text-siage-primary transition-colors pr-2 cursor-pointer"
-                    aria-label="Alternar visibilidade da confirmação de senha"
-                  >
-                    <span class="material-icons text-xl">{{ hidePassword2() ? 'visibility_off' : 'visibility' }}</span>
-                  </button>
-                  @if (confirmaBlurError()) {
-                    <mat-error>{{ confirmaBlurError() }}</mat-error>
-                  }
-                </mat-form-field>
-              </div>
+              <s-field label="Confirme a nova senha" required controlId="step3-confirm-password" [validationErrors]="{}" [error]="confirmaBlurError()">
+                <s-input type="password" [ngModel]="confirmaSenha()" [ngModelOptions]="{standalone: true}"
+                  (input)="onConfirmaSenhaChange($event)" (keydown)="onPasswordKeyDown($event)" (focusout)="onConfirmaSenhaBlur()"
+                  placeholder="Digite novamente a nova senha" maxlength="16" autocomplete="new-password" />
+              </s-field>
 
               <!-- Checklist dos 6 Critérios Solicitados -->
               <div class="p-3 sm:p-3.5 bg-siage-border/15 border border-siage-border/70 rounded-xl text-xs">
@@ -489,22 +413,16 @@ export interface ModalConfig {
 
               <!-- Botão Redefinir Senha -->
               <div class="flex flex-col gap-3 pt-2">
-                <button
+                <s-button
                   type="submit"
                   [disabled]="!isAllRulesPassed() || isSubmittingNewPassword()"
-                  class="w-full py-3 sm:py-3.5 lg:py-4 font-sans font-bold tracking-wide text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-siage-primary hover:bg-siage-primary/95 text-white rounded-xl shadow-sm transition-all duration-200 flex items-center justify-center gap-2"
+                  [loading]="isSubmittingNewPassword()"
+                  loadingText="Redefinindo senha..."
+                  fullWidth
                   id="step3-reset-button"
                 >
-                  @if (isSubmittingNewPassword()) {
-                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Redefinindo senha...</span>
-                  } @else {
-                    <span>Redefinir senha</span>
-                  }
-                </button>
+                  Redefinir senha
+                </s-button>
 
                 <!-- Voltar para identificação -->
                 <button
@@ -522,7 +440,7 @@ export interface ModalConfig {
           </div>
         }
 
-      </div>
+      </s-card>
 
       <!-- ========================================== -->
       <!-- SIMULADOR DE CENÁRIOS ULTRA-DISCRETO (FIXO NO CANTO INFERIOR) -->
@@ -734,7 +652,8 @@ export interface ModalConfig {
 export class EsqueciSenha implements OnDestroy {
   readonly app = inject(App);
   private readonly router = inject(Router);
-  private readonly toastService = inject(ToastService);
+  private readonly toastService = inject(SToastService);
+  private readonly simulatorToastService = inject(ToastService);
   private readonly authService = inject(AuthSessionService);
   private readonly cdr = inject(ChangeDetectorRef);
 
@@ -1212,7 +1131,7 @@ export class EsqueciSenha implements OnDestroy {
 
   simularCodigoExpirado() {
     this.codeExpirationTimer.set(0);
-    this.toastService.error('Código expirado. Solicite o reenvio e tente novamente.');
+    this.simulatorToastService.error('Código expirado. Solicite o reenvio e tente novamente.');
   }
 
   zerarTempoReenvio() {

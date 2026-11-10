@@ -7,6 +7,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
+import {SButtonComponent, SCardComponent, SFieldComponent, SIconButtonComponent, SInputComponent} from '@siage/siage-ui';
 import {ErrorStateMatcher} from '@angular/material/core';
 import {App} from './app';
 import {AuthSessionService, USUARIOS_TESTE} from './auth-session';
@@ -27,7 +28,12 @@ export class ImmediateErrorMatcher implements ErrorStateMatcher {
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    SButtonComponent,
+    SCardComponent,
+    SFieldComponent,
+    SIconButtonComponent,
+    SInputComponent
   ],
   template: `
     <!-- Cabeçalho Institucional Fixo -->
@@ -45,18 +51,13 @@ export class ImmediateErrorMatcher implements ErrorStateMatcher {
 
         <!-- Alternador de Tema e Ação Sair na ponta direita -->
         <div class="flex items-center gap-2 sm:gap-3">
-          <button 
+          <s-icon-button
             type="button" 
             (click)="app.toggleTheme()" 
-            class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-siage-surface hover:bg-siage-primary/10 border border-siage-border text-siage-primary transition-all cursor-pointer shadow-xs"
-            [attr.aria-label]="app.isDark() ? 'Alternar para tema claro' : 'Alternar para tema escuro'"
-            [title]="app.isDark() ? 'Alternar para tema claro' : 'Alternar para tema escuro'"
+            [icon]="app.isDark() ? 'light_mode' : 'dark_mode'"
+            [label]="app.isDark() ? 'Alternar para tema claro' : 'Alternar para tema escuro'"
             id="theme-toggle-button"
-          >
-            <mat-icon class="text-base sm:text-lg">
-              {{ app.isDark() ? 'light_mode' : 'dark_mode' }}
-            </mat-icon>
-          </button>
+          />
 
           <button 
             type="button"
@@ -77,7 +78,7 @@ export class ImmediateErrorMatcher implements ErrorStateMatcher {
       <div class="flex-1 flex items-center justify-center px-3 sm:px-4 py-2 sm:py-3 md:py-4 w-full">
         
         <!-- Card Central de Primeiro Acesso (ajustado para caber 100% na viewport sem necessidade de rolagem) -->
-        <div class="w-full max-w-[420px] bg-siage-surface border border-siage-border rounded-xl sm:rounded-2xl shadow-lg p-3.5 sm:p-4.5 md:p-5 relative font-sans transition-colors duration-200" id="primeiro-acesso-card">
+        <s-card class="w-full max-w-[440px] relative font-sans" [padding]="24" [elevation]="2" id="primeiro-acesso-card">
           
           <!-- Cabeçalho do Card -->
           <div class="text-center mb-2">
@@ -100,110 +101,27 @@ export class ImmediateErrorMatcher implements ErrorStateMatcher {
           <form [formGroup]="primeiroAcessoForm" (ngSubmit)="onSubmit($event)" class="flex flex-col gap-1.5">
             
             <!-- Campo 1: Senha atual -->
-            <div class="form-field-group">
-              <label class="form-label text-xs mb-0.5" for="primeiro-acesso-senha-atual">
-                Senha atual <span class="required-marker">*</span>
-              </label>
-              <mat-form-field appearance="outline" class="w-full compact-auth-field" subscriptSizing="fixed">
-                <input 
-                  matInput 
-                  formControlName="senhaAtual"
-                  [errorStateMatcher]="errorMatcher"
-                  [type]="hidePasswordCurrent() ? 'password' : 'text'"
-                  (input)="onSenhaAtualInput()"
-                  placeholder="Digite sua senha atual"
-                  maxlength="32"
-                  autocomplete="current-password"
-                  id="primeiro-acesso-senha-atual"
-                />
-                <button 
-                  type="button" 
-                  matSuffix 
-                  (click)="hidePasswordCurrent.set(!hidePasswordCurrent())" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors pr-2 cursor-pointer"
-                  aria-label="Alternar visibilidade da senha atual"
-                >
-                  <span class="material-icons text-xl">{{ hidePasswordCurrent() ? 'visibility_off' : 'visibility' }}</span>
-                </button>
-                @if (primeiroAcessoForm.controls.senhaAtual.hasError('senhaIncorreta')) {
-                  <mat-error id="primeiro-acesso-senha-atual-incorrect">Senha atual incorreta. Verifique a informação e tente novamente.</mat-error>
-                } @else if (primeiroAcessoForm.controls.senhaAtual.touched && primeiroAcessoForm.controls.senhaAtual.hasError('required')) {
-                  <mat-error id="primeiro-acesso-senha-atual-required">Senha é obrigatória.</mat-error>
-                }
-              </mat-form-field>
-            </div>
+            <s-field label="Senha atual" required controlId="primeiro-acesso-senha-atual" [validationErrors]="{}"
+              [error]="primeiroAcessoForm.controls.senhaAtual.hasError('senhaIncorreta') ? 'Senha atual incorreta. Verifique a informação e tente novamente.' : primeiroAcessoForm.controls.senhaAtual.touched && primeiroAcessoForm.controls.senhaAtual.hasError('required') ? 'Senha é obrigatória.' : ''">
+              <s-input type="password" formControlName="senhaAtual" (input)="onSenhaAtualInput()"
+                placeholder="Digite sua senha atual" maxlength="32" autocomplete="current-password" />
+            </s-field>
 
             <!-- Campo 2: Crie uma nova senha -->
-            <div class="form-field-group">
-              <label class="form-label text-xs mb-0.5" for="primeiro-acesso-nova-senha">
-                Crie uma nova senha <span class="required-marker">*</span>
-              </label>
-              <mat-form-field appearance="outline" class="w-full compact-auth-field" subscriptSizing="fixed">
-                <input 
-                  matInput 
-                  formControlName="novaSenha"
-                  [errorStateMatcher]="errorMatcher"
-                  [type]="hidePassword1() ? 'password' : 'text'"
-                  (input)="onNovaSenhaInput()"
-                  (keydown)="onPasswordKeyDown($event)"
-                  (blur)="onNovaSenhaBlur()"
-                  placeholder="Digite a nova senha"
-                  maxlength="16"
-                  autocomplete="new-password"
-                  id="primeiro-acesso-nova-senha"
-                />
-                <button 
-                  type="button" 
-                  matSuffix 
-                  (click)="hidePassword1.set(!hidePassword1())" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors pr-2 cursor-pointer"
-                  aria-label="Alternar visibilidade da nova senha"
-                >
-                  <span class="material-icons text-xl">{{ hidePassword1() ? 'visibility_off' : 'visibility' }}</span>
-                </button>
-                @if (primeiroAcessoForm.controls.novaSenha.touched && primeiroAcessoForm.controls.novaSenha.hasError('required')) {
-                  <mat-error id="primeiro-acesso-nova-senha-required">Senha é obrigatória.</mat-error>
-                } @else if (primeiroAcessoForm.controls.novaSenha.touched && primeiroAcessoForm.controls.novaSenha.hasError('criterios')) {
-                  <mat-error id="primeiro-acesso-nova-senha-criterios">A senha informada não atende aos critérios de segurança.</mat-error>
-                }
-              </mat-form-field>
-            </div>
+            <s-field label="Crie uma nova senha" required controlId="primeiro-acesso-nova-senha" [validationErrors]="{}"
+              [error]="primeiroAcessoForm.controls.novaSenha.touched ? (primeiroAcessoForm.controls.novaSenha.hasError('required') ? 'Senha é obrigatória.' : primeiroAcessoForm.controls.novaSenha.hasError('criterios') ? 'A senha informada não atende aos critérios de segurança.' : '') : ''">
+              <s-input type="password" formControlName="novaSenha" (input)="onNovaSenhaInput()"
+                (keydown)="onPasswordKeyDown($event)" (focusout)="onNovaSenhaBlur()"
+                placeholder="Digite a nova senha" maxlength="16" autocomplete="new-password" />
+            </s-field>
 
             <!-- Campo 3: Confirme a nova senha -->
-            <div class="form-field-group">
-              <label class="form-label text-xs mb-0.5" for="primeiro-acesso-confirma-senha">
-                Confirme a nova senha <span class="required-marker">*</span>
-              </label>
-              <mat-form-field appearance="outline" class="w-full compact-auth-field" subscriptSizing="fixed">
-                <input 
-                  matInput 
-                  formControlName="confirmaSenha"
-                  [errorStateMatcher]="errorMatcher"
-                  [type]="hidePassword2() ? 'password' : 'text'"
-                  (input)="onConfirmaSenhaInput()"
-                  (keydown)="onPasswordKeyDown($event)"
-                  (blur)="onConfirmaSenhaBlur()"
-                  placeholder="Digite novamente a nova senha"
-                  maxlength="16"
-                  autocomplete="new-password"
-                  id="primeiro-acesso-confirma-senha"
-                />
-                <button 
-                  type="button" 
-                  matSuffix 
-                  (click)="hidePassword2.set(!hidePassword2())" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors pr-2 cursor-pointer"
-                  aria-label="Alternar visibilidade da confirmação de senha"
-                >
-                  <span class="material-icons text-xl">{{ hidePassword2() ? 'visibility_off' : 'visibility' }}</span>
-                </button>
-                @if (primeiroAcessoForm.controls.confirmaSenha.touched && primeiroAcessoForm.controls.confirmaSenha.hasError('required')) {
-                  <mat-error id="primeiro-acesso-confirma-required">Confirmação de senha é obrigatória.</mat-error>
-                } @else if (primeiroAcessoForm.controls.confirmaSenha.touched && primeiroAcessoForm.controls.confirmaSenha.hasError('mismatch')) {
-                  <mat-error id="primeiro-acesso-confirma-mismatch">As senhas não coincidem.</mat-error>
-                }
-              </mat-form-field>
-            </div>
+            <s-field label="Confirme a nova senha" required controlId="primeiro-acesso-confirma-senha" [validationErrors]="{}"
+              [error]="primeiroAcessoForm.controls.confirmaSenha.touched ? (primeiroAcessoForm.controls.confirmaSenha.hasError('required') ? 'Confirmação de senha é obrigatória.' : primeiroAcessoForm.controls.confirmaSenha.hasError('mismatch') ? 'As senhas não coincidem.' : '') : ''">
+              <s-input type="password" formControlName="confirmaSenha" (input)="onConfirmaSenhaInput()"
+                (keydown)="onPasswordKeyDown($event)" (focusout)="onConfirmaSenhaBlur()"
+                placeholder="Digite novamente a nova senha" maxlength="16" autocomplete="new-password" />
+            </s-field>
 
             <!-- Checklist dos 6 Critérios Solicitados em 2 Colunas Compactas -->
             <div class="p-2 sm:p-2.5 bg-siage-border/15 border border-siage-border/70 rounded-lg text-xs my-0.5">
@@ -265,27 +183,21 @@ export class ImmediateErrorMatcher implements ErrorStateMatcher {
 
             <!-- Botão de Ação -->
             <div class="pt-0.5">
-              <button
+              <s-button
                 type="submit"
                 [disabled]="isSubmitting()"
-                class="w-full py-2.5 sm:py-2.5 font-sans font-bold tracking-wide text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-siage-primary hover:bg-siage-primary/95 text-white rounded-xl shadow-sm transition-all duration-200 flex items-center justify-center gap-2"
+                [loading]="isSubmitting()"
+                loadingText="Salvando..."
+                fullWidth
                 id="primeiro-acesso-submit-btn"
               >
-                @if (isSubmitting()) {
-                  <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>Salvando...</span>
-                } @else {
-                  <span>Definir nova senha</span>
-                }
-              </button>
+                Definir nova senha
+              </s-button>
             </div>
 
           </form>
 
-        </div>
+        </s-card>
 
       </div>
 

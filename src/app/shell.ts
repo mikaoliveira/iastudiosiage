@@ -1,10 +1,9 @@
-import {Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, OnDestroy, PLATFORM_ID} from '@angular/core';
+import {Component, inject, signal, computed, viewChild, ChangeDetectionStrategy, OnInit, OnDestroy, PLATFORM_ID} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
 import {RouterOutlet, Router, NavigationEnd} from '@angular/router';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatTooltipModule} from '@angular/material/tooltip';
+import {SIconButtonComponent, SMenuComponent, SMenuItemComponent, SMenuSeparatorComponent, SSidebarComponent} from '@siage/siage-ui';
 import {Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {App} from './app';
@@ -27,8 +26,11 @@ export interface GlobalModuleItem {
     RouterOutlet,
     MatToolbarModule,
     MatIconModule,
-    MatButtonModule,
-    MatTooltipModule,
+    SIconButtonComponent,
+    SMenuComponent,
+    SMenuItemComponent,
+    SMenuSeparatorComponent,
+    SSidebarComponent,
     SimulatorComponent
   ],
   template: `
@@ -38,16 +40,11 @@ export interface GlobalModuleItem {
       <mat-toolbar class="h-14 sm:h-16 flex-shrink-0 flex items-center justify-between border-b border-siage-border bg-siage-surface px-3 sm:px-4 z-40" id="shell-header">
         <div class="flex items-center gap-2 sm:gap-3">
           <!-- Toggle do menu lateral (Botão Hambúrguer) -->
-          <button 
-            mat-icon-button 
-            type="button"
-            (click)="toggleHamburger()" 
-            [title]="isMobile() ? (isMobileDrawerOpen() ? 'Fechar menu' : 'Abrir menu') : (isSidebarExpanded() ? 'Recolher menu' : 'Expandir menu')"
-            aria-label="Alternar menu de navegação"
-            class="text-siage-text-secondary hover:text-siage-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40 cursor-pointer"
-          >
-            <mat-icon>{{ isMobile() && isMobileDrawerOpen() ? 'close' : 'menu' }}</mat-icon>
-          </button>
+          <s-icon-button
+            [icon]="isMobile() && isMobileDrawerOpen() ? 'close' : 'menu'"
+            [label]="isMobile() ? (isMobileDrawerOpen() ? 'Fechar menu' : 'Abrir menu') : (isSidebarExpanded() ? 'Recolher menu' : 'Expandir menu')"
+            (click)="toggleHamburger()"
+          />
           
           <!-- Logo SIAGE-RH -->
           <div class="flex items-center gap-2 h-7 sm:h-8">
@@ -58,41 +55,33 @@ export interface GlobalModuleItem {
         <!-- Ações do Lado Direito da Barra Superior: Busca global -> Tema -> Perfil -->
         <div class="flex items-center gap-2 sm:gap-3">
           <!-- 1. Busca global -->
-          <button 
-            type="button" 
-            (click)="irParaBuscaGlobal()" 
-            class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-siage-surface hover:bg-siage-primary/10 border border-siage-border text-siage-primary transition-all cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
+          <s-icon-button
+            icon="search"
+            label="Busca global de funcionalidades"
+            class="rounded-full"
             [class.bg-siage-primary/15]="isBuscaGlobalAtiva()"
-            [class.border-siage-primary/40]="isBuscaGlobalAtiva()"
-            title="Busca global"
-            aria-label="Busca global de funcionalidades"
+            [iconFilled]="isBuscaGlobalAtiva()"
+            [attr.aria-current]="isBuscaGlobalAtiva() ? 'page' : null"
+            (click)="irParaBuscaGlobal()"
             id="shell-search-button"
-          >
-            <mat-icon class="text-base sm:text-lg">search</mat-icon>
-          </button>
+          />
 
           <!-- 2. Tema -->
-          <button 
-            type="button" 
-            (click)="app.toggleTheme()" 
-            class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-siage-surface hover:bg-siage-primary/10 border border-siage-border text-siage-primary transition-all cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-            [attr.aria-label]="app.isDark() ? 'Alternar para tema claro' : 'Alternar para tema escuro'"
-            [title]="app.isDark() ? 'Alternar para tema claro' : 'Alternar para tema escuro'"
+          <s-icon-button
+            [icon]="app.isDark() ? 'light_mode' : 'dark_mode'"
+            [label]="app.isDark() ? 'Alternar para tema claro' : 'Alternar para tema escuro'"
+            (click)="app.toggleTheme()"
             id="shell-theme-toggle-button"
-          >
-            <mat-icon class="text-base sm:text-lg">
-              {{ app.isDark() ? 'light_mode' : 'dark_mode' }}
-            </mat-icon>
-          </button>
+          />
 
           <!-- 3. Perfil do Usuário com Popover/Dropdown -->
           <div class="relative" id="profile-dropdown-wrapper">
             <!-- Botão com avatar e iniciais do usuário -->
             <button 
               type="button"
-              (click)="toggleProfileMenu($event)"
+              (click)="profile.openFromEvent($event)"
               class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-siage-primary/10 hover:bg-siage-primary/20 border border-siage-primary/30 flex items-center justify-center text-siage-primary font-bold text-xs sm:text-sm font-sans shadow-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40 select-none"
-              [attr.aria-expanded]="isProfileMenuOpen()"
+              [attr.aria-expanded]="profile.ariaExpanded()"
               aria-haspopup="true"
               aria-label="Menu de perfil do usuário"
               title="Perfil do usuário"
@@ -101,24 +90,8 @@ export interface GlobalModuleItem {
               {{ authService.getCurrentUserInitials() }}
             </button>
 
-            <!-- Dropdown do Perfil -->
-            @if (isProfileMenuOpen()) {
-              <!-- Backdrop invisível para fechar ao clicar fora -->
-              <div 
-                class="fixed inset-0 z-40 cursor-default" 
-                (click)="closeProfileMenu()" 
-                aria-hidden="true"
-              ></div>
-
-              <!-- Painel do Dropdown alinhado à direita -->
-              <div 
-                class="absolute right-0 top-full mt-2 w-72 bg-siage-surface border border-siage-border rounded-xl shadow-2xl z-50 p-4 font-sans text-left transition-all duration-150 animate-in fade-in zoom-in-95"
-                role="menu"
-                aria-orientation="vertical"
-                aria-labelledby="shell-profile-button"
-              >
-                <!-- Identificação do Usuário -->
-                <div class="flex flex-col gap-0.5 pb-2">
+            <s-menu #profile label="Menu de perfil do usuário">
+                <div class="w-72 flex flex-col gap-0.5 px-4 py-2">
                   <span class="text-sm font-poppins font-bold text-siage-text-primary leading-tight truncate">
                     {{ authService.getCurrentUserName() }}
                   </span>
@@ -132,36 +105,13 @@ export interface GlobalModuleItem {
 
                 <!-- Ação Trocar matrícula (exibida exclusivamente quando possuir mais de uma matrícula) -->
                 @if (authService.canSwitchMatricula()) {
-                  <div class="pt-2 border-t border-siage-border/50">
-                    <button 
-                      type="button" 
-                      (click)="onTrocarMatricula()"
-                      class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-sans font-semibold text-siage-text-primary hover:bg-siage-primary/10 hover:text-siage-primary transition-colors cursor-pointer text-left"
-                      role="menuitem"
-                    >
-                      <mat-icon style="font-size: 18px; width: 18px; height: 18px;" class="text-siage-text-secondary shrink-0">swap_horiz</mat-icon>
-                      <span class="truncate">Trocar matrícula</span>
-                    </button>
-                  </div>
+                  <s-menu-separator />
+                  <s-menu-item icon="swap_horiz" (triggered)="onTrocarMatricula()">Trocar matrícula</s-menu-item>
                 }
 
-                <!-- Divisor visual -->
-                <hr class="my-2 border-siage-border/60" />
-
-                <!-- Ação Sair -->
-                <div>
-                  <button 
-                    type="button" 
-                    (click)="logout()" 
-                    class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-sans font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer text-left"
-                    role="menuitem"
-                  >
-                    <mat-icon style="font-size: 18px; width: 18px; height: 18px;" class="text-red-600 dark:text-red-400 shrink-0">logout</mat-icon>
-                    <span>Sair</span>
-                  </button>
-                </div>
-              </div>
-            }
+                <s-menu-separator />
+                <s-menu-item icon="logout" destructive (triggered)="logout()">Sair</s-menu-item>
+            </s-menu>
           </div>
         </div>
       </mat-toolbar>
@@ -174,48 +124,18 @@ export interface GlobalModuleItem {
              Padrão do Ponto Digital: menu lateral com módulos navegáveis,
              sem painel contextual flutuante ou drawers duplicados.
              ======================================================== -->
-        <nav 
-          [class]="isSidebarExpanded() 
-            ? 'w-[240px] min-w-[240px] max-w-[240px]' 
-            : 'w-[68px] min-w-[68px] max-w-[68px]'"
-          class="hidden md:flex h-full bg-siage-surface border-r border-siage-border flex-col justify-between py-2 transition-all duration-200 shrink-0 z-20 select-none overflow-y-auto overflow-x-hidden"
-          aria-label="Menu principal dos módulos"
+        @if (!isMobile()) {
+        <s-sidebar
+          class="h-full shrink-0 z-20"
+          [items]="moduleItems"
+          [activeId]="activeModuleId()"
+          [collapsed]="!isSidebarExpanded()"
+          [showToggle]="false"
+          [breakpoint]="767"
+          label="Menu principal dos módulos"
+          (select)="onModuleSelectById($event)"
         >
-          <div class="flex flex-col space-y-1 px-1.5 sm:px-2">
-            @for (item of moduleItems; track item.id) {
-              <button 
-                type="button"
-                (click)="onModuleSelect(item)"
-                [matTooltip]="!isSidebarExpanded() ? item.label : ''"
-                matTooltipPosition="right"
-                [attr.aria-current]="isModuleSelected(item) ? 'page' : null"
-                class="siage-menu-btn"
-                [class.is-active]="isModuleSelected(item)"
-                [class.justify-center]="!isSidebarExpanded()"
-                [class.px-3]="isSidebarExpanded()"
-              >
-                <mat-icon 
-                  class="text-lg shrink-0 transition-colors"
-                  style="font-size: 20px; width: 20px; height: 20px;"
-                >
-                  {{ item.icon }}
-                </mat-icon>
-
-                @if (isSidebarExpanded()) {
-                  <span 
-                    class="font-sans text-xs truncate leading-none transition-colors"
-                    [class.font-semibold]="isModuleSelected(item)"
-                    [class.font-medium]="!isModuleSelected(item)"
-                  >
-                    {{ item.label }}
-                  </span>
-                }
-              </button>
-            }
-          </div>
-
-          <!-- Rodapé do menu lateral -->
-          <div class="pt-2 px-2 border-t border-siage-border/40 flex flex-col items-center">
+          <div footer class="pt-2 px-2 border-t border-siage-border/40 flex flex-col items-center">
             @if (!isSidebarExpanded()) {
               <div class="h-9 w-9 flex items-center justify-center opacity-70">
                 <img src="/logo-reduzido.svg" alt="SIAGE" class="w-6 h-6 object-contain" referrerpolicy="no-referrer" />
@@ -227,7 +147,8 @@ export interface GlobalModuleItem {
               </div>
             }
           </div>
-        </nav>
+        </s-sidebar>
+        }
 
         <!-- ========================================================
              2. DRAWER MOBILE (< 768px)
@@ -252,43 +173,25 @@ export interface GlobalModuleItem {
                 <span class="text-sm font-poppins font-bold text-siage-text-primary">Módulos</span>
               </div>
               
-              <button 
-                type="button" 
+              <s-icon-button
+                icon="close"
+                label="Fechar menu"
                 (click)="closeMobileDrawer()" 
-                title="Fechar menu"
-                aria-label="Fechar menu"
-                class="h-9 w-9 rounded-lg flex items-center justify-center text-siage-text-secondary hover:text-siage-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer shrink-0"
-              >
-                <mat-icon style="font-size: 20px; width: 20px; height: 20px;">close</mat-icon>
-              </button>
+              />
             </div>
 
             <!-- Lista de Módulos Globais Mobile -->
-            <div class="flex-1 overflow-y-auto p-2 space-y-1 font-sans">
-              @for (item of moduleItems; track item.id) {
-                <button 
-                  type="button" 
-                  (click)="onModuleSelect(item)"
-                  class="siage-menu-btn px-3.5"
-                  [class.is-active]="isModuleSelected(item)"
-                  [attr.aria-current]="isModuleSelected(item) ? 'page' : null"
-                >
-                  <div class="flex items-center justify-between w-full min-w-0">
-                    <div class="flex items-center gap-3 min-w-0">
-                      <mat-icon 
-                        class="shrink-0 transition-colors" 
-                        style="font-size: 20px; width: 20px; height: 20px;"
-                      >
-                        {{ item.icon }}
-                      </mat-icon>
-                      <span class="truncate" [class.font-semibold]="isModuleSelected(item)">{{ item.label }}</span>
-                    </div>
-                    @if (item.id === 'configuracoes' || item.id === 'profissionais') {
-                      <mat-icon class="text-sm shrink-0 transition-colors" [class.text-white]="isModuleSelected(item)" [class.text-siage-text-secondary]="!isModuleSelected(item)" style="font-size: 16px; width: 16px; height: 16px;">chevron_right</mat-icon>
-                    }
-                  </div>
-                </button>
-              }
+            <div class="flex-1 min-h-0 overflow-y-auto">
+              <s-sidebar
+                style="width: 100%; height: 100%"
+                [items]="moduleItems"
+                [activeId]="activeModuleId()"
+                [collapsed]="false"
+                [showToggle]="false"
+                [breakpoint]="0"
+                label="Menu de navegação móvel"
+                (select)="onModuleSelectById($event)"
+              />
             </div>
 
             <!-- Rodapé Mobile -->
@@ -332,8 +235,7 @@ export class ShellComponent implements OnInit, OnDestroy {
   // Controle do drawer no Mobile
   readonly isMobileDrawerOpen = signal<boolean>(false);
 
-  // Controle do popover/dropdown de Perfil
-  readonly isProfileMenuOpen = signal<boolean>(false);
+  private readonly profileMenu = viewChild(SMenuComponent);
 
   // Rota atual monitorada
   readonly currentUrl = signal<string>(this.router.url);
@@ -441,6 +343,11 @@ export class ShellComponent implements OnInit, OnDestroy {
     return this.activeModuleId() === item.id;
   }
 
+  onModuleSelectById(id: string) {
+    const item = this.moduleItems.find(module => module.id === id);
+    if (item) this.onModuleSelect(item);
+  }
+
   onModuleSelect(item: GlobalModuleItem) {
     this.closeMobileDrawer();
     this.activeModuleId.set(item.id);
@@ -456,15 +363,8 @@ export class ShellComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleProfileMenu(event?: MouseEvent) {
-    if (event) {
-      event.stopPropagation();
-    }
-    this.isProfileMenuOpen.update(v => !v);
-  }
-
   closeProfileMenu() {
-    this.isProfileMenuOpen.set(false);
+    this.profileMenu()?.close();
   }
 
   irParaBuscaGlobal() {

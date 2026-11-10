@@ -23,18 +23,13 @@
       </button>
 
       <!-- Botão de alternar tema -->
-      <button 
+      <s-icon-button
         type="button" 
         (click)="toggleTheme()" 
-        class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-siage-surface hover:bg-siage-primary/10 border border-siage-border text-siage-primary transition-all cursor-pointer shadow-xs ml-1"
-        [attr.aria-label]="isDark() ? 'Alternar para tema claro' : 'Alternar para tema escuro'"
-        [title]="isDark() ? 'Alternar para tema claro' : 'Alternar para tema escuro'"
+        [icon]="isDark() ? 'light_mode' : 'dark_mode'"
+        [label]="isDark() ? 'Alternar para tema claro' : 'Alternar para tema escuro'"
         id="theme-toggle-button"
-      >
-        <mat-icon class="text-base sm:text-lg">
-          {{ isDark() ? 'light_mode' : 'dark_mode' }}
-        </mat-icon>
-      </button>
+      />
     </div>
   </div>
 </header>
