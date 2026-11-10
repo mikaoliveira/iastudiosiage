@@ -36,6 +36,7 @@ import {SubgerenciaList, SubgerenciaForm, SubgerenciaView, subgerenciaFormDeacti
 import {NucleoList, NucleoForm, NucleoView, nucleoFormDeactivateGuard} from './nucleo';
 import {ExcecaoHierarquiaList, ExcecaoHierarquiaForm, ExcecaoHierarquiaView, excecaoHierarquiaFormDeactivateGuard} from './excecao-hierarquia';
 import {permissionGuard, createPermissionGuard} from './permission';
+import {provideSiageDateAdapter} from '@siage/siage-ui';
 
 export const routes: Routes = [
   {
@@ -71,9 +72,9 @@ export const routes: Routes = [
       { path: 'configuracoes/hierarquia', component: HierarquiaComponent, canActivate: [permissionGuard] },
       { path: 'configuracoes/hierarquia/visualizar', component: HierarquiaVisualizacao, canActivate: [permissionGuard] },
       { path: 'configuracoes/hierarquia/secretaria-geral', component: SecretariaGeralList, canActivate: [permissionGuard] },
-      { path: 'configuracoes/hierarquia/secretaria-geral/novo', component: SecretariaGeralForm, canActivate: [permissionGuard, createPermissionGuard], canDeactivate: [secretariaGeralFormDeactivateGuard] },
+      { path: 'configuracoes/hierarquia/secretaria-geral/novo', component: SecretariaGeralForm, providers: [provideSiageDateAdapter()], canActivate: [permissionGuard, createPermissionGuard], canDeactivate: [secretariaGeralFormDeactivateGuard] },
       { path: 'configuracoes/hierarquia/secretaria-geral/:id', component: SecretariaGeralView, canActivate: [permissionGuard] },
-      { path: 'configuracoes/hierarquia/secretaria-geral/:id/editar', component: SecretariaGeralForm, canActivate: [permissionGuard], canDeactivate: [secretariaGeralFormDeactivateGuard] },
+      { path: 'configuracoes/hierarquia/secretaria-geral/:id/editar', component: SecretariaGeralForm, providers: [provideSiageDateAdapter()], canActivate: [permissionGuard], canDeactivate: [secretariaGeralFormDeactivateGuard] },
       { path: 'configuracoes/hierarquia/secretaria-executiva', component: SecretariaExecutivaList, canActivate: [permissionGuard] },
       { path: 'configuracoes/hierarquia/secretaria-executiva/novo', component: SecretariaExecutivaForm, canActivate: [permissionGuard, createPermissionGuard], canDeactivate: [secretariaExecutivaFormDeactivateGuard] },
       { path: 'configuracoes/hierarquia/secretaria-executiva/:id', component: SecretariaExecutivaView, canActivate: [permissionGuard] },
