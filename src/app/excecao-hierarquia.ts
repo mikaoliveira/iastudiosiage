@@ -977,7 +977,6 @@ export class DetalhesExcecaoModal {
           (clear)="onLimpar()"
         >
           <ng-container [formGroup]="filtroForm">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start w-full">
               <!-- Filtro 1: Unidade de Trabalho / Setor -->
               <s-field label="Unidade de Trabalho / Setor" controlId="filter-setor">
                 <s-input
@@ -1031,7 +1030,6 @@ export class DetalhesExcecaoModal {
                   (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
                 />
               </s-field>
-            </div>
           </ng-container>
         </s-filter-card>
 
@@ -1925,7 +1923,8 @@ export class ExcecaoHierarquiaForm implements OnInit {
 
   readonly historicoEmpty: STableEmpty = {
     title: 'Sem histórico registrado',
-    description: 'Este setor não possui nenhum aprovador de exceção registrado em seu histórico.'
+    description: 'Este setor não possui nenhum aprovador de exceção registrado em seu histórico.',
+    actionLabel: ''
   };
 
   readonly historicoActions: readonly STableAction<RegistroHistoricoExcecao>[] = [
@@ -2546,7 +2545,8 @@ export class ExcecaoHierarquiaView implements OnInit {
 
   readonly historicoEmpty: STableEmpty = {
     title: 'Sem histórico registrado',
-    description: 'Este setor não possui nenhum aprovador de exceção registrado em seu histórico.'
+    description: 'Este setor não possui nenhum aprovador de exceção registrado em seu histórico.',
+    actionLabel: ''
   };
 
   readonly historicoActions: readonly STableAction<RegistroHistoricoExcecao>[] = [
