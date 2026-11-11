@@ -1,3 +1,12 @@
+import {STableAction, STableActionEvent, STableSort} from '@siage/siage-ui';
+import {from} from 'rxjs';
+import {SModalService, SToastService, SFilterCardComponent, STableComponent, STableCellDirective, STableColumn, SFileUploadComponent, SFileError} from '@siage/siage-ui';
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
+import {MatDatepickerIntl} from '@angular/material/datepicker';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {FormsModule, NgModel} from '@angular/forms';
+import {effect} from '@angular/core';
+import {SPageHeaderComponent, SFieldComponent, SInputComponent, SIconButtonComponent, SAutocompleteComponent, SSelectComponent, SIconComponent, SSwitchComponent, STooltipDirective, SButtonComponent, SDatepickerComponent, SAutocompleteSelection, SDateAdapter, S_DATE_FORMATS, SDatepickerIntl} from '@siage/siage-ui';
 import {
   Component,
   inject,
@@ -12,21 +21,21 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {CommonModule} from '@angular/common';
 import {toSignal} from '@angular/core/rxjs-interop';
 
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatTableModule} from '@angular/material/table';
-import {MatDialogModule, MatDialog} from '@angular/material/dialog';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatSelectModule} from '@angular/material/select';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
 
-import {SiageDatePickerComponent} from './siage-date-picker';
-import {SiagePaginatorComponent} from './siage-paginator';
-import {ConfirmacaoDialog, ModalService} from './dialog';
-import {ToastService} from './toast';
+
+
+
+
+import {MatDialogModule, MatDialog} from '@angular/material/dialog';
+
+
+
+
+
+
+
+
+
 import {PermissionService} from './permission';
 import {AcessoRestritoComponent} from './acesso-restrito';
 import {SimulatorService} from './simulator';
@@ -439,17 +448,20 @@ export class GerenciaRegionalService {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTableModule,
-    MatTooltipModule,
-    MatSelectModule,
-    MatSlideToggleModule,
-    MatAutocompleteModule,
-    SiagePaginatorComponent,
-    AcessoRestritoComponent
+    AcessoRestritoComponent,
+    SPageHeaderComponent,
+    SFieldComponent,
+    SInputComponent,
+    SIconButtonComponent,
+    SAutocompleteComponent,
+    SSelectComponent,
+    SSwitchComponent,
+    STooltipDirective,
+    SButtonComponent,
+    FormsModule,
+    SFilterCardComponent,
+    STableComponent,
+    STableCellDirective
   ],
   template: `
     @if (!permissionService.hasAccess()) {
@@ -457,431 +469,66 @@ export class GerenciaRegionalService {
     } @else {
       <div class="flex flex-col gap-6 max-w-7xl mx-auto w-full font-sans pb-12">
         <!-- Breadcrumb e Cabeçalho Principal -->
-        <div class="flex flex-col gap-2">
-          <!-- Breadcrumb -->
-          <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-xs text-siage-text-secondary">
-            <span 
-              (click)="goHome()" 
-              (keydown.enter)="goHome()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Início
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goConfiguracoes()" 
-              (keydown.enter)="goConfiguracoes()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurações
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goHierarquia()" 
-              (keydown.enter)="goHierarquia()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Hierarquia de Unidades e Cargos
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span class="text-siage-primary font-semibold" aria-current="page">Configurar Gerência Regional</span>
-          </nav>
+        <s-page-header [breadcrumbs]="[{label: 'Início', routerLink: '/inicio'}, {label: 'Configurações', routerLink: '/configuracoes'}, {label: 'Hierarquia de Unidades e Cargos', routerLink: '/configuracoes/hierarquia'}, {label: 'Configurar Gerência Regional'}]" title="Configurar Gerência Regional" description="Gerencie as Gerências Regionais vinculadas às Secretarias Executivas, a vinculação de chefia e suas normativas." showBack (back)="goHierarquia()"><s-button action="" type="button" (click)="onAdicionar()" [disabled]="!permissionService.canCreate()" [sTooltip]="!permissionService.canCreate() ? 'Você não possui permissão para cadastrar Gerência Regional' : 'Adicionar nova Gerência Regional'" icon="add" variant="primary" >
 
-          <!-- Título com Botão Voltar, Descrição e Botão Adicionar -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <button 
-                  mat-icon-button 
-                  type="button"
-                  (click)="goHierarquia()" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                  title="Voltar para Hierarquia de Unidades e Cargos"
-                  aria-label="Voltar para Hierarquia de Unidades e Cargos"
-                >
-                  <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-                </button>
-                <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                  Configurar Gerência Regional
-                </h1>
-              </div>
-
-              <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-2xl">
-                Gerencie as Gerências Regionais vinculadas às Secretarias Executivas, a vinculação de chefia e suas normativas.
-              </p>
-            </div>
-
-            <!-- Botão Adicionar -->
-            <div class="shrink-0 pl-8 sm:pl-0">
-              <button 
-                type="button" 
-                (click)="onAdicionar()"
-                [disabled]="!permissionService.canCreate()"
-                [matTooltip]="!permissionService.canCreate() ? 'Você não possui permissão para cadastrar Gerência Regional' : 'Adicionar nova Gerência Regional'"
-                class="inline-flex items-center justify-center gap-2 h-10 px-5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40 disabled:hover:bg-siage-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">add</mat-icon>
                 <span>Adicionar</span>
-              </button>
-            </div>
-          </div>
-        </div>
+              </s-button></s-page-header>
 
         <!-- Card de Filtros -->
-        <div class="bg-siage-surface border border-siage-border rounded-lg p-5 shadow-xs flex flex-col gap-4">
-          <form [formGroup]="filtroForm" (ngSubmit)="canBuscar() && onBuscar()" class="flex flex-col gap-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+        <s-filter-card [form]="filtroCardForm" disableSearchWithoutValue [showActiveFilters]="false" (search)="onBuscar()" (clear)="onLimpar()"><ng-container [formGroup]="filtroForm">
               
               <!-- Filtro: Nome (máximo de 200 caracteres) -->
               <div class="form-field-group">
-                <label for="filter-nome" class="siage-field-label">Nome</label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="filter-nome"
-                    type="text" 
-                    formControlName="nome" 
-                    maxlength="200"
-                    placeholder="Buscar por nome" 
-                    (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
-                    class="text-sm"
-                  />
-                  @if (filtroNomeVal()) {
-                    <button mat-icon-button matSuffix type="button" (click)="limparFiltroNome()" aria-label="Limpar campo">
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                    </button>
-                  }
-                </mat-form-field>
+
+                <s-field label="Nome" controlId="filter-nome"><s-input type="text" formControlName="nome" [maxlength]="200" placeholder="Buscar por nome" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" (focusout)="filtroForm.controls.nome.markAsTouched(); " />
+@if (filtroForm.controls.nome.value) { <s-icon-button icon="close" label="Limpar campo" text size="sm" (click)="limparFiltroNome()" /> }</s-field>
               </div>
 
               <!-- Filtro: Unidade de Trabalho (UTB) (Select com autocomplete contendo somente UTBs de Gerências Regionais cadastradas) -->
               <div class="form-field-group">
-                <label for="filter-utb" class="siage-field-label">Unidade de Trabalho (UTB)</label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="filter-utb"
-                    type="text" 
-                    formControlName="utb" 
-                    placeholder="Selecione ou busque uma unidade de trabalho" 
-                    [matAutocomplete]="autoUtb"
-                    #autoUtbTrigger="matAutocompleteTrigger"
-                    (focus)="autoUtbTrigger.openPanel()"
-                    (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
-                    class="text-sm"
-                  />
-                  <mat-autocomplete #autoUtb="matAutocomplete">
-                    @for (utb of filteredUtbsList(); track utb.codigo) {
-                      <mat-option [value]="utb.codigo + ' - ' + utb.nome">
-                        {{ utb.codigo }} - {{ utb.nome }}
-                      </mat-option>
-                    }
-                  </mat-autocomplete>
-                  @if (filtroUtbVal()) {
-                    <button mat-icon-button matSuffix type="button" (click)="limparFiltroUtb()" aria-label="Limpar campo">
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                    </button>
-                  } @else {
-                    <button mat-icon-button matSuffix type="button" (click)="autoUtbTrigger.openPanel()" aria-label="Abrir opções">
-                      <mat-icon class="text-siage-text-secondary">arrow_drop_down</mat-icon>
-                    </button>
-                  }
-                </mat-form-field>
+
+                <s-field label="Unidade de Trabalho (UTB)" controlId="filter-utb"><s-autocomplete formControlName="utb" placeholder="Selecione ou busque uma unidade de trabalho" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" [options]="opcoesfilter_utb()" (input)="onUtbInput($event)" (selectionChange)="onUtbSelectionChange($event)" (focusout)="filtroForm.controls.utb.markAsTouched()" /></s-field>
               </div>
 
               <!-- Filtro: Status (Todos, Ativo, Inativo) -->
               <div class="form-field-group">
-                <label for="filter-status" class="siage-field-label">Status</label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="status" id="filter-status" class="text-sm">
-                    <mat-option value="TODOS">Todos</mat-option>
-                    <mat-option value="ATIVO">Ativo</mat-option>
-                    <mat-option value="INATIVO">Inativo</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-            </div>
 
-            <!-- Botões Buscar e Limpar -->
-            <div class="flex items-center justify-end gap-3 pt-4 border-t border-siage-border/40">
-              <button 
-                type="button" 
-                (click)="onLimpar()"
-                class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-siage-primary/5 hover:border-siage-primary/30 active:scale-[0.99] transition-all cursor-pointer"
-              >
-                Limpar
-              </button>
-              
-              <button 
-                type="submit" 
-                [disabled]="!canBuscar()"
-                [matTooltip]="!canBuscar() ? 'Informe o Nome ou a Unidade de Trabalho (UTB) para realizar a busca' : 'Executar busca'"
-                class="inline-flex items-center justify-center gap-1.5 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-siage-primary"
-              >
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">search</mat-icon>
-                <span>Buscar</span>
-              </button>
-            </div>
-          </form>
-        </div>
+                <s-field label="Status" controlId="filter-status"><s-select formControlName="status" [options]="[{label: 'Todos', value: 'TODOS'}, {label: 'Ativo', value: 'ATIVO'}, {label: 'Inativo', value: 'INATIVO'}]" [clearable]="false" /></s-field>
+              </div>
+            </ng-container></s-filter-card>
 
         <!-- Tabela de Listagem / Estados -->
-        <div class="border border-siage-border rounded-lg overflow-hidden bg-siage-surface shadow-xs">
-          @if (isCarregando()) {
-            <div class="p-4 sm:p-6 space-y-4">
-              <div class="h-6 w-48 bg-slate-200 dark:bg-slate-700/50 rounded animate-pulse"></div>
-              <div class="space-y-3">
-                @for (i of [1, 2, 3]; track i) {
-                  <div class="h-14 bg-slate-100 dark:bg-slate-800/40 rounded-lg animate-pulse flex items-center justify-between px-4">
-                    <div class="h-4 w-52 bg-slate-200 dark:bg-slate-700/60 rounded"></div>
-                    <div class="h-4 w-44 bg-slate-200 dark:bg-slate-700/60 rounded"></div>
-                    <div class="h-4 w-28 bg-slate-200 dark:bg-slate-700/60 rounded"></div>
-                    <div class="h-4 w-24 bg-slate-200 dark:bg-slate-700/60 rounded"></div>
-                    <div class="h-6 w-16 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
-                    <div class="h-8 w-24 bg-slate-200 dark:bg-slate-700/60 rounded"></div>
-                  </div>
-                }
-              </div>
-            </div>
-          } @else if (isErro()) {
-            <div class="py-14 px-6 flex flex-col items-center justify-center text-center gap-3">
-              <div class="w-12 h-12 rounded-lg bg-[var(--destructive)]/10 text-[var(--destructive)] flex items-center justify-center">
-                <mat-icon style="font-size: 24px; width: 24px; height: 24px;">error_outline</mat-icon>
-              </div>
-              <div class="flex flex-col gap-1 max-w-md">
-                <h3 class="text-base font-poppins font-semibold text-siage-text-primary">Erro ao carregar dados</h3>
-                <p class="text-xs sm:text-sm text-siage-text-secondary">
-                  Não foi possível carregar as informações desta funcionalidade. Verifique sua conexão e tente novamente.
-                </p>
-              </div>
-              <button 
-                type="button" 
-                (click)="simulatorService.setScenario('normal')" 
-                class="mt-2 inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer"
-              >
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">refresh</mat-icon>
-                <span>Tentar novamente</span>
-              </button>
-            </div>
-          } @else if (isSemRegistros()) {
-            <div class="py-16 px-6 flex flex-col items-center justify-center text-center gap-3">
-              <div class="w-12 h-12 rounded-lg bg-siage-text-secondary/10 text-siage-text-secondary flex items-center justify-center">
-                <mat-icon style="font-size: 24px; width: 24px; height: 24px;">inbox</mat-icon>
-              </div>
-              <div class="flex flex-col gap-1 max-w-md">
-                <h3 class="text-base font-poppins font-semibold text-siage-text-primary">Nenhum registro cadastrado</h3>
-                <p class="text-xs sm:text-sm text-siage-text-secondary">Ainda não existem gerências regionais cadastradas.</p>
-              </div>
-            </div>
-          } @else if (isSemResultadoFiltro()) {
-            <div class="py-16 px-6 flex flex-col items-center justify-center text-center gap-3">
-              <div class="w-12 h-12 rounded-lg bg-siage-text-secondary/10 text-siage-text-secondary flex items-center justify-center">
-                <mat-icon style="font-size: 24px; width: 24px; height: 24px;">search_off</mat-icon>
-              </div>
-              <div class="flex flex-col gap-1 max-w-md">
-                <h3 class="text-base font-poppins font-semibold text-siage-text-primary">Nenhum resultado encontrado</h3>
-                <p class="text-xs sm:text-sm text-siage-text-secondary">Nenhum registro corresponde aos filtros aplicados.</p>
-              </div>
-            </div>
-          } @else {
-            <div class="overflow-x-auto w-full">
-              <table class="w-full text-left font-sans border-collapse">
-                <thead>
-                  <tr class="bg-black/[0.02] dark:bg-white/[0.02] border-b border-siage-border select-none">
-                    <th scope="col" class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 pl-4 pr-3 min-w-[240px]">
-                      <button 
-                        type="button" 
-                        (click)="toggleSort('nome')"
-                        class="inline-flex items-center gap-1.5 text-siage-text-secondary hover:text-siage-text-primary transition-colors cursor-pointer group focus-visible:outline-none focus-visible:underline"
-                        [attr.aria-label]="'Ordenar por Nome da Gerência Regional ' + (sortColumn() === 'nome' ? (sortDirection() === 'asc' ? 'decrescente' : 'crescente') : 'crescente')"
-                      >
-                        <span class="transition-colors" [class.text-siage-text-primary]="sortColumn() === 'nome'" [class.text-siage-text-secondary]="sortColumn() !== 'nome'">Nome da Gerência Regional</span>
-                        <mat-icon 
-                          class="transition-colors"
-                          [class.text-siage-text-primary]="sortColumn() === 'nome'"
-                          [class.text-siage-text-secondary/40]="sortColumn() !== 'nome'"
-                          [class.group-hover:text-siage-text-primary]="sortColumn() !== 'nome'"
-                          style="font-size: 16px; width: 16px; height: 16px;"
-                        >
-                          @if (sortColumn() === 'nome') {
-                            {{ sortDirection() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                          } @else {
-                            unfold_more
-                          }
-                        </mat-icon>
-                      </button>
-                    </th>
-
-                    <th scope="col" class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-3 min-w-[200px]">
-                      <button 
-                        type="button" 
-                        (click)="toggleSort('utb')"
-                        class="inline-flex items-center gap-1.5 text-siage-text-secondary hover:text-siage-text-primary transition-colors cursor-pointer group focus-visible:outline-none focus-visible:underline"
-                        [attr.aria-label]="'Ordenar por Unidade de Trabalho ' + (sortColumn() === 'utb' ? (sortDirection() === 'asc' ? 'decrescente' : 'crescente') : 'crescente')"
-                      >
-                        <span class="transition-colors" [class.text-siage-text-primary]="sortColumn() === 'utb'" [class.text-siage-text-secondary]="sortColumn() !== 'utb'">Unidade de Trabalho (UTB)</span>
-                        <mat-icon 
-                          class="transition-colors"
-                          [class.text-siage-text-primary]="sortColumn() === 'utb'"
-                          [class.text-siage-text-secondary/40]="sortColumn() !== 'utb'"
-                          [class.group-hover:text-siage-text-primary]="sortColumn() !== 'utb'"
-                          style="font-size: 16px; width: 16px; height: 16px;"
-                        >
-                          @if (sortColumn() === 'utb') {
-                            {{ sortDirection() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                          } @else {
-                            unfold_more
-                          }
-                        </mat-icon>
-                      </button>
-                    </th>
-
-                    <th scope="col" class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-3">
-                      Criador/Editor
-                    </th>
-
-                    <th scope="col" class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-3">
-                      <button 
-                        type="button" 
-                        (click)="toggleSort('dataCriacao')"
-                        class="inline-flex items-center gap-1.5 text-siage-text-secondary hover:text-siage-text-primary transition-colors cursor-pointer group focus-visible:outline-none focus-visible:underline"
-                        [attr.aria-label]="'Ordenar por Data de Criação ' + (sortColumn() === 'dataCriacao' ? (sortDirection() === 'asc' ? 'decrescente' : 'crescente') : 'crescente')"
-                      >
-                        <span class="transition-colors" [class.text-siage-text-primary]="sortColumn() === 'dataCriacao'" [class.text-siage-text-secondary]="sortColumn() !== 'dataCriacao'">Data de Criação</span>
-                        <mat-icon 
-                          class="transition-colors"
-                          [class.text-siage-text-primary]="sortColumn() === 'dataCriacao'"
-                          [class.text-siage-text-secondary/40]="sortColumn() !== 'dataCriacao'"
-                          [class.group-hover:text-siage-text-primary]="sortColumn() !== 'dataCriacao'"
-                          style="font-size: 16px; width: 16px; height: 16px;"
-                        >
-                          @if (sortColumn() === 'dataCriacao') {
-                            {{ sortDirection() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                          } @else {
-                            unfold_more
-                          }
-                        </mat-icon>
-                      </button>
-                    </th>
-
-                    <th scope="col" class="text-center font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-3 w-28">
-                      Status
-                    </th>
-
-                    <th scope="col" class="text-center font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-3 w-44">
-                      Ações
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-siage-border/40 font-sans">
-                  @for (item of paginatedItems(); track item.id) {
-                    <tr class="hover:bg-siage-primary/[0.04] dark:hover:bg-siage-primary/[0.06] transition-colors">
-                      <td class="text-left py-3.5 pl-4 pr-3 font-medium text-siage-text-primary">
-                        <span class="font-sans text-sm font-medium text-siage-text-primary leading-tight">{{ item.nome }}</span>
-                      </td>
-                      <td class="text-left font-sans text-siage-text-primary py-3.5 px-3 text-sm leading-normal break-words">
-                        {{ item.utbNome }}
-                      </td>
-                      <td class="text-left font-sans text-siage-text-secondary py-3.5 px-3 text-sm">
-                        {{ item.criadorEditor }}
-                      </td>
-                      <td class="text-left font-sans text-siage-text-secondary py-3.5 px-3 text-sm">
-                        {{ item.dataCriacao }}
-                      </td>
-                      <td class="text-center py-3.5 px-3 w-28">
-                        <span 
-                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-sans font-medium transition-colors"
-                          [class]="item.status === 'ATIVO' 
-                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' 
-                            : 'bg-slate-100 text-slate-600 dark:bg-slate-800/60 dark:text-slate-400 border border-slate-300/40 dark:border-slate-700/50'"
-                        >
-                          {{ item.status === 'ATIVO' ? 'Ativo' : 'Inativo' }}
-                        </span>
-                      </td>
-                      <td class="text-center py-3.5 px-3 w-44">
-                        <div class="flex items-center justify-center gap-1 mx-auto">
-                          <!-- Visualizar -->
-                          <button 
-                            type="button" 
-                            (click)="onVisualizar(item)" 
-                            matTooltip="Visualizar" 
-                            aria-label="Visualizar Gerência Regional"
-                            class="w-10 h-10 inline-flex items-center justify-center rounded-lg text-siage-text-secondary hover:text-siage-primary hover:bg-siage-primary/8 dark:hover:bg-siage-primary/12 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                          >
-                            <mat-icon style="font-size: 20px; width: 20px; height: 20px;">visibility</mat-icon>
-                          </button>
-
-                          <!-- Editar (se permitido e se ativo) -->
-                          @if (permissionService.canCreate() && item.status === 'ATIVO') {
-                            <button 
-                              type="button" 
-                              (click)="onEditar(item)" 
-                              matTooltip="Editar" 
-                              aria-label="Editar Gerência Regional"
-                              class="w-10 h-10 inline-flex items-center justify-center rounded-lg text-siage-text-secondary hover:text-siage-primary hover:bg-siage-primary/8 dark:hover:bg-siage-primary/12 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                            >
-                              <mat-icon style="font-size: 20px; width: 20px; height: 20px;">edit</mat-icon>
-                            </button>
-                          }
-
-                          <!-- Ativar / Inativar Slide Toggle -->
-                          @if (permissionService.canCreate()) {
-                            <div class="relative w-10 h-10 inline-flex items-center justify-center">
-                              <div class="controlled-sec-toggle flex items-center justify-center select-none" aria-hidden="true">
-                                <mat-slide-toggle 
-                                  [checked]="item.status === 'ATIVO'" 
-                                  tabindex="-1"
-                                  aria-hidden="true"
-                                  class="scale-90"
-                                >
-                                </mat-slide-toggle>
-                              </div>
-
-                              <button 
-                                type="button" 
-                                (click)="onToggleStatus(item)"
-                                [matTooltip]="item.status === 'ATIVO' ? 'Inativar' : 'Ativar'"
-                                [attr.aria-label]="item.status === 'ATIVO' ? 'Inativar Gerência Regional' : 'Ativar Gerência Regional'"
-                                class="absolute inset-0 z-20 w-full h-full cursor-pointer bg-transparent border-0 p-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                              >
-                              </button>
-                            </div>
-                          }
-                        </div>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Paginação Padrão SIAGE (10 itens por página) -->
-            <app-siage-paginator 
-              [length]="filteredItems().length"
-              [pageIndex]="pageIndex()"
-              [pageSize]="10"
-              (page)="onPageChange($event.pageIndex)"
-            />
-          }
-        </div>
+        <s-table label="Registros" [columns]="colunasVinculos" [actions]="tableActions()" (actionClick)="onTableAction($event)" [rows]="isErro() || isSemRegistros() || isSemResultadoFiltro() ? [] : paginatedItems()" [loading]="isCarregando()" (emptyAction)="simulatorService.setScenario('normal')"
+      [empty]="isErro() ? {variant: 'error', title: 'Erro ao carregar dados', description: 'Não foi possível carregar as informações desta funcionalidade. Verifique sua conexão e tente novamente.', actionLabel: 'Tentar novamente'} : isSemRegistros() ? {variant: 'no-results', title: 'Nenhum registro cadastrado', description: 'Ainda não existem gerências regionais cadastradas.', actionLabel: ''} : isSemResultadoFiltro() ? {variant: 'no-results', title: 'Nenhum resultado encontrado', description: 'Nenhum registro corresponde aos filtros aplicados.', actionLabel: ''} : {variant: 'no-results', title: 'Nenhum resultado encontrado', description: 'Nenhum registro corresponde aos filtros aplicados.', actionLabel: ''}"
+      [page]="pageIndex() + 1" [pageSize]="pageIndexSize()" [total]="filteredItems().length"
+      (pageChange)="pageIndex.set($event - 1)" (pageSizeChange)="pageIndexSize.set($event); pageIndex.set(0)" [sort]="{key: sortColumn() === 'utb' ? 'utbNome' : sortColumn(), direction: sortDirection()}" (sortChange)="onSortChange($event)">
+      <ng-template sTableCell="nome" let-item>
+                        <span class="font-sans text-sm font-medium text-siage-text-primary leading-tight">{{ item['nome'] }}</span>
+                      </ng-template>
+<ng-template sTableCell="utbNome" let-item>
+                        {{ item['utbNome'] }}
+                      </ng-template>
+<ng-template sTableCell="criadorEditor" let-item>
+                        {{ item['criadorEditor'] }}
+                      </ng-template>
+<ng-template sTableCell="dataCriacao" let-item>
+                        {{ item['dataCriacao'] }}
+                      </ng-template>
+<ng-template #customActions let-item>@if (permissionService.canCreate()) {<s-switch #chave="ngModel" [ngModel]="item['status'] === 'ATIVO'" [ngModelOptions]="{standalone: true}" [ariaLabel]="item['status'] === 'ATIVO' ? 'Inativar' : 'Ativar'" [sTooltip]="item['status'] === 'ATIVO' ? 'Inativar' : 'Ativar'" (ngModelChange)="onSwitchOficial(item, chave)" />}</ng-template>
+    </s-table>
       </div>
     }
   `
 })
 export class GerenciaRegionalList {
+  private readonly modalService = inject(SModalService);
   readonly router = inject(Router);
   readonly service = inject(GerenciaRegionalService);
   readonly secGeralService = inject(SecretariaGeralService);
   readonly permissionService = inject(PermissionService);
   readonly simulatorService = inject(SimulatorService);
   private readonly dialog = inject(MatDialog);
-  private readonly toast = inject(ToastService);
+  private readonly toast = inject(SToastService);
 
   readonly filtroForm = new FormGroup({
     nome: new FormControl(''),
@@ -892,6 +539,7 @@ export class GerenciaRegionalList {
   readonly filtroNomeVal = toSignal(this.filtroForm.controls.nome.valueChanges, { initialValue: '' });
   readonly filtroUtbVal = toSignal(this.filtroForm.controls.utb.valueChanges, { initialValue: '' });
   readonly filtroStatusVal = toSignal(this.filtroForm.controls.status.valueChanges, { initialValue: 'TODOS' });
+  readonly utbTextoDigitado = signal('');
 
   // Filtros aplicados
   readonly appliedNome = signal('');
@@ -915,10 +563,13 @@ export class GerenciaRegionalList {
         list.push(found);
       } else {
         const item = items.find(i => i.utbCodigo === codigo);
+        const rawNome = item?.utbNome || codigo;
+        const prefix = `${codigo} - `;
+        const nomeSemCodigo = rawNome.startsWith(prefix) ? rawNome.slice(prefix.length) : rawNome;
         list.push({
           codigo,
-          nome: item?.utbNome || codigo,
-          descricaoCompleta: `${codigo} - ${item?.utbNome || codigo}`
+          nome: nomeSemCodigo,
+          descricaoCompleta: `${codigo} - ${nomeSemCodigo}`
         });
       }
     }
@@ -927,7 +578,7 @@ export class GerenciaRegionalList {
 
   readonly filteredUtbsList = computed(() => {
     const list = this.utbsVinculadas();
-    const query = (this.filtroUtbVal() || '').trim().toLowerCase();
+    const query = (this.utbTextoDigitado() || this.filtroUtbVal() || '').trim().toLowerCase();
     if (!query) return list;
     return list.filter(u => 
       u.codigo.toLowerCase().includes(query) || 
@@ -938,8 +589,9 @@ export class GerenciaRegionalList {
 
   // Habilita busca se Nome, UTB ou Status diferente de Todos forem preenchidos
   readonly canBuscar = computed(() => {
+    this.valoresFiltroOficial();
     const formNome = (this.filtroNomeVal() || '').trim();
-    const formUtb = (this.filtroUtbVal() || '').trim();
+    const formUtb = (this.filtroUtbVal() || this.utbTextoDigitado() || '').trim();
     const formStatus = this.filtroStatusVal() || 'TODOS';
     return formNome.length > 0 || formUtb.length > 0 || formStatus !== 'TODOS';
   });
@@ -991,17 +643,62 @@ export class GerenciaRegionalList {
 
   readonly paginatedItems = computed(() => {
     const list = this.filteredItems();
-    const start = this.pageIndex() * 10;
-    return list.slice(start, start + 10);
+    const start = this.pageIndex() * this.pageIndexSize();
+    return list.slice(start, start + this.pageIndexSize());
   });
 
   readonly isSemResultadoFiltro = computed(() => {
     return !this.isSemRegistros() && this.filteredItems().length === 0;
   });
 
+    readonly opcoesfilter_utb = computed(() => this.utbsVinculadas().map(utb => ({label: `${ utb.codigo } - ${ utb.nome }`, value: utb.codigo + ' - ' + utb.nome})));
+    readonly filtroCardForm = new FormGroup({ativo: new FormControl('')});
+  readonly valoresFiltroOficial = toSignal(this.filtroForm.valueChanges, {initialValue: this.filtroForm.value});
+  private readonly estadoFiltroOficial = effect(() => {
+    const value = this.valoresFiltroOficial();
+    const ativo = (value.nome || '').trim() || (value.utb || this.utbTextoDigitado() || '').trim() || value.status !== 'TODOS' ? '1' : '';
+    if (this.filtroCardForm.controls.ativo.value !== ativo) this.filtroCardForm.controls.ativo.setValue(ativo);
+  });
+  readonly pageIndexSize = signal(10);
+  readonly colunasVinculos: readonly STableColumn<GerenciaRegionalItem>[] = [{key: 'nome', label: 'Nome da Gerência Regional', sortable: true},
+    {key: 'utbNome', label: 'Unidade de Trabalho (UTB)', sortable: true},
+    {key: 'criadorEditor', label: 'Criador/Editor'},
+    {key: 'dataCriacao', label: 'Data de Criação', sortable: true},
+    {key: 'status', label: 'Status', badge: (item) => ({label: item.status === 'ATIVO' ? 'Ativo' : 'Inativo', tone: item.status === 'ATIVO' ? 'success' : 'secondary'})}];
+  readonly tableActions = computed<readonly STableAction<GerenciaRegionalItem>[]>(() => [
+    {id: 'view', icon: 'visibility', label: 'Visualizar Gerência Regional'},
+    {id: 'edit', icon: 'edit', label: 'Editar Gerência Regional', hidden: item => !this.permissionService.canCreate() || item.status !== 'ATIVO'}
+  ]);
+
+  onTableAction(event: STableActionEvent<GerenciaRegionalItem>) {
+    if (event.action === 'view') this.onVisualizar(event.row);
+    else if (event.action === 'edit') this.onEditar(event.row);
+  }
+
+  onSortChange(sort: STableSort | null) {
+    if (!sort) {
+      this.sortColumn.set('dataCriacao');
+      this.sortDirection.set('desc');
+    } else {
+      this.sortColumn.set(sort.key === 'utbNome' ? 'utb' : sort.key as 'dataCriacao' | 'nome');
+      this.sortDirection.set(sort.direction);
+    }
+    this.pageIndex.set(0);
+  }
+
+    readonly estadoFormularioOficial = toSignal(this.filtroForm.valueChanges, {initialValue: this.filtroForm.value});
+  onUtbInput(event: Event) {
+    const target = event.target as HTMLInputElement | null;
+    this.utbTextoDigitado.set(target?.value ?? '');
+  }
+
+  onUtbSelectionChange(selection: SAutocompleteSelection | null) {
+    this.utbTextoDigitado.set(selection?.label ?? '');
+  }
+
   onBuscar() {
     this.appliedNome.set((this.filtroForm.get('nome')?.value || '').trim());
-    const rawUtb = (this.filtroForm.get('utb')?.value || '').trim();
+    const rawUtb = (this.filtroForm.get('utb')?.value || this.utbTextoDigitado() || '').trim();
     const parts = rawUtb.split(' - ');
     this.appliedUtb.set(parts[0] ? parts[0].trim() : rawUtb);
     this.appliedStatus.set(this.filtroForm.get('status')?.value || 'TODOS');
@@ -1014,6 +711,7 @@ export class GerenciaRegionalList {
       utb: '',
       status: 'TODOS'
     });
+    this.utbTextoDigitado.set('');
     this.appliedNome.set('');
     this.appliedUtb.set('');
     this.appliedStatus.set('TODOS');
@@ -1026,6 +724,7 @@ export class GerenciaRegionalList {
 
   limparFiltroUtb() {
     this.filtroForm.get('utb')?.setValue('');
+    this.utbTextoDigitado.set('');
   }
 
   toggleSort(column: 'dataCriacao' | 'nome' | 'utb') {
@@ -1066,7 +765,12 @@ export class GerenciaRegionalList {
     this.router.navigate(['/configuracoes/hierarquia/gerencia-regional', item.id, 'editar']);
   }
 
-  onToggleStatus(item: GerenciaRegionalItem) {
+  onSwitchOficial(item: GerenciaRegionalItem, chave: NgModel) {
+    chave.control.setValue(item.status === 'ATIVO', {emitViewToModelChange: false});
+    this.onToggleStatus(item, chave);
+  }
+
+  onToggleStatus(item: GerenciaRegionalItem, chave?: NgModel) {
     if (item.status === 'INATIVO') {
       // Inativação irreversível: proibir reativação e exibir somente toast explicativo sem modal
       this.toast.warning('A inativação de uma Gerência Regional é irreversível. O registro não pode ser reativado.');
@@ -1074,19 +778,9 @@ export class GerenciaRegionalList {
     }
 
     // 1. Ao tentar inativar, abrir PRIMEIRAMENTE o modal de confirmação "Inativar registro?"
-    const dialogRef = this.dialog.open(ConfirmacaoDialog, {
-      disableClose: true,
-      data: {
-        title: 'Inativar registro?',
-        message: `Deseja inativar ${item.nome}? A inativação é irreversível e o registro não poderá ser reativado.`,
-        cancelLabel: 'Cancelar',
-        actionLabel: 'Sim, inativar',
-        actionType: 'destructive',
-        loadingLabel: 'Verificando...'
-      }
-    });
+    const dialogRef = from(this.modalService.confirm({title: 'Inativar registro?', description: `Deseja inativar ${item.nome}? A inativação é irreversível e o registro não poderá ser reativado.`, cancelLabel: 'Cancelar', confirmLabel: 'Sim, inativar', variant: 'destructive'}));
 
-    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
+    dialogRef.subscribe((confirmado: boolean) => {
       if (!confirmado) {
         return;
       }
@@ -1100,13 +794,10 @@ export class GerenciaRegionalList {
 
       // 3. Havendo impedimentos, exibir o modal padronizado com os motivos
       if (temOutrosImpedimentos) {
-        this.dialog.open(ImpedimentoInativacaoModal, {
-          width: '520px',
-          maxWidth: 'calc(100vw - 2.5rem)',
-          hasBackdrop: true,
-          backdropClass: 'cdk-overlay-dark-backdrop',
-          autoFocus: false,
-          data: {
+        this.modalService.open(ImpedimentoInativacaoModal, {width: '520px',
+maxWidth: 'calc(100vw - 2.5rem)',
+autoFocus: false,
+data: {
             nome: item.nome,
             temNormativaExtincao,
             totalSubordinadas,
@@ -1114,27 +805,23 @@ export class GerenciaRegionalList {
             nomeChefe: item.chefeImediato?.nome,
             unidadesDescricao: 'Núcleos e Escolas',
             totalProfissionais
-          }
-        });
+          }});
         return;
       }
 
       // 4. Sem outros impedimentos, exigir Normativa de Extinção.
       if (!temNormativaExtincao) {
-        const anexarRef = this.dialog.open(AnexarNormativaExtincaoModal, {
-          width: '560px',
-          maxWidth: 'calc(100vw - 2.5rem)',
-          hasBackdrop: true,
-          backdropClass: 'cdk-overlay-dark-backdrop',
-          autoFocus: false,
-          data: {
+        const anexarRef = this.modalService.open<AnexarNormativaExtincaoModal, unknown, NormativaItem>(AnexarNormativaExtincaoModal, {width: '560px',
+maxWidth: 'calc(100vw - 2.5rem)',
+autoFocus: false,
+data: {
             nome: item.nome
-          }
-        });
+          }});
 
         anexarRef.afterClosed().subscribe((normativa: NormativaItem | undefined) => {
           if (normativa) {
             this.service.inativar(item.id, normativa);
+            chave?.control.setValue(false, {emitViewToModelChange: false});
             this.toast.success('Registro inativado com sucesso.');
           }
         });
@@ -1143,6 +830,7 @@ export class GerenciaRegionalList {
 
       // 5. Todos os critérios atendidos: inativação direta
       this.service.inativar(item.id);
+            chave?.control.setValue(false, {emitViewToModelChange: false});
       this.toast.success('Registro inativado com sucesso.');
     });
   }
@@ -1155,97 +843,61 @@ export class GerenciaRegionalList {
 @Component({
   selector: 'app-gerencia-regional-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {provide: DateAdapter, useClass: SDateAdapter},
+    {provide: MAT_DATE_FORMATS, useValue: S_DATE_FORMATS},
+    {provide: MAT_DATE_LOCALE, useValue: 'pt-BR'},
+    {provide: MatDatepickerIntl, useClass: SDatepickerIntl}
+  ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTableModule,
-    MatTooltipModule,
-    MatAutocompleteModule,
     MatDialogModule,
-    SiageDatePickerComponent,
-    SiagePaginatorComponent,
-    AcessoRestritoComponent
+    AcessoRestritoComponent,
+    SFieldComponent,
+    SInputComponent,
+    SIconButtonComponent,
+    SAutocompleteComponent,
+    SIconComponent,
+    STooltipDirective,
+    SButtonComponent,
+    SDatepickerComponent,
+    SFileUploadComponent,
+    STableComponent,
+    STableCellDirective
+  ,
+    SPageHeaderComponent
   ],
+  styles: [`
+    :host .sg-anexo-com-arquivo {
+      flex-wrap: nowrap;
+      gap: var(--space-8, 8px);
+      min-height: var(--s-field-h, var(--field-h, 48px));
+      padding: 0 var(--space-4, 4px) 0 var(--field-px, 16px);
+      background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+      border-radius: var(--radius-control, 8px);
+    }
+    :host .sg-anexo-com-arquivo > s-file-upload,
+    :host ::ng-deep .sg-anexo-com-arquivo .s-file-upload__arquivo {
+      display: contents;
+    }
+    :host ::ng-deep .sg-anexo-com-arquivo .s-file-upload__icone,
+    :host ::ng-deep .sg-anexo-com-arquivo .s-file-upload__nome,
+    :host ::ng-deep .sg-anexo-com-arquivo .s-file-upload__tamanho {
+      order: -1;
+    }
+  `],
   template: `
     @if (!permissionService.hasAccess() || (!isEditMode() && !permissionService.canCreate())) {
       <app-acesso-restrito backUrl="/configuracoes/hierarquia/gerencia-regional" />
     } @else {
       <div class="flex flex-col gap-6 max-w-7xl mx-auto w-full font-sans pb-16">
         <!-- Breadcrumb e Cabeçalho Principal -->
-        <div class="flex flex-col gap-2">
-          <nav class="flex items-center gap-2 text-xs text-siage-text-secondary" aria-label="Navegação estrutural">
-            <span 
-              (click)="goHome()" 
-              (keydown.enter)="goHome()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Início
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goConfiguracoes()" 
-              (keydown.enter)="goConfiguracoes()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurações
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goHierarquia()" 
-              (keydown.enter)="goHierarquia()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Hierarquia de Unidades e Cargos
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="onCancelar()" 
-              (keydown.enter)="onCancelar()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurar Gerência Regional
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span class="text-siage-primary font-semibold" aria-current="page">{{ isEditMode() ? 'Editar' : 'Cadastrar' }}</span>
-          </nav>
+        <s-page-header [breadcrumbs]="[{label: 'Início', routerLink: '/inicio'}, {label: 'Configurações', routerLink: '/configuracoes'}, {label: 'Hierarquia de Unidades e Cargos', routerLink: '/configuracoes/hierarquia'}, {label: 'Configurar Gerência Regional', routerLink: '/configuracoes/hierarquia/gerencia-regional'}, {label: isEditMode() ? 'Editar' : 'Cadastrar'}]"
+        [title]="isEditMode() ? 'Editar Gerência Regional' : 'Adicionar Gerência Regional'" [description]="isEditMode() ? 'Atualize as informações, chefia e normativas da Gerência Regional.' : 'Preencha os campos obrigatórios para estruturar a Gerência Regional.'"
+        showBack (back)="onCancelar()">
 
-          <!-- Título com Botão Voltar -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <button 
-                  mat-icon-button 
-                  type="button"
-                  (click)="onCancelar()" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                  title="Voltar para a listagem"
-                  aria-label="Voltar para a listagem"
-                >
-                  <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-                </button>
-                <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                  {{ isEditMode() ? 'Editar Gerência Regional' : 'Adicionar Gerência Regional' }}
-                </h1>
-              </div>
-
-              <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-2xl">
-                {{ isEditMode() ? 'Atualize as informações, chefia e normativas da Gerência Regional.' : 'Preencha os campos obrigatórios para estruturar a Gerência Regional.' }}
-              </p>
-            </div>
-          </div>
-        </div>
+      </s-page-header>
 
         <!-- FORMULÁRIO ORGANIZADO EM SEÇÕES -->
         <form [formGroup]="form" class="flex flex-col gap-6">
@@ -1255,124 +907,34 @@ export class GerenciaRegionalList {
           <!-- ============================================== -->
           <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
             <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">domain</mat-icon>
+              <s-icon name="domain" size="xs"  />
               <span>1. Identificação</span>
             </h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
               <!-- Nome da Gerência Regional -->
               <div class="md:col-span-2 form-field-group">
-                <label for="form-nome" class="siage-field-label">
-                  Nome da Gerência Regional <span class="required-marker">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="form-nome"
-                    formControlName="nome" 
-                    maxlength="200"
-                    placeholder="Ex: Gerência Regional de João Pessoa - 1ª Região"
-                  >
-                  <mat-hint align="end" class="text-xs text-siage-text-secondary">
+
+                <s-field label="Nome da Gerência Regional" controlId="form-nome" required [error]="(form.get('nome')?.hasError('required') &amp;&amp; form.get('nome')?.touched) ? 'O Nome da Gerência Regional é obrigatório.' : (form.get('nome')?.hasError('duplicado')) ? 'Já existe uma Gerência Regional cadastrada com este nome.' : ''"><s-input formControlName="nome" [maxlength]="200" placeholder="Ex: Gerência Regional de João Pessoa - 1ª Região" (focusout)="form.controls.nome.markAsTouched(); " /></s-field><span align="end" class="text-xs text-siage-text-secondary">
                     {{ (form.get('nome')?.value || '').length }} / 200
-                  </mat-hint>
-                  @if (form.get('nome')?.hasError('required') && form.get('nome')?.touched) {
-                    <mat-error>O Nome da Gerência Regional é obrigatório.</mat-error>
-                  }
-                  @if (form.get('nome')?.hasError('duplicado')) {
-                    <mat-error>Já existe uma Gerência Regional cadastrada com este nome.</mat-error>
-                  }
-                </mat-form-field>
+                  </span>
               </div>
 
               <!-- Campo Obrigatório: Secretaria Geral Vinculada -->
               <div class="form-field-group">
-                <label for="form-sec-geral" class="siage-field-label">
-                  Secretaria Geral <span class="required-marker">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="form-sec-geral"
-                    type="text" 
-                    [formControl]="secGeralInputControl" 
-                    placeholder="Selecione ou busque a Secretaria Geral vinculada" 
-                    [matAutocomplete]="autoSecGeral"
-                    #autoSecGeralTrigger="matAutocompleteTrigger"
-                    (focus)="autoSecGeralTrigger.openPanel()"
-                    class="text-sm"
-                  />
-                  <mat-autocomplete #autoSecGeral="matAutocomplete" (optionSelected)="onSecGeralSelected($event.option.value)">
-                    @for (sec of filteredSecsGerais(); track sec.id) {
-                      <mat-option [value]="sec.id">
-                        {{ sec.nome }}
-                      </mat-option>
-                    }
-                  </mat-autocomplete>
-                  @if (secGeralInputControl.value) {
-                    <button mat-icon-button matSuffix type="button" (click)="limparSecGeral()" aria-label="Limpar campo">
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                    </button>
-                  } @else {
-                    <button mat-icon-button matSuffix type="button" (click)="autoSecGeralTrigger.openPanel()" aria-label="Abrir opções">
-                      <mat-icon class="text-siage-text-secondary">arrow_drop_down</mat-icon>
-                    </button>
-                  }
-                  @if ((form.get('secretariaGeralId')?.hasError('required') || secGeralInputControl.hasError('required')) && (form.get('secretariaGeralId')?.touched || secGeralInputControl.touched)) {
-                    <mat-error>A Secretaria Geral é obrigatória.</mat-error>
-                  }
-                </mat-form-field>
+
+                <s-field label="Secretaria Geral" controlId="form-sec-geral" required [error]="((form.get('secretariaGeralId')?.hasError('required') || secGeralInputControl.hasError('required')) &amp;&amp; (form.get('secretariaGeralId')?.touched || secGeralInputControl.touched)) ? 'A Secretaria Geral é obrigatória.' : ''"><s-autocomplete [formControl]="secGeralInputControlOficial" placeholder="Selecione ou busque a Secretaria Geral vinculada" [options]="opcoesform_sec_geral()" (selectionChange)="selecionarform_sec_geral($event)" (input)="secGeralInputControl.setValue($any($event.target).value)" (focusout)="secGeralInputControl.markAsTouched(); " /></s-field>
               </div>
 
               <!-- Unidade de Trabalho (UTB) -->
               <div class="form-field-group">
-                <label for="form-utb" class="siage-field-label">
-                  Unidade de Trabalho (UTB) <span class="required-marker">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="form-utb"
-                    type="text" 
-                    [formControl]="utbInputControl" 
-                    placeholder="Selecione ou busque uma unidade de trabalho" 
-                    [matAutocomplete]="autoUtbForm"
-                    #autoUtbFormTrigger="matAutocompleteTrigger"
-                    (focus)="!isUtbBloqueada() && autoUtbFormTrigger.openPanel()"
-                    (blur)="onUtbBlur()"
-                    class="text-sm"
-                  />
-                  <mat-autocomplete #autoUtbForm="matAutocomplete" (optionSelected)="onUtbSelected($event.option.value)">
-                    @for (utb of filteredUtbs(); track utb.codigo) {
-                      <mat-option [value]="utb.codigo">
-                        {{ utb.codigo }} - {{ utb.nome }}
-                      </mat-option>
-                    }
-                  </mat-autocomplete>
-                  @if (utbInputControl.value && !isUtbBloqueada()) {
-                    <button mat-icon-button matSuffix type="button" (click)="limparUtb()" aria-label="Limpar campo">
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                    </button>
-                  } @else {
-                    <button mat-icon-button matSuffix type="button" (click)="!isUtbBloqueada() && autoUtbFormTrigger.openPanel()" [disabled]="isUtbBloqueada()" aria-label="Abrir opções">
-                      <mat-icon class="text-siage-text-secondary">arrow_drop_down</mat-icon>
-                    </button>
-                  }
-                  @if (isUtbBloqueada()) {
-                    <mat-hint class="text-xs text-siage-text-secondary">
+
+                <s-field label="Unidade de Trabalho (UTB)" controlId="form-utb" required [error]="(utbInputControl.hasError('emUso') || form.get('utbCodigo')?.hasError('emUso')) ? 'A Unidade de Trabalho (UTB) selecionada já está vinculada a outra unidade ativa.' : ((form.get('utbCodigo')?.hasError('required') || utbInputControl.hasError('required')) &amp;&amp; (form.get('utbCodigo')?.touched || utbInputControl.touched)) ? 'A Unidade de Trabalho (UTB) é obrigatória.' : ''"><s-autocomplete [formControl]="utbInputControlOficial" placeholder="Selecione ou busque uma unidade de trabalho" [options]="opcoesform_utb()" (selectionChange)="selecionarform_utb($event)" (input)="utbInputControl.setValue($any($event.target).value)" (focusout)="utbInputControl.markAsTouched(); onUtbBlur()" /></s-field>@if (isUtbBloqueada()) {<span class="text-xs text-siage-text-secondary">
                       <span class="text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1 mt-0.5">
-                        <mat-icon style="font-size: 14px; width: 14px; height: 14px;">lock</mat-icon>
+                        <s-icon name="lock" size="xs"  />
                         A Unidade de Trabalho (UTB) não pode ser alterada porque existem chefia ou núcleos e escolas vinculados.
                       </span>
-                    </mat-hint>
-                  }
-                  @if ((form.get('utbCodigo')?.hasError('required') || utbInputControl.hasError('required')) && (form.get('utbCodigo')?.touched || utbInputControl.touched)) {
-                    <mat-error>A Unidade de Trabalho (UTB) é obrigatória.</mat-error>
-                  }
-                  @if (utbInputControl.hasError('emUso')) {
-                    <mat-error>A Unidade de Trabalho (UTB) selecionada já está vinculada a outra unidade ativa.</mat-error>
-                  }
-                </mat-form-field>
+                    </span>}
               </div>
             </div>
           </div>
@@ -1383,22 +945,16 @@ export class GerenciaRegionalList {
           <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
             <div class="flex items-center justify-between border-b border-siage-border/40 pb-2 flex-wrap gap-2">
               <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2">
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">badge</mat-icon>
+                <s-icon name="badge" size="xs"  />
                 <span>2. Chefia Imediata e Ato Governamental</span>
               </h3>
 
               <!-- Ação de Adicionar Chefe (quando ainda não houver chefe) -->
               @if (!chefeImediato()) {
-                <button 
-                  type="button" 
-                  (click)="abrirBuscaChefe()"
-                  [disabled]="!form.get('utbCodigo')?.value"
-                  [matTooltip]="!form.get('utbCodigo')?.value ? 'Selecione uma Unidade de Trabalho (UTB) primeiro' : 'Buscar servidor vinculado à UTB'"
-                  class="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-xs transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">person_add</mat-icon>
+                <s-button type="button" (click)="abrirBuscaChefe()" [disabled]="!form.get('utbCodigo')?.value" [sTooltip]="!form.get('utbCodigo')?.value ? 'Selecione uma Unidade de Trabalho (UTB) primeiro' : 'Buscar servidor vinculado à UTB'" icon="person_add" variant="primary" >
+
                   <span>Adicionar Chefe</span>
-                </button>
+                </s-button>
               }
             </div>
 
@@ -1418,14 +974,10 @@ export class GerenciaRegionalList {
 
                   <!-- Ação sobre o chefe: Remover Chefe -->
                   <div class="flex items-center gap-2">
-                    <button 
-                      type="button" 
-                      (click)="removerChefe()"
-                      class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 text-xs font-medium text-red-600 dark:text-red-400 transition-colors cursor-pointer"
-                    >
-                      <mat-icon style="font-size: 14px; width: 14px; height: 14px;">close</mat-icon>
+                    <s-button type="button" (click)="removerChefe()" icon="close" variant="destructive" outlined>
+
                       <span>Remover Chefe</span>
-                    </button>
+                    </s-button>
                   </div>
                 </div>
 
@@ -1452,159 +1004,45 @@ export class GerenciaRegionalList {
                 <div class="mt-2 pt-4 border-t border-siage-border/40 flex flex-col gap-4">
                   <div class="flex items-center justify-between gap-2 flex-wrap">
                     <div class="flex items-center gap-2">
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;" class="text-siage-primary">description</mat-icon>
+                      <s-icon name="description" size="xs" class="text-siage-primary" />
                       <span class="text-xs font-poppins font-bold uppercase tracking-wider text-siage-primary">
                         Ato Governamental de Nomeação *
                       </span>
                     </div>
 
                     @if (isEditMode()) {
-                      <button 
-                        type="button" 
-                        (click)="abrirHistoricoAtos()"
-                        class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-siage-border bg-siage-surface hover:bg-black/5 dark:hover:bg-white/5 text-xs font-medium text-siage-text-primary transition-colors cursor-pointer"
-                        title="Consultar histórico de atos governamentais"
-                      >
-                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;" class="text-siage-text-secondary">history</mat-icon>
+                      <s-button type="button" (click)="abrirHistoricoAtos()" title="Consultar histórico de atos governamentais" icon="history" variant="secondary" outlined>
+
                         <span>Consultar histórico</span>
-                      </button>
+                      </s-button>
                     }
                   </div>
 
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Número do Ato (limitado a 20 caracteres) -->
                     <div class="form-field-group">
-                      <label for="form-ato-numero" class="siage-field-label">
-                        Número do Ato Governamental <span class="required-marker">*</span>
-                      </label>
-                      <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                        <input 
-                          matInput 
-                          id="form-ato-numero"
-                          [formControl]="atoNumeroControl" 
-                          maxlength="20"
-                          placeholder="Ex: Ato nº 3.010/2024"
-                        >
-                        @if (atoNumeroControl.hasError('required') && atoNumeroControl.touched) {
-                          <mat-error>O Número do Ato Governamental é obrigatório.</mat-error>
-                        } @else if (atoNumeroControl.hasError('maxlength') && atoNumeroControl.touched) {
-                          <mat-error>O Número do Ato Governamental deve ter no máximo 20 caracteres.</mat-error>
-                        }
-                      </mat-form-field>
+
+                      <s-field label="Número do Ato Governamental" controlId="form-ato-numero" required [error]="(atoNumeroControl.hasError('required') &amp;&amp; atoNumeroControl.touched) ? 'O Número do Ato Governamental é obrigatório.' : (atoNumeroControl.hasError('maxlength') &amp;&amp; atoNumeroControl.touched) ? 'O Número do Ato Governamental deve ter no máximo 20 caracteres.' : ''"><s-input [formControl]="atoNumeroControl" [maxlength]="20" placeholder="Ex: Ato nº 3.010/2024" (focusout)="atoNumeroControl.markAsTouched(); " /></s-field>
                     </div>
 
                     <!-- Data da Publicação -->
                     <div class="form-field-group">
-                      <app-siage-date-picker
-                        id="form-ato-data"
-                        label="Data da Publicação"
-                        [required]="true"
-                        [formControl]="atoDataControl"
-                        [control]="atoDataControl"
-                        errorMessage="A Data da Publicação é obrigatória."
-                      />
+                      <s-field label="Data da Publicação" controlId="form-ato-data" required [error]="atoDataControl.touched &amp;&amp; atoDataControl.invalid ? (atoDataControl.getError('dataFormato') || atoDataControl.getError('dataRange') || 'A Data da Publicação é obrigatória.') : ''"><s-datepicker [formControl]="atoDataPicker.dateControl" [min]="dataMinima" [max]="dataMaxima" [openOnClick]="false" placeholder="DD/MM/AAAA" (input)="atoDataPicker.onInput($event)" (focusout)="atoDataPicker.onFocusOut($event)" /></s-field>
                     </div>
                   </div>
 
                   <!-- Anexo do Documento do Ato -->
-                  <div class="flex flex-col gap-2">
-                    <span class="text-xs font-semibold text-siage-text-secondary">
-                      Documento do Ato Governamental * (PDF, JPG, JPEG, PNG até 10 MB)
-                    </span>
-
-                    @if (atoDocumento(); as doc) {
-                      <div class="border border-siage-border rounded-lg overflow-hidden bg-siage-surface">
-                        <div class="flex items-center justify-between p-3.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                          <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded bg-siage-primary/10 text-siage-primary flex items-center justify-center shrink-0">
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">description</mat-icon>
-                            </div>
-                            <div class="flex flex-col">
-                              <span class="text-xs sm:text-sm font-medium text-siage-text-primary">{{ doc.nomeArquivo }}</span>
-                              <span class="text-[11px] text-siage-text-secondary">{{ doc.tamanho }} • Enviado em {{ doc.dataUpload }}</span>
-                            </div>
-                          </div>
-                          <div class="flex items-center gap-1">
-                            <button 
-                              type="button" 
-                              (click)="visualizarDoc(doc, 'Ato Governamental')" 
-                              matTooltip="Visualizar anexo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                            </button>
-                            <button 
-                              type="button" 
-                              (click)="baixarDoc(doc)" 
-                              matTooltip="Baixar arquivo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-                            </button>
-                            <button 
-                              type="button" 
-                              (click)="removerDocAto()" 
-                              matTooltip="Remover anexo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-red-600 flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    } @else {
-                      <div 
-                        id="container-anexo-ato"
-                        tabindex="0"
-                        class="border-2 border-dashed rounded-lg p-4 text-center transition-colors focus:outline-none focus:ring-2 focus:ring-siage-primary/40"
-                        [class.border-red-500]="atoDocInvalido()"
-                        [class.bg-red-50/20]="atoDocInvalido()"
-                        [class.dark:bg-red-950/20]="atoDocInvalido()"
-                        [class.border-siage-border/80]="!atoDocInvalido() && canAnexarAto()"
-                        [class.hover:border-siage-primary/60]="!atoDocInvalido() && canAnexarAto()"
-                        [class.bg-siage-surface/50]="!atoDocInvalido() && canAnexarAto()"
-                        [class.border-slate-200]="!atoDocInvalido() && !canAnexarAto()"
-                        [class.dark:border-slate-800]="!atoDocInvalido() && !canAnexarAto()"
-                        [class.bg-slate-100/50]="!atoDocInvalido() && !canAnexarAto()"
-                        [class.dark:bg-slate-900/20]="!atoDocInvalido() && !canAnexarAto()"
-                        [class.opacity-60]="!canAnexarAto()"
-                        [class.cursor-not-allowed]="!canAnexarAto()"
-                      >
-                        <input 
-                          type="file" 
-                          id="file-ato-gov" 
-                          class="hidden" 
-                          accept=".pdf,.jpg,.jpeg,.png" 
-                          [disabled]="!canAnexarAto()"
-                          (change)="onFileAtoSelected($event)"
-                        >
-                        <label 
-                          for="file-ato-gov" 
-                          class="flex flex-col items-center justify-center gap-1.5"
-                          [class.cursor-pointer]="canAnexarAto()"
-                          [class.cursor-not-allowed]="!canAnexarAto()"
-                        >
-                          <mat-icon [class.text-siage-primary]="canAnexarAto()" [class.text-siage-text-secondary]="!canAnexarAto()" style="font-size: 24px; width: 24px; height: 24px;">cloud_upload</mat-icon>
-                          <span class="text-xs font-semibold" [class.text-siage-primary]="canAnexarAto()" [class.text-siage-text-secondary]="!canAnexarAto()">
-                            Clique para anexar o documento do Ato Governamental
-                          </span>
-                          <span class="text-[11px] text-siage-text-secondary">
-                            @if (canAnexarAto()) {
-                              PDF, JPG, JPEG ou PNG (máx. 10 MB)
-                            } @else {
-                              Preencha o Número do Ato e a Data da Publicação para habilitar a anexação
-                            }
-                          </span>
-                        </label>
-                      </div>
-                      @if (atoDocInvalido()) {
-                        <span class="text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-1 mt-1">
-                          <mat-icon style="font-size: 14px; width: 14px; height: 14px;">error</mat-icon>
-                          É obrigatório anexar o documento do Ato Governamental.
-                        </span>
-                      }
-                    }
-                  </div>
+                  <s-field id="container-anexo-ato" label="Documento do Ato Governamental (PDF, JPG, JPEG, PNG até 10 MB)" required [error]="atoDocInvalido() ? 'É obrigatório anexar o documento do Ato Governamental.' : ''" class="flex flex-col gap-2">
+      <div class="flex items-center gap-2 flex-wrap" [class.sg-anexo-com-arquivo]="!!atoDocumento()">
+        @if (atoDocumento(); as doc) { <s-icon-button icon="visibility" label="Visualizar anexo" text sTooltip="Visualizar anexo" (click)="visualizarDoc(doc, 'Ato Governamental')" /> }
+        <s-file-upload appearance="button" buttonLabel="Selecionar arquivo" [formControl]="arquivoAtoControl"
+          [fileName]="atoDocumento()?.nomeArquivo" [fileId]="atoDocumento()?.id" [allowDownload]="true"
+          [accept]="['pdf', 'jpg', 'jpeg', 'png']" [maxSizeMb]="10" [showErrorDialog]="false"
+          (fileSelected)="onFileAtoSelected($event)" (fileRemoved)="removerDocAto()"
+          (fileError)="onFileUploadError($event)" (download)="baixarDoc(atoDocumento()!)"  (click)="onCliqueDownloadLocal($event, arquivoAtoControl.value, atoDocumento())" />
+      </div>
+      @if (!canAnexarAto() && !atoDocumento()) { <span class="text-xs text-siage-text-secondary">Preencha o Número do Ato e a Data da Publicação para habilitar a anexação</span> }
+    </s-field>
                 </div>
               </div>
             } @else {
@@ -1612,15 +1050,10 @@ export class GerenciaRegionalList {
               <div class="py-6 text-center text-xs text-siage-text-secondary border border-dashed border-siage-border rounded-lg flex flex-col items-center justify-center gap-3">
                 <span>Nenhum Chefe Imediato vinculado no momento.</span>
                 @if (isEditMode()) {
-                  <button 
-                    type="button" 
-                    (click)="abrirHistoricoAtos()"
-                    class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-siage-border bg-siage-surface hover:bg-black/5 dark:hover:bg-white/5 text-xs font-medium text-siage-text-primary transition-colors cursor-pointer"
-                    title="Consultar histórico de atos governamentais"
-                  >
-                    <mat-icon style="font-size: 16px; width: 16px; height: 16px;" class="text-siage-text-secondary">history</mat-icon>
+                  <s-button type="button" (click)="abrirHistoricoAtos()" title="Consultar histórico de atos governamentais" icon="history" variant="secondary" outlined>
+
                     <span>Consultar histórico</span>
-                  </button>
+                  </s-button>
                 }
               </div>
             }
@@ -1631,14 +1064,14 @@ export class GerenciaRegionalList {
           <!-- ============================================== -->
           <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-6">
             <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">gavel</mat-icon>
+              <s-icon name="gavel" size="xs"  />
               <span>3. Gestão de Normativas</span>
             </h3>
 
             <!-- BLOCO 1: NORMATIVA DE CRIAÇÃO -->
             <div class="flex flex-col gap-4">
               <div class="flex items-center gap-2">
-                <mat-icon style="font-size: 16px; width: 16px; height: 16px;" class="text-emerald-600">verified</mat-icon>
+                <s-icon name="verified" size="xs" class="text-emerald-600" />
                 <span class="text-xs font-poppins font-bold uppercase tracking-wider text-siage-text-primary">
                   Normativa de Criação *
                 </span>
@@ -1661,35 +1094,10 @@ export class GerenciaRegionalList {
                   </div>
 
                   @if (currentItem?.normativaCriacao?.documento; as doc) {
-                    <div class="col-span-12 border border-siage-border rounded-lg overflow-hidden bg-siage-surface mt-2">
-                      <div class="flex items-center justify-between p-3.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                        <div class="flex items-center gap-3">
-                          <div class="w-8 h-8 rounded bg-siage-primary/10 text-siage-primary flex items-center justify-center shrink-0">
-                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">description</mat-icon>
-                          </div>
-                          <div class="flex flex-col">
-                            <span class="text-xs sm:text-sm font-medium text-siage-text-primary">{{ doc.nomeArquivo }}</span>
-                            <span class="text-[11px] text-siage-text-secondary">{{ doc.tamanho }} • Enviado em {{ doc.dataUpload }}</span>
-                          </div>
-                        </div>
-                        <div class="flex items-center gap-1">
-                          <button 
-                            type="button" 
-                            (click)="visualizarDoc(doc, 'Normativa de Criação')" 
-                            matTooltip="Visualizar anexo" 
-                            class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                          >
-                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                          </button>
-                          <button 
-                            type="button" 
-                            (click)="baixarDoc(doc)" 
-                            matTooltip="Baixar arquivo" 
-                            class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                          >
-                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-                          </button>
-                        </div>
+                    <div class="col-span-12">
+                      <div class="sg-anexo-com-arquivo flex items-center gap-2">
+                        <s-icon-button icon="visibility" type="button" (click)="visualizarDoc(doc, 'Normativa de Criação')" sTooltip="Visualizar anexo" label="Visualizar anexo" text size="sm" variant="info" />
+                      <s-file-upload appearance="button" [fileName]="doc.nomeArquivo" [fileId]="doc.id" [allowDownload]="true" [allowRemove]="false" (download)="baixarDoc(doc)" />
                       </div>
                     </div>
                   }
@@ -1699,160 +1107,35 @@ export class GerenciaRegionalList {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <!-- Nome da Normativa de Criação -->
                   <div class="md:col-span-3 form-field-group">
-                    <label for="form-norm-criacao-nome" class="siage-field-label">
-                      Nome da Normativa de Criação <span class="required-marker">*</span>
-                    </label>
-                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                      <input 
-                        matInput 
-                        id="form-norm-criacao-nome"
-                        [formControl]="normCriacaoNomeControl" 
-                        maxlength="100"
-                        placeholder="Ex: Decreto Estadual nº 42.180/2023 - Criação da 1ª Gerência Regional"
-                      >
-                      <mat-hint align="end" class="text-xs text-siage-text-secondary">
+
+                    <s-field label="Nome da Normativa de Criação" controlId="form-norm-criacao-nome" required [error]="(normCriacaoNomeControl.hasError('required') &amp;&amp; normCriacaoNomeControl.touched) ? 'O Nome da Normativa de Criação é obrigatório.' : (normCriacaoNomeControl.hasError('maxlength') &amp;&amp; normCriacaoNomeControl.touched) ? 'O Nome da Normativa de Criação deve ter no máximo 100 caracteres.' : ''"><s-input [formControl]="normCriacaoNomeControl" [maxlength]="100" placeholder="Ex: Decreto Estadual nº 42.180/2023 - Criação da 1ª Gerência Regional" (focusout)="normCriacaoNomeControl.markAsTouched(); " /></s-field><span align="end" class="text-xs text-siage-text-secondary">
                         {{ (normCriacaoNomeControl.value || '').length }} / 100
-                      </mat-hint>
-                      @if (normCriacaoNomeControl.hasError('required') && normCriacaoNomeControl.touched) {
-                        <mat-error>O Nome da Normativa de Criação é obrigatório.</mat-error>
-                      } @else if (normCriacaoNomeControl.hasError('maxlength') && normCriacaoNomeControl.touched) {
-                        <mat-error>O Nome da Normativa de Criação deve ter no máximo 100 caracteres.</mat-error>
-                      }
-                    </mat-form-field>
+                      </span>
                   </div>
 
                   <!-- Número da Normativa -->
                   <div class="form-field-group">
-                    <label for="form-norm-criacao-numero" class="siage-field-label">
-                      Número da Normativa de Criação <span class="required-marker">*</span>
-                    </label>
-                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                      <input 
-                        matInput 
-                        id="form-norm-criacao-numero"
-                        [formControl]="normCriacaoNumeroControl" 
-                        maxlength="20"
-                        placeholder="Ex: 42.180"
-                      >
-                      @if (normCriacaoNumeroControl.hasError('required') && normCriacaoNumeroControl.touched) {
-                        <mat-error>O Número da Normativa de Criação é obrigatório.</mat-error>
-                      } @else if (normCriacaoNumeroControl.hasError('maxlength') && normCriacaoNumeroControl.touched) {
-                        <mat-error>O Número da Normativa de Criação deve ter no máximo 20 caracteres.</mat-error>
-                      }
-                    </mat-form-field>
+
+                    <s-field label="Número da Normativa de Criação" controlId="form-norm-criacao-numero" required [error]="(normCriacaoNumeroControl.hasError('required') &amp;&amp; normCriacaoNumeroControl.touched) ? 'O Número da Normativa de Criação é obrigatório.' : (normCriacaoNumeroControl.hasError('maxlength') &amp;&amp; normCriacaoNumeroControl.touched) ? 'O Número da Normativa de Criação deve ter no máximo 20 caracteres.' : ''"><s-input [formControl]="normCriacaoNumeroControl" [maxlength]="20" placeholder="Ex: 42.180" (focusout)="normCriacaoNumeroControl.markAsTouched(); " /></s-field>
                   </div>
 
                   <!-- Data da Publicação -->
                   <div class="md:col-span-2 form-field-group">
-                    <app-siage-date-picker
-                      id="form-norm-criacao-data"
-                      label="Data da Publicação"
-                      [required]="true"
-                      [formControl]="normCriacaoDataControl"
-                      [control]="normCriacaoDataControl"
-                      errorMessage="A Data da Publicação é obrigatória."
-                    />
+                    <s-field label="Data da Publicação" controlId="form-norm-criacao-data" required [error]="normCriacaoDataControl.touched &amp;&amp; normCriacaoDataControl.invalid ? (normCriacaoDataControl.getError('dataFormato') || normCriacaoDataControl.getError('dataRange') || 'A Data da Publicação é obrigatória.') : ''"><s-datepicker [formControl]="normCriacaoDataPicker.dateControl" [min]="dataMinima" [max]="dataMaxima" [openOnClick]="false" placeholder="DD/MM/AAAA" (input)="normCriacaoDataPicker.onInput($event)" (focusout)="normCriacaoDataPicker.onFocusOut($event)" /></s-field>
                   </div>
 
                   <!-- Anexo do Documento de Criação -->
-                  <div class="md:col-span-3 flex flex-col gap-2">
-                    <span class="text-xs font-semibold text-siage-text-secondary">
-                      Documento Anexo da Normativa de Criação *
-                    </span>
-
-                    @if (normCriacaoDoc(); as doc) {
-                      <div class="border border-siage-border rounded-lg overflow-hidden bg-siage-surface">
-                        <div class="flex items-center justify-between p-3.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                          <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded bg-siage-primary/10 text-siage-primary flex items-center justify-center shrink-0">
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">description</mat-icon>
-                            </div>
-                            <div class="flex flex-col">
-                              <span class="text-xs sm:text-sm font-medium text-siage-text-primary">{{ doc.nomeArquivo }}</span>
-                              <span class="text-[11px] text-siage-text-secondary">{{ doc.tamanho }} • Enviado em {{ doc.dataUpload }}</span>
-                            </div>
-                          </div>
-                          <div class="flex items-center gap-1">
-                            <button 
-                              type="button" 
-                              (click)="visualizarDoc(doc, 'Normativa de Criação')" 
-                              matTooltip="Visualizar anexo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                            </button>
-                            <button 
-                              type="button" 
-                              (click)="baixarDoc(doc)" 
-                              matTooltip="Baixar arquivo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-                            </button>
-                            <button 
-                              type="button" 
-                              (click)="removerDocCriacao()" 
-                              matTooltip="Remover anexo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-red-600 flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    } @else {
-                      <div 
-                        id="container-anexo-criacao"
-                        tabindex="0"
-                        class="border-2 border-dashed rounded-lg p-4 text-center transition-colors focus:outline-none focus:ring-2 focus:ring-siage-primary/40"
-                        [class.border-red-500]="normCriacaoDocInvalido()"
-                        [class.bg-red-50/20]="normCriacaoDocInvalido()"
-                        [class.dark:bg-red-950/20]="normCriacaoDocInvalido()"
-                        [class.border-siage-border/80]="!normCriacaoDocInvalido() && canAnexarNormCriacao()"
-                        [class.hover:border-siage-primary/60]="!normCriacaoDocInvalido() && canAnexarNormCriacao()"
-                        [class.bg-siage-surface/50]="!normCriacaoDocInvalido() && canAnexarNormCriacao()"
-                        [class.border-slate-200]="!normCriacaoDocInvalido() && !canAnexarNormCriacao()"
-                        [class.dark:border-slate-800]="!normCriacaoDocInvalido() && !canAnexarNormCriacao()"
-                        [class.bg-slate-100/50]="!normCriacaoDocInvalido() && !canAnexarNormCriacao()"
-                        [class.dark:bg-slate-900/20]="!normCriacaoDocInvalido() && !canAnexarNormCriacao()"
-                        [class.opacity-60]="!canAnexarNormCriacao()"
-                        [class.cursor-not-allowed]="!canAnexarNormCriacao()"
-                      >
-                        <input 
-                          type="file" 
-                          id="file-norm-cria" 
-                          class="hidden" 
-                          accept=".pdf,.jpg,.jpeg,.png" 
-                          [disabled]="!canAnexarNormCriacao()"
-                          (change)="onFileNormCriacaoSelected($event)"
-                        >
-                        <label 
-                          for="file-norm-cria" 
-                          class="flex flex-col items-center justify-center gap-1.5"
-                          [class.cursor-pointer]="canAnexarNormCriacao()"
-                          [class.cursor-not-allowed]="!canAnexarNormCriacao()"
-                        >
-                          <mat-icon [class.text-siage-primary]="canAnexarNormCriacao()" [class.text-siage-text-secondary]="!canAnexarNormCriacao()" style="font-size: 24px; width: 24px; height: 24px;">cloud_upload</mat-icon>
-                          <span class="text-xs font-semibold" [class.text-siage-primary]="canAnexarNormCriacao()" [class.text-siage-text-secondary]="!canAnexarNormCriacao()">
-                            Clique para anexar o documento da Normativa de Criação
-                          </span>
-                          <span class="text-[11px] text-siage-text-secondary">
-                            @if (canAnexarNormCriacao()) {
-                              PDF, JPG, JPEG ou PNG (máx. 10 MB)
-                            } @else {
-                              Preencha o Nome, Número e Data da Publicação para habilitar a anexação
-                            }
-                          </span>
-                        </label>
-                      </div>
-                      @if (normCriacaoDocInvalido()) {
-                        <span class="text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-1 mt-1">
-                          <mat-icon style="font-size: 14px; width: 14px; height: 14px;">error</mat-icon>
-                          É obrigatório anexar o documento da Normativa de Criação.
-                        </span>
-                      }
-                    }
-                  </div>
+                  <s-field id="container-anexo-criacao" label="Documento da Normativa de Criação (PDF, JPG, JPEG, PNG até 10 MB)" required [error]="normCriacaoDocInvalido() ? 'É obrigatório anexar o documento da Normativa de Criação.' : ''" class="md:col-span-3 flex flex-col gap-2">
+      <div class="flex items-center gap-2 flex-wrap" [class.sg-anexo-com-arquivo]="!!normCriacaoDoc()">
+        @if (normCriacaoDoc(); as doc) { <s-icon-button icon="visibility" label="Visualizar anexo" text sTooltip="Visualizar anexo" (click)="visualizarDoc(doc, 'Normativa de Criação')" /> }
+        <s-file-upload appearance="button" buttonLabel="Selecionar arquivo" [formControl]="arquivoCriacaoControl"
+          [fileName]="normCriacaoDoc()?.nomeArquivo" [fileId]="normCriacaoDoc()?.id" [allowDownload]="true"
+          [accept]="['pdf', 'jpg', 'jpeg', 'png']" [maxSizeMb]="10" [showErrorDialog]="false"
+          (fileSelected)="onFileNormCriacaoSelected($event)" (fileRemoved)="removerDocCriacao()"
+          (fileError)="onFileUploadError($event)" (download)="baixarDoc(normCriacaoDoc()!)"  (click)="onCliqueDownloadLocal($event, arquivoCriacaoControl.value, normCriacaoDoc())" />
+      </div>
+      @if (!canAnexarNormCriacao() && !normCriacaoDoc()) { <span class="text-xs text-siage-text-secondary">Preencha o Nome, Número e Data da Publicação para habilitar a anexação</span> }
+    </s-field>
                 </div>
               }
             </div>
@@ -1861,7 +1144,7 @@ export class GerenciaRegionalList {
             <div class="pt-4 border-t border-siage-border/40 flex flex-col gap-4">
               <div class="flex items-center justify-between gap-2 flex-wrap">
                 <div class="flex items-center gap-2">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;" class="text-amber-600">history_edu</mat-icon>
+                  <s-icon name="history_edu" size="xs" class="text-amber-600" />
                   <span class="text-xs font-poppins font-bold uppercase tracking-wider text-siage-text-primary">
                     Normativa de Extinção
                   </span>
@@ -1872,14 +1155,10 @@ export class GerenciaRegionalList {
 
                 <!-- Botão Adicionar Normativa: quando sem normativa cadastrada e formulário não expandido -->
                 @if (!temNormativaExtincao() && !expandindoNormativaExtincao()) {
-                  <button 
-                    type="button" 
-                    (click)="abrirAdicaoNormativaExtincao()"
-                    class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-siage-border bg-siage-surface hover:bg-black/5 dark:hover:bg-white/5 text-xs font-medium text-siage-text-primary transition-colors cursor-pointer"
-                  >
-                    <mat-icon style="font-size: 16px; width: 16px; height: 16px;">add</mat-icon>
+                  <s-button type="button" (click)="abrirAdicaoNormativaExtincao()" icon="add" variant="secondary" outlined>
+
                     <span>Adicionar Normativa de Extinção</span>
-                  </button>
+                  </s-button>
                 }
               </div>
 
@@ -1900,35 +1179,10 @@ export class GerenciaRegionalList {
                   </div>
 
                   @if (normExtincaoDoc(); as doc) {
-                    <div class="col-span-12 border border-siage-border rounded-lg overflow-hidden bg-siage-surface mt-2">
-                      <div class="flex items-center justify-between p-3.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                        <div class="flex items-center gap-3">
-                          <div class="w-8 h-8 rounded bg-siage-primary/10 text-siage-primary flex items-center justify-center shrink-0">
-                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">description</mat-icon>
-                          </div>
-                          <div class="flex flex-col">
-                            <span class="text-xs sm:text-sm font-medium text-siage-text-primary">{{ doc.nomeArquivo }}</span>
-                            <span class="text-[11px] text-siage-text-secondary">{{ doc.tamanho }} • Enviado em {{ doc.dataUpload }}</span>
-                          </div>
-                        </div>
-                        <div class="flex items-center gap-1">
-                          <button 
-                            type="button" 
-                            (click)="visualizarDoc(doc, 'Normativa de Extinção')" 
-                            matTooltip="Visualizar anexo" 
-                            class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                          >
-                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                          </button>
-                          <button 
-                            type="button" 
-                            (click)="baixarDoc(doc)" 
-                            matTooltip="Baixar arquivo" 
-                            class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                          >
-                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-                          </button>
-                        </div>
+                    <div class="col-span-12">
+                      <div class="sg-anexo-com-arquivo flex items-center gap-2">
+                        <s-icon-button icon="visibility" type="button" (click)="visualizarDoc(doc, 'Normativa de Extinção')" sTooltip="Visualizar anexo" label="Visualizar anexo" text size="sm" variant="info" />
+                      <s-file-upload appearance="button" [fileName]="doc.nomeArquivo" [fileId]="doc.id" [allowDownload]="true" [allowRemove]="false" (download)="baixarDoc(doc)" />
                       </div>
                     </div>
                   }
@@ -1937,176 +1191,43 @@ export class GerenciaRegionalList {
                 <!-- Estado 2: Formulário Expandido para preenchimento de Normativa de Extinção -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border border-siage-border rounded-lg p-4 bg-slate-50/30 dark:bg-slate-900/20">
                   <div class="md:col-span-3 form-field-group">
-                    <label for="form-norm-ext-nome" class="siage-field-label">
-                      Nome da Normativa de Extinção <span class="required-marker">*</span>
-                    </label>
-                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                      <input 
-                        matInput 
-                        id="form-norm-ext-nome"
-                        [formControl]="normExtincaoNomeControl" 
-                        maxlength="100"
-                        placeholder="Ex: Lei Complementar nº 189/2023 - Extinção da Gerência"
-                      >
-                      <mat-hint align="end" class="text-xs text-siage-text-secondary">
+
+                    <s-field label="Nome da Normativa de Extinção" controlId="form-norm-ext-nome" required [error]="(normExtincaoNomeControl.hasError('required') &amp;&amp; normExtincaoNomeControl.touched) ? 'O Nome da Normativa de Extinção é obrigatório.' : (normExtincaoNomeControl.hasError('maxlength') &amp;&amp; normExtincaoNomeControl.touched) ? 'O Nome da Normativa de Extinção deve ter no máximo 100 caracteres.' : ''"><s-input [formControl]="normExtincaoNomeControl" [maxlength]="100" placeholder="Ex: Lei Complementar nº 189/2023 - Extinção da Gerência" (focusout)="normExtincaoNomeControl.markAsTouched(); " /></s-field><span align="end" class="text-xs text-siage-text-secondary">
                         {{ (normExtincaoNomeControl.value || '').length }} / 100
-                      </mat-hint>
-                      @if (normExtincaoNomeControl.hasError('required') && normExtincaoNomeControl.touched) {
-                        <mat-error>O Nome da Normativa de Extinção é obrigatório.</mat-error>
-                      } @else if (normExtincaoNomeControl.hasError('maxlength') && normExtincaoNomeControl.touched) {
-                        <mat-error>O Nome da Normativa de Extinção deve ter no máximo 100 caracteres.</mat-error>
-                      }
-                    </mat-form-field>
+                      </span>
                   </div>
 
                   <div class="form-field-group">
-                    <label for="form-norm-ext-numero" class="siage-field-label">
-                      Número da Normativa de Extinção <span class="required-marker">*</span>
-                    </label>
-                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                      <input 
-                        matInput 
-                        id="form-norm-ext-numero"
-                        [formControl]="normExtincaoNumeroControl" 
-                        maxlength="20"
-                        placeholder="Ex: 189"
-                      >
-                      @if (normExtincaoNumeroControl.hasError('required') && normExtincaoNumeroControl.touched) {
-                        <mat-error>O Número da Normativa de Extinção é obrigatório.</mat-error>
-                      } @else if (normExtincaoNumeroControl.hasError('maxlength') && normExtincaoNumeroControl.touched) {
-                        <mat-error>O Número da Normativa de Extinção deve ter no máximo 20 caracteres.</mat-error>
-                      }
-                    </mat-form-field>
+
+                    <s-field label="Número da Normativa de Extinção" controlId="form-norm-ext-numero" required [error]="(normExtincaoNumeroControl.hasError('required') &amp;&amp; normExtincaoNumeroControl.touched) ? 'O Número da Normativa de Extinção é obrigatório.' : (normExtincaoNumeroControl.hasError('maxlength') &amp;&amp; normExtincaoNumeroControl.touched) ? 'O Número da Normativa de Extinção deve ter no máximo 20 caracteres.' : ''"><s-input [formControl]="normExtincaoNumeroControl" [maxlength]="20" placeholder="Ex: 189" (focusout)="normExtincaoNumeroControl.markAsTouched(); " /></s-field>
                   </div>
 
                   <div class="md:col-span-2 form-field-group">
-                    <app-siage-date-picker
-                      id="form-norm-ext-data"
-                      label="Data da Publicação"
-                      [required]="true"
-                      [formControl]="normExtincaoDataControl"
-                      [control]="normExtincaoDataControl"
-                      errorMessage="A Data da Publicação é obrigatória."
-                    />
+                    <s-field label="Data da Publicação" controlId="form-norm-ext-data" required [error]="normExtincaoDataControl.touched &amp;&amp; normExtincaoDataControl.invalid ? (normExtincaoDataControl.getError('dataFormato') || normExtincaoDataControl.getError('dataRange') || 'A Data da Publicação é obrigatória.') : ''"><s-datepicker [formControl]="normExtincaoDataPicker.dateControl" [min]="dataMinima" [max]="dataMaxima" [openOnClick]="false" placeholder="DD/MM/AAAA" (input)="normExtincaoDataPicker.onInput($event)" (focusout)="normExtincaoDataPicker.onFocusOut($event)" /></s-field>
                   </div>
 
                   <!-- Anexo da Normativa de Extinção -->
-                  <div class="md:col-span-3 flex flex-col gap-2">
-                    <span class="text-xs font-semibold text-siage-text-secondary">
-                      Documento da Normativa de Extinção * (PDF, JPG, JPEG ou PNG até 10 MB)
-                    </span>
-
-                    @if (normExtincaoDoc(); as doc) {
-                      <div class="border border-siage-border rounded-lg overflow-hidden bg-siage-surface">
-                        <div class="flex items-center justify-between p-3.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                          <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded bg-siage-primary/10 text-siage-primary flex items-center justify-center shrink-0">
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">description</mat-icon>
-                            </div>
-                            <div class="flex flex-col">
-                              <span class="text-xs sm:text-sm font-medium text-siage-text-primary">{{ doc.nomeArquivo }}</span>
-                              <span class="text-[11px] text-siage-text-secondary">{{ doc.tamanho }} • Enviado em {{ doc.dataUpload }}</span>
-                            </div>
-                          </div>
-                          <div class="flex items-center gap-1">
-                            <button 
-                              type="button" 
-                              (click)="visualizarDoc(doc, 'Normativa de Extinção')" 
-                              matTooltip="Visualizar anexo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                            </button>
-                            <button 
-                              type="button" 
-                              (click)="baixarDoc(doc)" 
-                              matTooltip="Baixar arquivo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-                            </button>
-                            <button 
-                              type="button" 
-                              (click)="removerDocExtincao()" 
-                              matTooltip="Remover anexo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-red-600 flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    } @else {
-                      <div 
-                        id="container-anexo-extincao"
-                        tabindex="0"
-                        class="border-2 border-dashed rounded-lg p-4 text-center transition-colors focus:outline-none focus:ring-2 focus:ring-siage-primary/40"
-                        [class.border-red-500]="normExtincaoDocInvalido()"
-                        [class.bg-red-50/20]="normExtincaoDocInvalido()"
-                        [class.dark:bg-red-950/20]="normExtincaoDocInvalido()"
-                        [class.border-siage-border/80]="!normExtincaoDocInvalido() && canAnexarNormExtincao()"
-                        [class.hover:border-siage-primary/60]="!normExtincaoDocInvalido() && canAnexarNormExtincao()"
-                        [class.bg-siage-surface/50]="!normExtincaoDocInvalido() && canAnexarNormExtincao()"
-                        [class.border-slate-200]="!normExtincaoDocInvalido() && !canAnexarNormExtincao()"
-                        [class.dark:border-slate-800]="!normExtincaoDocInvalido() && !canAnexarNormExtincao()"
-                        [class.bg-slate-100/50]="!normExtincaoDocInvalido() && !canAnexarNormExtincao()"
-                        [class.dark:bg-slate-900/20]="!normExtincaoDocInvalido() && !canAnexarNormExtincao()"
-                        [class.opacity-60]="!canAnexarNormExtincao()"
-                        [class.cursor-not-allowed]="!canAnexarNormExtincao()"
-                      >
-                        <input 
-                          type="file" 
-                          id="file-norm-ext" 
-                          class="hidden" 
-                          accept=".pdf,.jpg,.jpeg,.png" 
-                          [disabled]="!canAnexarNormExtincao()"
-                          (change)="onFileNormExtincaoSelected($event)"
-                        >
-                        <label 
-                          for="file-norm-ext" 
-                          class="flex flex-col items-center justify-center gap-1.5"
-                          [class.cursor-pointer]="canAnexarNormExtincao()"
-                          [class.cursor-not-allowed]="!canAnexarNormExtincao()"
-                        >
-                          <mat-icon [class.text-siage-primary]="canAnexarNormExtincao()" [class.text-siage-text-secondary]="!canAnexarNormExtincao()" style="font-size: 24px; width: 24px; height: 24px;">cloud_upload</mat-icon>
-                          <span class="text-xs font-semibold" [class.text-siage-primary]="canAnexarNormExtincao()" [class.text-siage-text-secondary]="!canAnexarNormExtincao()">
-                            Clique para anexar o documento da Normativa de Extinção
-                          </span>
-                          <span class="text-[11px] text-siage-text-secondary">
-                            @if (canAnexarNormExtincao()) {
-                              PDF, JPG, JPEG ou PNG (máx. 10 MB)
-                            } @else {
-                              Preencha o Nome, Número e Data da Publicação para habilitar a anexação
-                            }
-                          </span>
-                        </label>
-                      </div>
-                      @if (normExtincaoDocInvalido()) {
-                        <span class="text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-1 mt-1">
-                          <mat-icon style="font-size: 14px; width: 14px; height: 14px;">error</mat-icon>
-                          É obrigatório anexar o documento da Normativa de Extinção.
-                        </span>
-                      }
-                    }
-                  </div>
+                  <s-field id="container-anexo-extincao" label="Documento da Normativa de Extinção (PDF, JPG, JPEG, PNG até 10 MB)" required [error]="normExtincaoDocInvalido() ? 'É obrigatório anexar o documento da Normativa de Extinção.' : ''" class="md:col-span-3 flex flex-col gap-2">
+      <div class="flex items-center gap-2 flex-wrap" [class.sg-anexo-com-arquivo]="!!normExtincaoDoc()">
+        @if (normExtincaoDoc(); as doc) { <s-icon-button icon="visibility" label="Visualizar anexo" text sTooltip="Visualizar anexo" (click)="visualizarDoc(doc, 'Normativa de Extinção')" /> }
+        <s-file-upload appearance="button" buttonLabel="Selecionar arquivo" [formControl]="arquivoExtincaoControl"
+          [fileName]="normExtincaoDoc()?.nomeArquivo" [fileId]="normExtincaoDoc()?.id" [allowDownload]="true"
+          [accept]="['pdf', 'jpg', 'jpeg', 'png']" [maxSizeMb]="10" [showErrorDialog]="false"
+          (fileSelected)="onFileNormExtincaoSelected($event)" (fileRemoved)="removerDocExtincao()"
+          (fileError)="onFileUploadError($event)" (download)="baixarDoc(normExtincaoDoc()!)"  (click)="onCliqueDownloadLocal($event, arquivoExtincaoControl.value, normExtincaoDoc())" />
+      </div>
+      @if (!canAnexarNormExtincao() && !normExtincaoDoc()) { <span class="text-xs text-siage-text-secondary">Preencha o Nome, Número e Data da Publicação para habilitar a anexação</span> }
+    </s-field>
 
                   <!-- Botões de Ação do Formulário Expandido -->
                   <div class="md:col-span-3 flex items-center justify-end gap-2 pt-2 border-t border-siage-border/40">
-                    <button 
-                      type="button" 
-                      (click)="cancelarAdicaoNormativaExtincao()"
-                      class="h-8 px-3 rounded-lg border border-siage-border bg-siage-surface hover:bg-black/5 dark:hover:bg-white/5 text-xs font-medium text-siage-text-primary transition-colors cursor-pointer"
-                    >
+                    <s-button type="button" (click)="cancelarAdicaoNormativaExtincao()"  variant="secondary" outlined>
                       Cancelar
-                    </button>
-                    <button 
-                      type="button" 
-                      (click)="confirmarAdicaoNormativaExtincao()"
-                      class="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-xs transition-all shadow-xs cursor-pointer"
-                    >
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">check</mat-icon>
+                    </s-button>
+                    <s-button type="button" (click)="confirmarAdicaoNormativaExtincao()" icon="check" variant="primary" >
+
                       <span>Adicionar</span>
-                    </button>
+                    </s-button>
                   </div>
                 </div>
               }
@@ -2119,7 +1240,7 @@ export class GerenciaRegionalList {
           @if (isEditMode()) {
             <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
               <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">account_tree</mat-icon>
+                <s-icon name="account_tree" size="xs"  />
                 <span>4. Núcleos e Escolas Vinculados</span>
               </h3>
 
@@ -2130,160 +1251,57 @@ export class GerenciaRegionalList {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                   <!-- Filtro: Nome -->
                   <div class="form-field-group">
-                    <label for="filtro-sub-nome" class="siage-field-label">Nome</label>
-                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                      <input 
-                        matInput 
-                        id="filtro-sub-nome" 
-                        type="text"
-                        [formControl]="filtroSubordinadaNome" 
-                        maxlength="200"
-                        placeholder="Digite o nome"
-                        (keydown.enter)="$event.preventDefault(); canBuscarSubordinadas() && onBuscarSubordinadas()"
-                        class="text-sm"
-                      />
-                      @if (filtroSubNomeVal()) {
-                        <button mat-icon-button matSuffix type="button" (click)="limparFiltroSubNome()" aria-label="Limpar campo">
-                          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                        </button>
-                      }
-                    </mat-form-field>
+
+                    <s-field label="Nome" controlId="filtro-sub-nome"><s-input type="text" [formControl]="filtroSubordinadaNome" [maxlength]="200" placeholder="Digite o nome" (keydown.enter)="$event.preventDefault(); canBuscarSubordinadas() &amp;&amp; onBuscarSubordinadas()" (focusout)="filtroSubordinadaNome.markAsTouched(); " />
+@if (filtroSubordinadaNome.value) { <s-icon-button icon="close" label="Limpar campo" text size="sm" (click)="limparFiltroSubNome()" /> }</s-field>
                   </div>
 
                   <!-- Filtro: Unidade de Trabalho (UTB) -->
                   <div class="form-field-group">
-                    <label for="filtro-sub-utb" class="siage-field-label">Unidade de Trabalho (UTB)</label>
-                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                      <input 
-                        matInput 
-                        id="filtro-sub-utb" 
-                        type="text"
-                        [formControl]="filtroSubordinadaUtb" 
-                        placeholder="Selecione ou busque uma unidade de trabalho"
-                        [matAutocomplete]="autoUtbSub"
-                        #autoUtbSubTrigger="matAutocompleteTrigger"
-                        (focus)="autoUtbSubTrigger.openPanel()"
-                        (keydown.enter)="$event.preventDefault(); canBuscarSubordinadas() && onBuscarSubordinadas()"
-                        class="text-sm"
-                      />
-                      <mat-autocomplete #autoUtbSub="matAutocomplete">
-                        @for (utb of filteredSubUtbsList(); track utb) {
-                          <mat-option [value]="utb">
-                            {{ utb }}
-                          </mat-option>
-                        }
-                      </mat-autocomplete>
-                      @if (filtroSubUtbVal()) {
-                        <button mat-icon-button matSuffix type="button" (click)="limparFiltroSubUtb()" aria-label="Limpar campo">
-                          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                        </button>
-                      } @else {
-                        <button mat-icon-button matSuffix type="button" (click)="autoUtbSubTrigger.openPanel()" aria-label="Abrir opções">
-                          <mat-icon class="text-siage-text-secondary">arrow_drop_down</mat-icon>
-                        </button>
-                      }
-                    </mat-form-field>
+
+                    <s-field label="Unidade de Trabalho (UTB)" controlId="filtro-sub-utb"><s-autocomplete [formControl]="filtroSubordinadaUtb" placeholder="Selecione ou busque uma unidade de trabalho" (keydown.enter)="$event.preventDefault(); canBuscarSubordinadas() &amp;&amp; onBuscarSubordinadas()" [options]="opcoesfiltro_sub_utb()" (input)="onSubUtbInput($event)" (selectionChange)="onSubUtbSelectionChange($event)" (focusout)="filtroSubordinadaUtb.markAsTouched()" /></s-field>
                   </div>
                 </div>
 
                 <!-- Botões Buscar e Limpar -->
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-siage-border/40">
-                  <button 
-                    type="button" 
-                    (click)="onLimparSubordinadas()"
-                    class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-siage-primary/5 hover:border-siage-primary/30 active:scale-[0.99] transition-all cursor-pointer"
-                  >
+                  <s-button type="button" (click)="onLimparSubordinadas()"  variant="primary" >
                     Limpar
-                  </button>
+                  </s-button>
                   
-                  <button 
-                    type="button" 
-                    (click)="canBuscarSubordinadas() && onBuscarSubordinadas()"
-                    [disabled]="!canBuscarSubordinadas()"
-                    [matTooltip]="!canBuscarSubordinadas() ? 'Informe o Nome ou a Unidade de Trabalho (UTB) para realizar a busca' : 'Executar busca'"
-                    class="inline-flex items-center justify-center gap-1.5 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-siage-primary"
-                  >
-                    <mat-icon style="font-size: 18px; width: 18px; height: 18px;">search</mat-icon>
+                  <s-button type="button" (click)="canBuscarSubordinadas() &amp;&amp; onBuscarSubordinadas()" [disabled]="!canBuscarSubordinadas()" [sTooltip]="!canBuscarSubordinadas() ? 'Informe o Nome ou a Unidade de Trabalho (UTB) para realizar a busca' : 'Executar busca'" icon="search" variant="primary" >
+
                     <span>Buscar</span>
-                  </button>
+                  </s-button>
                 </div>
               </div>
 
               <!-- Tabela de Subordinadas Vinculadas -->
               <div class="border border-siage-border rounded-lg overflow-hidden bg-siage-surface">
-                <table class="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr class="bg-slate-100/70 dark:bg-slate-800/50 border-b border-siage-border text-siage-text-secondary font-semibold">
-                      <th class="p-3">
-                        <button 
-                          type="button" 
-                          (click)="toggleSortSubordinadas()"
-                          class="inline-flex items-center gap-1.5 hover:text-siage-primary transition-colors cursor-pointer group"
-                        >
-                          <span>Tipo / Unidade Vinculada</span>
-                          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">
-                            {{ sortSubDirection() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                          </mat-icon>
-                        </button>
-                      </th>
-                      <th class="p-3">Chefia Imediata</th>
-                      <th class="p-3">Unidade de Trabalho (UTB)</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-siage-border/40">
-                    @for (sub of paginatedSubordinadas(); track sub.id) {
-                      <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                        <td class="p-3 font-medium text-siage-text-primary">
-                          <span class="text-[10px] uppercase font-bold text-siage-primary block">{{ sub.tipo }}</span>
-                          <span class="text-sm font-medium">{{ sub.nome }}</span>
-                        </td>
-                        <td class="p-3 text-sm text-siage-text-secondary">{{ sub.chefiaImediata }}</td>
-                        <td class="p-3 text-sm text-siage-text-secondary">{{ sub.utb }}</td>
-                      </tr>
-                    } @empty {
-                      <tr>
-                        <td colspan="3" class="p-6 text-center text-xs text-siage-text-secondary">
-                          Nenhum vínculo foi encontrado.
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
+                <s-table label="Unidades vinculadas" [columns]="colunasVinculos" [rows]="paginatedSubordinadas()"
+      [empty]="{variant: 'no-results', title: 'Nenhum vínculo foi encontrado.', description: '', actionLabel: ''}"
+      [page]="subordinadasPageIndex() + 1" [pageSize]="subordinadasPageIndexSize()" [total]="filteredSubordinadas().length"
+      (pageChange)="subordinadasPageIndex.set($event - 1)" (pageSizeChange)="subordinadasPageIndexSize.set($event); subordinadasPageIndex.set(0)" (sortChange)="toggleSortSubordinadas()">
+      <ng-template sTableCell="nome" let-sub>
+                          <span class="text-[10px] uppercase font-bold text-siage-primary block">{{ sub['tipo'] }}</span>
+                          <span class="text-sm font-medium">{{ sub['nome'] }}</span>
+                        </ng-template>
+<ng-template sTableCell="chefiaImediata" let-sub>{{ sub['chefiaImediata'] }}</ng-template>
+<ng-template sTableCell="utb" let-sub>{{ sub['utb'] }}</ng-template>
+    </s-table>
 
-                <app-siage-paginator 
-                  [length]="filteredSubordinadas().length"
-                  [pageIndex]="subordinadasPageIndex()"
-                  [pageSize]="10"
-                  (page)="onSubordinadasPageChange($event.pageIndex)"
-                />
+
               </div>
             </div>
           }
 
           <!-- RODAPÉ DE AÇÕES DO FORMULÁRIO -->
           <div class="flex items-center justify-end gap-3 pt-4 border-t border-siage-border/40">
-            <button 
-              type="button" 
-              (click)="onCancelar()" 
-              class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer"
-            >
+            <s-button type="button" (click)="onCancelar()"  variant="secondary" outlined>
               Cancelar
-            </button>
+            </s-button>
 
-            <button 
-              type="button" 
-              (click)="onSalvar()" 
-              [disabled]="isSaving()"
-              class="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer disabled:opacity-50"
-            >
-              @if (isSaving()) {
-                <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                <span>Salvando...</span>
-              } @else {
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">{{ isEditMode() ? 'check' : 'save' }}</mat-icon>
-                <span>{{ isEditMode() ? 'Atualizar' : 'Salvar' }}</span>
-              }
-            </button>
+            <s-button type="button" (click)="onSalvar()" [disabled]="isSaving()" variant="primary" [icon]="isEditMode() ? 'check' : 'save'" [loading]="isSaving()" loadingText="Salvando...">{{ isEditMode() ? 'Atualizar' : 'Salvar' }}</s-button>
           </div>
         </form>
       </div>
@@ -2297,8 +1315,8 @@ export class GerenciaRegionalForm implements OnInit {
   readonly secGeralService = inject(SecretariaGeralService);
   readonly permissionService = inject(PermissionService);
   private readonly dialog = inject(MatDialog);
-  private readonly modalService = inject(ModalService);
-  private readonly toastService = inject(ToastService);
+  private readonly modalService = inject(SModalService);
+  private readonly toastService = inject(SToastService);
 
   readonly isEditMode = signal(false);
   readonly isSaving = signal(false);
@@ -2306,7 +1324,7 @@ export class GerenciaRegionalForm implements OnInit {
   currentItem: GerenciaRegionalItem | null = null;
 
   // Unidade de Trabalho e Secretaria Geral
-  readonly utbInputControl = new FormControl('', [Validators.required]);
+  readonly utbInputControl = new FormControl({ value: '', disabled: true }, [Validators.required]);
   readonly secGeralInputControl = new FormControl('', [Validators.required]);
   readonly utbInputVal = toSignal(this.utbInputControl.valueChanges, { initialValue: '' });
   readonly secGeralInputVal = toSignal(this.secGeralInputControl.valueChanges, { initialValue: '' });
@@ -2370,6 +1388,7 @@ export class GerenciaRegionalForm implements OnInit {
 
   // Autocomplete de Secretarias Gerais (somente ativas, ordenadas alfabeticamente)
   readonly filteredSecsGerais = computed(() => {
+    this.estadosecGeralInputControl();
     const list = this.secGeralService.items().filter(s => s.status === 'ATIVO');
     const sorted = [...list].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     const query = (this.secGeralInputVal() || this.secGeralInputControl.value || '').trim().toLowerCase();
@@ -2379,6 +1398,7 @@ export class GerenciaRegionalForm implements OnInit {
 
   // Autocomplete de UTBs do sistema
   readonly filteredUtbs = computed(() => {
+    this.estadoutbInputControl();
     const list = this.secGeralService.utbs();
     const query = (this.utbInputVal() || this.utbInputControl.value || '').trim().toLowerCase();
     if (!query) return list;
@@ -2397,8 +1417,36 @@ export class GerenciaRegionalForm implements OnInit {
     return temChefe || temSubordinadas;
   });
 
+  readonly hasSecGeralValida = computed(() => {
+    this.estadoFormularioOficial();
+    const id = (this.valorsecGeralInputControlOficial() || this.form.controls.secretariaGeralId.value || '').trim();
+    return id.length > 0;
+  });
+
+  readonly isUtbDesabilitada = computed(() => {
+    return this.isUtbBloqueada() || !this.hasSecGeralValida();
+  });
+
+  // Mantém a UTB efetivamente travada (não só o aviso) enquanto houver impedimento ou sem Secretaria Geral
+  private readonly syncUtbDisableState = effect(() => {
+    this.atualizarEstadoUtb();
+  });
+
+  private atualizarEstadoUtb() {
+    const desabilitada = this.isUtbDesabilitada();
+    if (desabilitada) {
+      this.utbInputControl.disable({ emitEvent: false });
+      this.utbInputControlOficial.disable({ emitEvent: false });
+    } else {
+      this.utbInputControl.enable({ emitEvent: false });
+      this.utbInputControlOficial.enable({ emitEvent: false });
+    }
+  }
+
   // Habilita anexação do Ato Governamental apenas se Chefe Imediato selecionado e Número e Data válidos
   readonly canAnexarAto = computed(() => {
+    this.estadoatoNumeroControl();
+    this.estadoatoDataControl();
     if (!this.chefeImediato()) return false;
     const num = (this.atoNumeroVal() || this.atoNumeroControl.value || '').trim();
     const data = (this.atoDataVal() || this.atoDataControl.value || '').trim();
@@ -2407,6 +1455,9 @@ export class GerenciaRegionalForm implements OnInit {
 
   // Habilita anexação da Normativa de Criação apenas se Nome, Número e Data válidos
   readonly canAnexarNormCriacao = computed(() => {
+    this.estadonormCriacaoNomeControl();
+    this.estadonormCriacaoNumeroControl();
+    this.estadonormCriacaoDataControl();
     const nome = (this.normCriacaoNomeVal() || this.normCriacaoNomeControl.value || '').trim();
     const num = (this.normCriacaoNumeroVal() || this.normCriacaoNumeroControl.value || '').trim();
     const data = (this.normCriacaoDataVal() || this.normCriacaoDataControl.value || '').trim();
@@ -2415,12 +1466,155 @@ export class GerenciaRegionalForm implements OnInit {
 
   // Habilita anexação da Normativa de Extinção apenas se Nome, Número e Data válidos
   readonly canAnexarNormExtincao = computed(() => {
+    this.estadonormExtincaoNomeControl();
+    this.estadonormExtincaoNumeroControl();
+    this.estadonormExtincaoDataControl();
     const nome = (this.normExtincaoNomeVal() || this.normExtincaoNomeControl.value || '').trim();
     const num = (this.normExtincaoNumeroVal() || this.normExtincaoNumeroControl.value || '').trim();
     const data = (this.normExtincaoDataVal() || this.normExtincaoDataControl.value || '').trim();
     return nome.length > 0 && nome.length <= 100 && num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data);
   });
 
+  readonly opcoesform_sec_geral = computed(() => {
+    const atual = this.valorsecGeralInputControlOficial() || this.form.controls.secretariaGeralId.value;
+    const base = this.secGeralService.items()
+      .filter(s => s.status === 'ATIVO')
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    const opcoes = base.map(sec => ({label: sec.nome, value: sec.id}));
+    if (atual && !opcoes.some(o => o.value === atual)) {
+      const selecionada = this.secGeralService.getItem(atual);
+      if (selecionada) return [{label: selecionada.nome, value: selecionada.id}, ...opcoes];
+      if (this.currentItem && this.currentItem.secretariaGeralId === atual) {
+        return [{label: this.currentItem.secretariaGeralNome, value: atual}, ...opcoes];
+      }
+    }
+    return opcoes;
+  });
+    readonly arquivoAtoControl = new FormControl<File | null>({value: null, disabled: true});
+  readonly uploadatoNumeroControl = toSignal(this.atoNumeroControl.valueChanges, {initialValue: this.atoNumeroControl.value});
+  readonly uploadatoDataControl = toSignal(this.atoDataControl.valueChanges, {initialValue: this.atoDataControl.value});
+  private readonly estadoArquivoAto = effect(() => {
+    this.uploadatoNumeroControl();
+    this.uploadatoDataControl();
+    if (this.canAnexarAto() || this.atoDocumento()) this.arquivoAtoControl.enable({emitEvent: false});
+    else this.arquivoAtoControl.disable({emitEvent: false});
+    if (!this.atoDocumento() && this.arquivoAtoControl.value) this.arquivoAtoControl.reset(null, {emitEvent: false});
+  });
+  readonly arquivoCriacaoControl = new FormControl<File | null>({value: null, disabled: true});
+  readonly uploadnormCriacaoNomeControl = toSignal(this.normCriacaoNomeControl.valueChanges, {initialValue: this.normCriacaoNomeControl.value});
+  readonly uploadnormCriacaoNumeroControl = toSignal(this.normCriacaoNumeroControl.valueChanges, {initialValue: this.normCriacaoNumeroControl.value});
+  readonly uploadnormCriacaoDataControl = toSignal(this.normCriacaoDataControl.valueChanges, {initialValue: this.normCriacaoDataControl.value});
+  private readonly estadoArquivoCriacao = effect(() => {
+    this.uploadnormCriacaoNomeControl();
+    this.uploadnormCriacaoNumeroControl();
+    this.uploadnormCriacaoDataControl();
+    if (this.canAnexarNormCriacao() || this.normCriacaoDoc()) this.arquivoCriacaoControl.enable({emitEvent: false});
+    else this.arquivoCriacaoControl.disable({emitEvent: false});
+    if (!this.normCriacaoDoc() && this.arquivoCriacaoControl.value) this.arquivoCriacaoControl.reset(null, {emitEvent: false});
+  });
+  readonly arquivoExtincaoControl = new FormControl<File | null>({value: null, disabled: true});
+  readonly uploadnormExtincaoNomeControl = toSignal(this.normExtincaoNomeControl.valueChanges, {initialValue: this.normExtincaoNomeControl.value});
+  readonly uploadnormExtincaoNumeroControl = toSignal(this.normExtincaoNumeroControl.valueChanges, {initialValue: this.normExtincaoNumeroControl.value});
+  readonly uploadnormExtincaoDataControl = toSignal(this.normExtincaoDataControl.valueChanges, {initialValue: this.normExtincaoDataControl.value});
+  private readonly estadoArquivoExtincao = effect(() => {
+    this.uploadnormExtincaoNomeControl();
+    this.uploadnormExtincaoNumeroControl();
+    this.uploadnormExtincaoDataControl();
+    if (this.canAnexarNormExtincao() || this.normExtincaoDoc()) this.arquivoExtincaoControl.enable({emitEvent: false});
+    else this.arquivoExtincaoControl.disable({emitEvent: false});
+    if (!this.normExtincaoDoc() && this.arquivoExtincaoControl.value) this.arquivoExtincaoControl.reset(null, {emitEvent: false});
+  });
+    readonly estadoutbInputControl = toSignal(this.utbInputControl.valueChanges, {initialValue: this.utbInputControl.value});
+  readonly estadosecGeralInputControl = toSignal(this.secGeralInputControl.valueChanges, {initialValue: this.secGeralInputControl.value});
+  readonly estadoatoNumeroControl = toSignal(this.atoNumeroControl.valueChanges, {initialValue: this.atoNumeroControl.value});
+  readonly estadoatoDataControl = toSignal(this.atoDataControl.valueChanges, {initialValue: this.atoDataControl.value});
+  readonly estadonormCriacaoNomeControl = toSignal(this.normCriacaoNomeControl.valueChanges, {initialValue: this.normCriacaoNomeControl.value});
+  readonly estadonormCriacaoNumeroControl = toSignal(this.normCriacaoNumeroControl.valueChanges, {initialValue: this.normCriacaoNumeroControl.value});
+  readonly estadonormCriacaoDataControl = toSignal(this.normCriacaoDataControl.valueChanges, {initialValue: this.normCriacaoDataControl.value});
+  readonly estadonormExtincaoNomeControl = toSignal(this.normExtincaoNomeControl.valueChanges, {initialValue: this.normExtincaoNomeControl.value});
+  readonly estadonormExtincaoNumeroControl = toSignal(this.normExtincaoNumeroControl.valueChanges, {initialValue: this.normExtincaoNumeroControl.value});
+  readonly estadonormExtincaoDataControl = toSignal(this.normExtincaoDataControl.valueChanges, {initialValue: this.normExtincaoDataControl.value});
+  readonly estadofiltroSubordinadaNome = toSignal(this.filtroSubordinadaNome.valueChanges, {initialValue: this.filtroSubordinadaNome.value});
+  readonly estadofiltroSubordinadaUtb = toSignal(this.filtroSubordinadaUtb.valueChanges, {initialValue: this.filtroSubordinadaUtb.value});
+  readonly estadoFormularioOficial = toSignal(this.form.valueChanges, {initialValue: this.form.value});
+  onCliqueDownloadLocal(event: MouseEvent, arquivo: File | null, doc: DocumentoAnexo | undefined) {
+    if (arquivo && doc && (event.target as Element).closest('button[aria-label="Baixar arquivo"]')) {
+      this.toastService.success(`Download de "${doc.nomeArquivo}" iniciado.`);
+    }
+  }
+  onFileUploadError(error: SFileError) {
+    if (error.kind === 'size') this.toastService.warning('O arquivo excede o limite máximo permitido de 10 MB.');
+    else this.toastService.warning('Formato não suportado. Utilize PDF, JPG, JPEG ou PNG.');
+  }
+  readonly subordinadasPageIndexSize = signal(10);
+  readonly colunasVinculos: readonly STableColumn<GerenciaRegionalItem['subordinadas'][number]>[] = [{key: 'nome', label: 'Tipo / Unidade Vinculada', sortable: true},
+    {key: 'chefiaImediata', label: 'Chefia Imediata'},
+    {key: 'utb', label: 'Unidade de Trabalho (UTB)'}];
+  selecionarform_sec_geral(selection: SAutocompleteSelection | null) {
+    if (selection) { this.onSecGeralSelected(String(selection.value)); } else { this.limparSecGeral(); }
+  }
+  readonly secGeralInputControlOficial = new FormControl<string | null>(null);
+  private readonly syncsecGeralInputControlOficial = effect(() => {
+    this.estadoFormularioOficial();
+    this.isUtbBloqueada();
+    const nextVal = this.valorsecGeralInputControlOficial() || this.form.controls.secretariaGeralId.value || null;
+    if (this.secGeralInputControlOficial.value !== nextVal) {
+      this.secGeralInputControlOficial.setValue(nextVal, {emitEvent: false});
+    }
+    const shouldDisable = this.secGeralInputControl.disabled;
+    if (shouldDisable && !this.secGeralInputControlOficial.disabled) {
+      this.secGeralInputControlOficial.disable({emitEvent: false});
+    } else if (!shouldDisable && this.secGeralInputControlOficial.disabled) {
+      this.secGeralInputControlOficial.enable({emitEvent: false});
+    }
+  });
+  readonly valorsecGeralInputControlOficial = toSignal(this.form.controls.secretariaGeralId.valueChanges, {initialValue: this.form.controls.secretariaGeralId.value});
+  readonly opcoesform_utb = computed(() => {
+    const atual = this.valorutbInputControlOficial() || this.form.controls.utbCodigo.value;
+    const opcoes = this.secGeralService.utbs().map(utb => ({label: `${utb.codigo} - ${utb.nome}`, value: utb.codigo}));
+    if (atual && !opcoes.some(o => o.value === atual)) {
+      const selecionada = this.secGeralService.utbs().find(u => u.codigo === atual);
+      if (selecionada) return [{label: `${selecionada.codigo} - ${selecionada.nome}`, value: selecionada.codigo}, ...opcoes];
+      if (this.currentItem && this.currentItem.utbCodigo === atual) {
+        return [{label: this.currentItem.utbNome, value: atual}, ...opcoes];
+      }
+    }
+    return opcoes;
+  });
+  selecionarform_utb(selection: SAutocompleteSelection | null) {
+    if (selection) { this.onUtbSelected(String(selection.value)); }
+  }
+  readonly utbInputControlOficial = new FormControl<string | null>({ value: null, disabled: true });
+  private readonly syncutbInputControlOficial = effect(() => {
+    this.estadoFormularioOficial();
+    const shouldDisable = this.isUtbDesabilitada();
+    const nextVal = this.valorutbInputControlOficial() || this.form.controls.utbCodigo.value || null;
+    if (this.utbInputControlOficial.value !== nextVal) {
+      this.utbInputControlOficial.setValue(nextVal, {emitEvent: false});
+      if (this.utbInputControl.hasError('emUso') || this.form.get('utbCodigo')?.hasError('emUso')) {
+        this.utbInputControlOficial.setErrors({ emUso: true });
+      }
+    }
+    if (shouldDisable && !this.utbInputControlOficial.disabled) {
+      this.utbInputControlOficial.disable({emitEvent: false});
+    } else if (!shouldDisable && this.utbInputControlOficial.disabled) {
+      this.utbInputControlOficial.enable({emitEvent: false});
+    }
+  });
+  readonly valorutbInputControlOficial = toSignal(this.form.controls.utbCodigo.valueChanges, {initialValue: this.form.controls.utbCodigo.value});
+  readonly opcoesfiltro_sub_utb = computed(() => {
+    const list = this.subordinadasOriginais();
+    const set = new Set<string>();
+    list.forEach(item => {
+      if (item.utb) set.add(item.utb);
+    });
+    return Array.from(set).map(utb => ({label: utb, value: utb}));
+  });
+  readonly atoDataPicker = new DataFormulario(this.atoDataControl);
+  readonly normCriacaoDataPicker = new DataFormulario(this.normCriacaoDataControl);
+  readonly normExtincaoDataPicker = new DataFormulario(this.normExtincaoDataControl);
+  readonly dataMinima = new Date(1900, 0, 1);
+  readonly dataMaxima = new Date(2100, 11, 31);
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     const url = this.router.url;
@@ -2438,13 +1632,6 @@ export class GerenciaRegionalForm implements OnInit {
     this.form.get('nome')?.valueChanges.subscribe(() => {
       if (this.form.get('nome')?.hasError('duplicado')) {
         this.form.get('nome')?.setErrors(null);
-      }
-    });
-
-    // Limpa erro de UTB em uso ao alterar
-    this.utbInputControl.valueChanges.subscribe(() => {
-      if (this.utbInputControl.hasError('emUso')) {
-        this.utbInputControl.setErrors(null);
       }
     });
   }
@@ -2466,6 +1653,7 @@ export class GerenciaRegionalForm implements OnInit {
 
     this.secGeralInputControl.setValue(item.secretariaGeralNome, { emitEvent: false });
     this.utbInputControl.setValue(item.utbNome, { emitEvent: false });
+    this.atualizarEstadoUtb();
 
     if (item.chefeImediato) {
       this.chefeImediato.set(item.chefeImediato);
@@ -2531,8 +1719,8 @@ export class GerenciaRegionalForm implements OnInit {
       return true;
     }
     return new Promise<boolean>((resolve) => {
-      const dialogRef = this.modalService.confirmarCancelamento();
-      dialogRef.afterClosed().subscribe((confirmado: boolean) => {
+      const dialogRef = from(this.modalService.confirm({title: 'Tem certeza que deseja cancelar?', description: 'As alterações não salvas serão perdidas.', confirmLabel: 'Sim, cancelar', cancelLabel: 'Não', variant: 'default'}));
+      dialogRef.subscribe((confirmado: boolean) => {
         if (confirmado) {
           this.isDiscarded = true;
           resolve(true);
@@ -2549,6 +1737,8 @@ export class GerenciaRegionalForm implements OnInit {
       this.form.get('secretariaGeralId')?.setValue(found.id);
       this.form.get('secretariaGeralId')?.markAsDirty();
       this.secGeralInputControl.setValue(found.nome, { emitEvent: false });
+      this.secGeralInputControlOficial.setValue(found.id, { emitEvent: false });
+      this.atualizarEstadoUtb();
     }
   }
 
@@ -2556,20 +1746,30 @@ export class GerenciaRegionalForm implements OnInit {
     this.form.get('secretariaGeralId')?.setValue('');
     this.form.get('secretariaGeralId')?.markAsDirty();
     this.secGeralInputControl.setValue('');
+    this.secGeralInputControlOficial.setValue(null, { emitEvent: false });
+    this.atualizarEstadoUtb();
   }
 
   onUtbSelected(codigo: string) {
-    if (this.isUtbBloqueada()) return;
+    if (this.isUtbDesabilitada()) return;
     const utb = this.secGeralService.utbs().find(u => u.codigo === codigo);
     if (!utb) return;
 
-    const currentCodigo = this.form.get('utbCodigo')?.value;
-    if (currentCodigo === codigo) return;
+    const currentCodigo = this.form.getRawValue().utbCodigo;
+    if (currentCodigo === codigo && !this.utbInputControl.hasError('emUso')) return;
 
-    // Verifica exclusividade da UTB
+    // Verifica exclusividade da UTB: mantém selecionada e visível com erro até escolher uma UTB válida
     if (this.service.isUtbEmUso(codigo, this.itemId || undefined)) {
+      this.form.get('utbCodigo')?.setValue(codigo);
+      this.form.get('utbCodigo')?.markAsDirty();
+      this.form.get('utbCodigo')?.setErrors({ emUso: true });
+      this.form.get('utbCodigo')?.markAsTouched();
+      this.utbInputControl.setValue(`${utb.codigo} - ${utb.nome}`, { emitEvent: false });
       this.utbInputControl.setErrors({ emUso: true });
       this.utbInputControl.markAsTouched();
+      this.utbInputControlOficial.setValue(codigo, { emitEvent: false });
+      this.utbInputControlOficial.setErrors({ emUso: true });
+      this.utbInputControlOficial.markAsTouched();
       return;
     }
 
@@ -2580,7 +1780,11 @@ export class GerenciaRegionalForm implements OnInit {
     const aplicarNovaUtb = () => {
       this.form.get('utbCodigo')?.setValue(codigo);
       this.form.get('utbCodigo')?.markAsDirty();
+      this.form.get('utbCodigo')?.setErrors(null);
       this.utbInputControl.setValue(`${utb.codigo} - ${utb.nome}`, { emitEvent: false });
+      this.utbInputControl.setErrors(null);
+      this.utbInputControlOficial.setValue(codigo, { emitEvent: false });
+      this.utbInputControlOficial.setErrors(null);
 
       // Se houver chefe vinculado e a UTB mudou, desvincula chefia e ato
       if (this.chefeImediato()) {
@@ -2601,35 +1805,34 @@ export class GerenciaRegionalForm implements OnInit {
   }
 
   confirmarTrocaUtb(novoCodigo: string, callbackConfirmado: () => void) {
-    const currentCodigo = this.form.get('utbCodigo')?.value;
+    const currentCodigo = this.form.getRawValue().utbCodigo;
     const existing = this.secGeralService.utbs().find((u: UtbItem) => u.codigo === currentCodigo);
-    const existingLabel = existing ? `${existing.codigo} - ${existing.nome}` : '';
+    const existingLabel = existing
+      ? `${existing.codigo} - ${existing.nome}`
+      : (this.currentItem && this.currentItem.utbCodigo === currentCodigo ? this.currentItem.utbNome : '');
 
-    const dialogRef = this.dialog.open(ConfirmacaoDialog, {
-      disableClose: true,
-      data: {
-        title: 'Alterar Unidade de Trabalho?',
-        message: 'Ao alterar a Unidade de Trabalho (UTB), os vínculos de chefia existentes poderão ser removidos. Deseja continuar?',
-        cancelLabel: 'Não',
-        actionLabel: 'Sim, alterar',
-        actionType: 'primary'
-      }
-    });
+    const dialogRef = from(this.modalService.confirm({title: 'Alterar Unidade de Trabalho?', description: 'Ao alterar a Unidade de Trabalho (UTB), os vínculos de chefia existentes poderão ser removidos. Deseja continuar?', cancelLabel: 'Não', confirmLabel: 'Sim, alterar', variant: 'default'}));
 
-    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
+    dialogRef.subscribe((confirmado: boolean) => {
       this.isHandlingUtbSelection = false;
       if (confirmado) {
         callbackConfirmado();
       } else {
         // Preserva a UTB original e todos os dados vinculados
         this.utbInputControl.setValue(existingLabel, { emitEvent: false });
+        this.utbInputControlOficial.setValue(currentCodigo || null, { emitEvent: false });
+        if (currentCodigo && this.service.isUtbEmUso(currentCodigo, this.itemId || undefined)) {
+          this.form.get('utbCodigo')?.setErrors({ emUso: true });
+          this.utbInputControl.setErrors({ emUso: true });
+          this.utbInputControlOficial.setErrors({ emUso: true });
+        }
       }
     });
   }
 
   limparUtb() {
-    if (this.isUtbBloqueada()) return;
-    const currentCodigo = this.form.get('utbCodigo')?.value;
+    if (this.isUtbDesabilitada()) return;
+    const currentCodigo = this.form.getRawValue().utbCodigo;
     if (!currentCodigo && !this.utbInputControl.value) return;
 
     const requiresConfirmation = this.isEditMode()
@@ -2640,6 +1843,9 @@ export class GerenciaRegionalForm implements OnInit {
       this.form.get('utbCodigo')?.setValue('');
       this.form.get('utbCodigo')?.markAsDirty();
       this.utbInputControl.setValue('');
+      this.utbInputControl.setErrors(null);
+      this.utbInputControlOficial.setValue(null, { emitEvent: false });
+      this.utbInputControlOficial.setErrors(null);
       if (this.chefeImediato()) {
         this.chefeImediato.set(undefined);
         this.atoNumeroControl.reset('');
@@ -2661,14 +1867,28 @@ export class GerenciaRegionalForm implements OnInit {
     if (this.isHandlingUtbSelection || this.dialog.openDialogs.length > 0) {
       return;
     }
-    if (this.isUtbBloqueada()) return;
+    if (this.isUtbDesabilitada()) return;
 
-    const currentSelectedCodigo = this.form.get('utbCodigo')?.value;
+    const currentSelectedCodigo = this.form.getRawValue().utbCodigo;
     const text = (this.utbInputControl.value || '').trim();
     if (!text) {
       if (currentSelectedCodigo) {
         this.limparUtb();
       }
+      return;
+    }
+
+    if (currentSelectedCodigo && this.service.isUtbEmUso(currentSelectedCodigo, this.itemId || undefined)) {
+      const existing = this.secGeralService.utbs().find(u => u.codigo === currentSelectedCodigo);
+      const fallbackLabel = existing ? `${existing.codigo} - ${existing.nome}` : text;
+      this.utbInputControl.setValue(fallbackLabel, { emitEvent: false });
+      this.utbInputControlOficial.setValue(currentSelectedCodigo, { emitEvent: false });
+      this.form.get('utbCodigo')?.setErrors({ emUso: true });
+      this.form.get('utbCodigo')?.markAsTouched();
+      this.utbInputControl.setErrors({ emUso: true });
+      this.utbInputControl.markAsTouched();
+      this.utbInputControlOficial.setErrors({ emUso: true });
+      this.utbInputControlOficial.markAsTouched();
       return;
     }
 
@@ -2683,30 +1903,31 @@ export class GerenciaRegionalForm implements OnInit {
       }
     } else if (currentSelectedCodigo) {
       const existing = this.secGeralService.utbs().find(u => u.codigo === currentSelectedCodigo);
-      this.utbInputControl.setValue(existing ? `${existing.codigo} - ${existing.nome}` : '', { emitEvent: false });
+      const fallbackLabel = existing
+        ? `${existing.codigo} - ${existing.nome}`
+        : (this.currentItem && this.currentItem.utbCodigo === currentSelectedCodigo ? this.currentItem.utbNome : '');
+      this.utbInputControl.setValue(fallbackLabel, { emitEvent: false });
+      this.utbInputControlOficial.setValue(currentSelectedCodigo, { emitEvent: false });
     } else {
       this.utbInputControl.setValue('');
+      this.utbInputControlOficial.setValue(null, { emitEvent: false });
     }
   }
 
   abrirBuscaChefe() {
-    const utbCodigo = this.form.get('utbCodigo')?.value;
+    const utbCodigo = this.form.getRawValue().utbCodigo;
     if (!utbCodigo) {
       this.toastService.warning('Selecione primeiro uma Unidade de Trabalho (UTB).');
       return;
     }
 
-    const dialogRef = this.dialog.open(BuscaServidorModal, {
-      width: '820px',
-      maxWidth: 'calc(100vw - 2.5rem)',
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      autoFocus: false,
-      data: {
+    const dialogRef = this.modalService.open<BuscaServidorModal, unknown, ServidorUtbItem>(BuscaServidorModal, {width: '820px',
+maxWidth: 'calc(100vw - 2.5rem)',
+autoFocus: false,
+data: {visualSecretariaGeral: true,
         utbCodigo,
         unidadeNome: 'Gerência Regional'
-      }
-    });
+      }});
 
     dialogRef.afterClosed().subscribe((servidor: ServidorUtbItem | undefined) => {
       if (servidor) {
@@ -2739,18 +1960,9 @@ export class GerenciaRegionalForm implements OnInit {
   }
 
   removerChefe() {
-    const dialogRef = this.dialog.open(ConfirmacaoDialog, {
-      disableClose: true,
-      data: {
-        title: 'Remover Chefe Imediato?',
-        message: 'Deseja remover o vínculo da chefia imediata desta Gerência Regional? O Ato Governamental associado também será desvinculado.',
-        cancelLabel: 'Cancelar',
-        actionLabel: 'Sim, remover',
-        actionType: 'destructive'
-      }
-    });
+    const dialogRef = from(this.modalService.confirm({title: 'Remover Chefe Imediato?', description: 'Deseja remover o vínculo da chefia imediata desta Gerência Regional? O Ato Governamental associado também será desvinculado.', cancelLabel: 'Cancelar', confirmLabel: 'Sim, remover', variant: 'destructive'}));
 
-    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
+    dialogRef.subscribe((confirmado: boolean) => {
       if (confirmado) {
         this.chefeImediato.set(undefined);
         this.atoNumeroControl.reset('');
@@ -2769,31 +1981,28 @@ export class GerenciaRegionalForm implements OnInit {
       this.chefeImediato()?.nome
     );
 
-    this.dialog.open(HistoricoAtosModal, {
-      width: '900px',
-      maxWidth: 'calc(100vw - 2.5rem)',
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      autoFocus: false,
-      data: {
+    this.modalService.open(HistoricoAtosModal, {width: '900px',
+maxWidth: 'calc(100vw - 2.5rem)',
+autoFocus: false,
+data: {
         atos
-      }
-    });
+      }});
   }
 
-  onFileAtoSelected(event: Event) {
+  onFileAtoSelected(event: Event | File | null) {
+    if (!event) return;
     if (!this.canAnexarAto()) {
       this.toastService.warning('Preencha os campos obrigatórios do Ato Governamental com valores válidos antes de anexar o documento.');
       return;
     }
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
-    const file = input.files[0];
+    const input = event instanceof File ? null : event.target as HTMLInputElement;
+    const file = event instanceof File ? event : input?.files?.[0];
+    if (!file) return;
 
     // Validação de Tamanho (máx 10 MB)
     if (file.size > 10 * 1024 * 1024) {
       this.toastService.warning('O arquivo excede o limite máximo permitido de 10 MB.');
-      input.value = '';
+      if (input) input.value = '';
       return;
     }
 
@@ -2801,7 +2010,7 @@ export class GerenciaRegionalForm implements OnInit {
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (!['pdf', 'jpg', 'jpeg', 'png'].includes(ext || '')) {
       this.toastService.warning('Formato não suportado. Utilize PDF, JPG, JPEG ou PNG.');
-      input.value = '';
+      if (input) input.value = '';
       return;
     }
 
@@ -2816,7 +2025,7 @@ export class GerenciaRegionalForm implements OnInit {
 
     this.atoDocumento.set(doc);
     this.atoDocInvalido.set(false);
-    input.value = '';
+    if (input) input.value = '';
     this.toastService.success(`Documento "${file.name}" anexado com sucesso.`);
   }
 
@@ -2824,25 +2033,26 @@ export class GerenciaRegionalForm implements OnInit {
     this.atoDocumento.set(undefined);
   }
 
-  onFileNormCriacaoSelected(event: Event) {
+  onFileNormCriacaoSelected(event: Event | File | null) {
+    if (!event) return;
     if (!this.canAnexarNormCriacao()) {
       this.toastService.warning('Preencha os campos obrigatórios da Normativa de Criação com valores válidos antes de anexar o documento.');
       return;
     }
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
-    const file = input.files[0];
+    const input = event instanceof File ? null : event.target as HTMLInputElement;
+    const file = event instanceof File ? event : input?.files?.[0];
+    if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
       this.toastService.warning('O arquivo excede o limite máximo permitido de 10 MB.');
-      input.value = '';
+      if (input) input.value = '';
       return;
     }
 
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (!['pdf', 'jpg', 'jpeg', 'png'].includes(ext || '')) {
       this.toastService.warning('Formato não suportado. Utilize PDF, JPG, JPEG ou PNG.');
-      input.value = '';
+      if (input) input.value = '';
       return;
     }
 
@@ -2857,7 +2067,7 @@ export class GerenciaRegionalForm implements OnInit {
 
     this.normCriacaoDoc.set(doc);
     this.normCriacaoDocInvalido.set(false);
-    input.value = '';
+    if (input) input.value = '';
     this.toastService.success(`Normativa de Criação "${file.name}" anexada com sucesso.`);
   }
 
@@ -2943,25 +2153,26 @@ export class GerenciaRegionalForm implements OnInit {
     this.toastService.success('Normativa de Extinção adicionada com sucesso.');
   }
 
-  onFileNormExtincaoSelected(event: Event) {
+  onFileNormExtincaoSelected(event: Event | File | null) {
+    if (!event) return;
     if (!this.canAnexarNormExtincao()) {
       this.toastService.warning('Preencha os campos obrigatórios da Normativa de Extinção com valores válidos antes de anexar o documento.');
       return;
     }
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
-    const file = input.files[0];
+    const input = event instanceof File ? null : event.target as HTMLInputElement;
+    const file = event instanceof File ? event : input?.files?.[0];
+    if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
       this.toastService.warning('O arquivo excede o limite máximo permitido de 10 MB.');
-      input.value = '';
+      if (input) input.value = '';
       return;
     }
 
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (!['pdf', 'jpg', 'jpeg', 'png'].includes(ext || '')) {
       this.toastService.warning('Formato não suportado. Utilize PDF, JPG, JPEG ou PNG.');
-      input.value = '';
+      if (input) input.value = '';
       return;
     }
 
@@ -2976,7 +2187,7 @@ export class GerenciaRegionalForm implements OnInit {
 
     this.normExtincaoDoc.set(doc);
     this.normExtincaoDocInvalido.set(false);
-    input.value = '';
+    if (input) input.value = '';
     this.toastService.success(`Normativa de Extinção "${file.name}" anexada com sucesso.`);
   }
 
@@ -2985,19 +2196,14 @@ export class GerenciaRegionalForm implements OnInit {
   }
 
   visualizarDoc(doc: DocumentoAnexo, tipo?: string) {
-    this.dialog.open(VisualizarDocumentoModal, {
-      disableClose: true,
-      width: '780px',
-      maxWidth: 'calc(100vw - 2.5rem)',
-      height: '620px',
-      maxHeight: '82vh',
-      panelClass: 'siage-pdf-dialog-panel',
-      data: {
+    this.modalService.open(VisualizarDocumentoModal, {disableClose: true,
+width: '780px',
+maxWidth: 'calc(100vw - 2.5rem)',
+data: {
         documento: doc,
         titulo: 'Visualizar anexo',
         tipoDocumento: tipo
-      }
-    });
+      }});
   }
 
   baixarDoc(doc: DocumentoAnexo) {
@@ -3005,6 +2211,17 @@ export class GerenciaRegionalForm implements OnInit {
   }
 
   // Métodos de Subordinadas (Núcleos e Escolas) no modo edição
+  readonly filtroSubUtbTexto = signal('');
+
+  onSubUtbInput(event: Event) {
+    const target = event.target as HTMLInputElement | null;
+    this.filtroSubUtbTexto.set(target?.value ?? '');
+  }
+
+  onSubUtbSelectionChange(selection: SAutocompleteSelection | null) {
+    this.filtroSubUtbTexto.set(selection?.label ?? '');
+  }
+
   readonly filteredSubUtbsList = computed(() => {
     const list = this.subordinadasOriginais();
     const set = new Set<string>();
@@ -3012,14 +2229,14 @@ export class GerenciaRegionalForm implements OnInit {
       if (item.utb) set.add(item.utb);
     });
     const all = Array.from(set);
-    const query = (this.filtroSubUtbVal() || '').trim().toLowerCase();
+    const query = (this.filtroSubUtbTexto() || this.filtroSubUtbVal() || '').trim().toLowerCase();
     if (!query) return all;
     return all.filter(u => u.toLowerCase().includes(query));
   });
 
   readonly canBuscarSubordinadas = computed(() => {
     const nome = (this.filtroSubNomeVal() || '').trim();
-    const utb = (this.filtroSubUtbVal() || '').trim();
+    const utb = (this.filtroSubUtbVal() || this.filtroSubUtbTexto() || '').trim();
     return nome.length > 0 || utb.length > 0;
   });
 
@@ -3042,8 +2259,8 @@ export class GerenciaRegionalForm implements OnInit {
 
   readonly paginatedSubordinadas = computed(() => {
     const list = this.filteredSubordinadas();
-    const start = this.subordinadasPageIndex() * 10;
-    return list.slice(start, start + 10);
+    const start = this.subordinadasPageIndex() * this.subordinadasPageIndexSize();
+    return list.slice(start, start + this.subordinadasPageIndexSize());
   });
 
   toggleSortSubordinadas() {
@@ -3053,13 +2270,14 @@ export class GerenciaRegionalForm implements OnInit {
 
   onBuscarSubordinadas() {
     this.appliedSubordinadaNome.set((this.filtroSubordinadaNome.value || '').trim());
-    this.appliedSubordinadaUtb.set((this.filtroSubordinadaUtb.value || '').trim());
+    this.appliedSubordinadaUtb.set((this.filtroSubordinadaUtb.value || this.filtroSubUtbTexto() || '').trim());
     this.subordinadasPageIndex.set(0);
   }
 
   onLimparSubordinadas() {
     this.filtroSubordinadaNome.setValue('');
     this.filtroSubordinadaUtb.setValue('');
+    this.filtroSubUtbTexto.set('');
     this.appliedSubordinadaNome.set('');
     this.appliedSubordinadaUtb.set('');
     this.subordinadasPageIndex.set(0);
@@ -3071,6 +2289,7 @@ export class GerenciaRegionalForm implements OnInit {
 
   limparFiltroSubUtb() {
     this.filtroSubordinadaUtb.setValue('');
+    this.filtroSubUtbTexto.set('');
   }
 
   onSubordinadasPageChange(newPageIndex: number) {
@@ -3099,8 +2318,8 @@ export class GerenciaRegionalForm implements OnInit {
       return;
     }
 
-    const dialogRef = this.modalService.confirmarCancelamento();
-    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
+    const dialogRef = from(this.modalService.confirm({title: 'Tem certeza que deseja cancelar?', description: 'As alterações não salvas serão perdidas.', confirmLabel: 'Sim, cancelar', cancelLabel: 'Não', variant: 'default'}));
+    dialogRef.subscribe((confirmado: boolean) => {
       if (confirmado) {
         this.isDiscarded = true;
         this.goBack();
@@ -3114,7 +2333,7 @@ export class GerenciaRegionalForm implements OnInit {
       if (idPrimeiroInvalido) {
         const target = document.getElementById(idPrimeiroInvalido);
         if (target) {
-          el = target.querySelector('input') || target;
+          el = target.querySelector('input:not([type="file"]), button, [tabindex="0"]') || target;
         }
       }
       if (!el) {
@@ -3189,7 +2408,7 @@ export class GerenciaRegionalForm implements OnInit {
     // 1. Identificação: Nome, Secretaria Geral e UTB
     const nome = (this.form.get('nome')?.value || '').trim();
     const secGeralId = (this.form.get('secretariaGeralId')?.value || '').trim();
-    const utbCodigo = this.form.get('utbCodigo')?.value;
+    const utbCodigo = this.form.getRawValue().utbCodigo;
 
     if (!nome) {
       this.form.get('nome')?.setErrors({ required: true });
@@ -3217,11 +2436,17 @@ export class GerenciaRegionalForm implements OnInit {
       this.form.get('utbCodigo')?.markAsTouched();
       this.utbInputControl.setErrors({ required: true });
       this.utbInputControl.markAsTouched();
+      this.utbInputControlOficial.setErrors({ required: true });
+      this.utbInputControlOficial.markAsTouched();
       hasError = true;
       if (!firstInvalidId) firstInvalidId = 'form-utb';
     } else if (this.service.isUtbEmUso(utbCodigo, this.itemId || undefined)) {
+      this.form.get('utbCodigo')?.setErrors({ emUso: true });
+      this.form.get('utbCodigo')?.markAsTouched();
       this.utbInputControl.setErrors({ emUso: true });
       this.utbInputControl.markAsTouched();
+      this.utbInputControlOficial.setErrors({ emUso: true });
+      this.utbInputControlOficial.markAsTouched();
       hasError = true;
       if (!firstInvalidId) firstInvalidId = 'form-utb';
     }
@@ -3423,107 +2648,51 @@ export class GerenciaRegionalForm implements OnInit {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTableModule,
-    MatTooltipModule,
-    MatAutocompleteModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatDialogModule,
-    SiagePaginatorComponent,
-    AcessoRestritoComponent
+    AcessoRestritoComponent,
+    SFieldComponent,
+    SInputComponent,
+    SIconButtonComponent,
+    SAutocompleteComponent,
+    SIconComponent,
+    STooltipDirective,
+    SButtonComponent,
+    SFileUploadComponent,
+    STableComponent,
+    STableCellDirective
+  ,
+    SPageHeaderComponent
   ],
+  styles: [`
+    :host .sg-anexo-com-arquivo {
+      flex-wrap: nowrap;
+      gap: var(--space-8, 8px);
+      min-height: var(--s-field-h, var(--field-h, 48px));
+      padding: 0 var(--space-4, 4px) 0 var(--field-px, 16px);
+      background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+      border-radius: var(--radius-control, 8px);
+    }
+    :host .sg-anexo-com-arquivo > s-file-upload,
+    :host ::ng-deep .sg-anexo-com-arquivo .s-file-upload__arquivo {
+      display: contents;
+    }
+    :host ::ng-deep .sg-anexo-com-arquivo .s-file-upload__icone,
+    :host ::ng-deep .sg-anexo-com-arquivo .s-file-upload__nome,
+    :host ::ng-deep .sg-anexo-com-arquivo .s-file-upload__tamanho {
+      order: -1;
+    }
+  `],
   template: `
     @if (!permissionService.hasAccess()) {
       <app-acesso-restrito backUrl="/configuracoes/hierarquia/gerencia-regional" />
     } @else {
       <div class="flex flex-col gap-6 max-w-7xl mx-auto w-full font-sans pb-16">
         <!-- Breadcrumb e Cabeçalho Principal -->
-        <div class="flex flex-col gap-2">
-          <nav class="flex items-center gap-2 text-xs text-siage-text-secondary" aria-label="Navegação estrutural">
-            <span 
-              (click)="goHome()" 
-              (keydown.enter)="goHome()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Início
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goConfiguracoes()" 
-              (keydown.enter)="goConfiguracoes()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurações
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goHierarquia()" 
-              (keydown.enter)="goHierarquia()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Hierarquia de Unidades e Cargos
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goBack()" 
-              (keydown.enter)="goBack()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurar Gerência Regional
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span class="text-siage-primary font-semibold" aria-current="page">Visualizar</span>
-          </nav>
-
-          <!-- Título com Botão Voltar e Botão Editar -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <button 
-                  mat-icon-button 
-                  type="button"
-                  (click)="goBack()" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                  title="Voltar para a listagem"
-                  aria-label="Voltar para a listagem"
-                >
-                  <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-                </button>
-                <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                  Visualizar Gerência Regional
-                </h1>
-              </div>
-
-              <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-2xl">
-                Consulte as informações, dados de chefia, normativas e núcleos e escolas vinculados da Gerência Regional.
-              </p>
-            </div>
-
-            <!-- Ação Editar (somente se ativo e com permissão) -->
-            @if (permissionService.canCreate() && item()?.status === 'ATIVO') {
-              <div class="shrink-0 pl-8 sm:pl-0">
-                <button 
-                  type="button" 
-                  (click)="onEditar()"
-                  class="inline-flex items-center justify-center gap-2 h-10 px-5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                >
-                  <mat-icon style="font-size: 18px; width: 18px; height: 18px;">edit</mat-icon>
-                  <span>Editar</span>
-                </button>
-              </div>
-            }
-          </div>
-        </div>
+        <s-page-header [breadcrumbs]="[{label: 'Início', routerLink: '/inicio'}, {label: 'Configurações', routerLink: '/configuracoes'}, {label: 'Hierarquia de Unidades e Cargos', routerLink: '/configuracoes/hierarquia'}, {label: 'Configurar Gerência Regional', routerLink: '/configuracoes/hierarquia/gerencia-regional'}, {label: 'Visualizar'}]"
+        title="Visualizar Gerência Regional" description="Consulte as informações, dados de chefia, normativas e núcleos e escolas vinculados da Gerência Regional."
+        showBack (back)="goBack()">
+        @if (permissionService.canCreate() && item()?.status === 'ATIVO') {<s-button action icon="edit" (click)="onEditar()">Editar</s-button>}
+      </s-page-header>
 
         @if (item(); as gr) {
           <div class="flex flex-col gap-6">
@@ -3531,7 +2700,7 @@ export class GerenciaRegionalForm implements OnInit {
             <!-- Card 1: Identificação da Gerência Regional -->
             <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
               <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">domain</mat-icon>
+                <s-icon name="domain" size="xs"  />
                 <span>1. Identificação da Gerência Regional</span>
               </h3>
 
@@ -3573,7 +2742,7 @@ export class GerenciaRegionalForm implements OnInit {
             <!-- Card 2: Chefia Imediata e Ato Governamental -->
             <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
               <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">badge</mat-icon>
+                <s-icon name="badge" size="xs"  />
                 <span>2. Chefia Imediata e Ato Governamental</span>
               </h3>
 
@@ -3615,21 +2784,16 @@ export class GerenciaRegionalForm implements OnInit {
                   <div class="mt-2 pt-4 border-t border-siage-border/40 flex flex-col gap-4">
                     <div class="flex items-center justify-between gap-2 flex-wrap">
                       <div class="flex items-center gap-2">
-                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;" class="text-siage-primary">description</mat-icon>
+                        <s-icon name="description" size="xs" class="text-siage-primary" />
                         <span class="text-xs font-poppins font-bold uppercase tracking-wider text-siage-primary">
                           Ato Governamental de Nomeação
                         </span>
                       </div>
 
-                      <button 
-                        type="button" 
-                        (click)="abrirHistoricoAtos()"
-                        class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-siage-border bg-siage-surface hover:bg-black/5 dark:hover:bg-white/5 text-xs font-medium text-siage-text-primary transition-colors cursor-pointer"
-                        title="Consultar histórico de atos governamentais"
-                      >
-                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;" class="text-siage-text-secondary">history</mat-icon>
+                      <s-button type="button" (click)="abrirHistoricoAtos()" title="Consultar histórico de atos governamentais" icon="history" variant="secondary" outlined>
+
                         <span>Consultar histórico</span>
-                      </button>
+                      </s-button>
                     </div>
 
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -3645,36 +2809,9 @@ export class GerenciaRegionalForm implements OnInit {
 
                     <!-- Anexo do Documento com Visualizar e Baixar -->
                     @if (chefe.atoGovernamental.documento; as doc) {
-                      <div class="border border-siage-border rounded-lg overflow-hidden bg-siage-surface">
-                        <div class="flex items-center justify-between p-3.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                          <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded bg-siage-primary/10 text-siage-primary flex items-center justify-center shrink-0">
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">description</mat-icon>
-                            </div>
-                            <div class="flex flex-col">
-                              <span class="text-xs sm:text-sm font-medium text-siage-text-primary">{{ doc.nomeArquivo }}</span>
-                              <span class="text-[11px] text-siage-text-secondary">{{ doc.tamanho }} • Enviado em {{ doc.dataUpload }}</span>
-                            </div>
-                          </div>
-                          <div class="flex items-center gap-1">
-                            <button 
-                              type="button" 
-                              (click)="visualizarDoc(doc, 'Ato Governamental')" 
-                              matTooltip="Visualizar anexo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                            </button>
-                            <button 
-                              type="button" 
-                              (click)="baixarDoc(doc)" 
-                              matTooltip="Baixar arquivo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-                            </button>
-                          </div>
-                        </div>
+                      <div class="sg-anexo-com-arquivo flex items-center gap-2">
+                        <s-icon-button icon="visibility" type="button" (click)="visualizarDoc(doc, 'Ato Governamental')" sTooltip="Visualizar anexo" label="Visualizar anexo" text size="sm" variant="info" />
+                      <s-file-upload appearance="button" [fileName]="doc.nomeArquivo" [fileId]="doc.id" [allowDownload]="true" [allowRemove]="false" (download)="baixarDoc(doc)" />
                       </div>
                     }
                   </div>
@@ -3682,15 +2819,10 @@ export class GerenciaRegionalForm implements OnInit {
               } @else {
                 <div class="py-6 text-center text-xs text-siage-text-secondary border border-dashed border-siage-border rounded-lg flex flex-col items-center justify-center gap-3">
                   <span>Nenhum Chefe Imediato vinculado no momento.</span>
-                  <button 
-                    type="button" 
-                    (click)="abrirHistoricoAtos()"
-                    class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-siage-border bg-siage-surface hover:bg-black/5 dark:hover:bg-white/5 text-xs font-medium text-siage-text-primary transition-colors cursor-pointer"
-                    title="Consultar histórico de atos governamentais"
-                  >
-                    <mat-icon style="font-size: 16px; width: 16px; height: 16px;" class="text-siage-text-secondary">history</mat-icon>
+                  <s-button type="button" (click)="abrirHistoricoAtos()" title="Consultar histórico de atos governamentais" icon="history" variant="secondary" outlined>
+
                     <span>Consultar histórico</span>
-                  </button>
+                  </s-button>
                 </div>
               }
             </div>
@@ -3698,7 +2830,7 @@ export class GerenciaRegionalForm implements OnInit {
             <!-- Card 3: Núcleos e Escolas Vinculados -->
             <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
               <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">account_tree</mat-icon>
+                <s-icon name="account_tree" size="xs"  />
                 <span>3. Núcleos e Escolas Vinculados</span>
               </h3>
 
@@ -3709,146 +2841,60 @@ export class GerenciaRegionalForm implements OnInit {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                   <!-- Filtro: Nome -->
                   <div class="form-field-group">
-                    <label for="view-filtro-sub-nome" class="siage-field-label">Nome</label>
-                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                      <input 
-                        matInput 
-                        id="view-filtro-sub-nome" 
-                        type="text"
-                        [formControl]="filtroNome" 
-                        maxlength="200"
-                        placeholder="Digite o nome"
-                        (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
-                        class="text-sm"
-                      />
-                      @if (filtroNomeVal()) {
-                        <button mat-icon-button matSuffix type="button" (click)="limparFiltroNome()" aria-label="Limpar campo">
-                          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                        </button>
-                      }
-                    </mat-form-field>
+
+                    <s-field label="Nome" controlId="view-filtro-sub-nome"><s-input type="text" [formControl]="filtroNome" [maxlength]="200" placeholder="Digite o nome" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" (focusout)="filtroNome.markAsTouched(); " />
+@if (filtroNome.value) { <s-icon-button icon="close" label="Limpar campo" text size="sm" (click)="limparFiltroNome()" /> }</s-field>
                   </div>
 
                   <!-- Filtro: Unidade de Trabalho (UTB) (Select com autocomplete contendo somente UTBs das subordinadas vinculadas) -->
                   <div class="form-field-group">
-                    <label for="view-filtro-sub-utb" class="siage-field-label">Unidade de Trabalho (UTB)</label>
-                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                      <input 
-                        matInput 
-                        id="view-filtro-sub-utb" 
-                        type="text"
-                        [formControl]="filtroUtb" 
-                        placeholder="Selecione ou busque uma unidade de trabalho"
-                        [matAutocomplete]="autoUtbView"
-                        #autoUtbViewTrigger="matAutocompleteTrigger"
-                        (focus)="autoUtbViewTrigger.openPanel()"
-                        (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
-                        class="text-sm"
-                      />
-                      <mat-autocomplete #autoUtbView="matAutocomplete">
-                        @for (utb of filteredUtbOptions(); track utb) {
-                          <mat-option [value]="utb">
-                            {{ utb }}
-                          </mat-option>
-                        }
-                      </mat-autocomplete>
-                      @if (filtroUtbVal()) {
-                        <button mat-icon-button matSuffix type="button" (click)="limparFiltroUtb()" aria-label="Limpar campo">
-                          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                        </button>
-                      } @else {
-                        <button mat-icon-button matSuffix type="button" (click)="autoUtbViewTrigger.openPanel()" aria-label="Abrir opções">
-                          <mat-icon class="text-siage-text-secondary">arrow_drop_down</mat-icon>
-                        </button>
-                      }
-                    </mat-form-field>
+
+                    <s-field label="Unidade de Trabalho (UTB)" controlId="view-filtro-sub-utb"><s-autocomplete [formControl]="filtroUtb" placeholder="Selecione ou busque uma unidade de trabalho" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" [options]="opcoesview_filtro_sub_utb()" (input)="onUtbInput($event)" (selectionChange)="onUtbSelectionChange($event)" (focusout)="filtroUtb.markAsTouched()" /></s-field>
                   </div>
                 </div>
 
                 <!-- Botões Buscar e Limpar -->
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-siage-border/40">
-                  <button 
-                    type="button" 
-                    (click)="onLimpar()"
-                    class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-siage-primary/5 hover:border-siage-primary/30 active:scale-[0.99] transition-all cursor-pointer"
-                  >
+                  <s-button type="button" (click)="onLimpar()"  variant="primary" >
                     Limpar
-                  </button>
+                  </s-button>
                   
-                  <button 
-                    type="button" 
-                    (click)="canBuscar() && onBuscar()"
-                    [disabled]="!canBuscar()"
-                    [matTooltip]="!canBuscar() ? 'Informe o Nome ou a Unidade de Trabalho (UTB) para realizar a busca' : 'Executar busca'"
-                    class="inline-flex items-center justify-center gap-1.5 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-siage-primary"
-                  >
-                    <mat-icon style="font-size: 18px; width: 18px; height: 18px;">search</mat-icon>
+                  <s-button type="button" (click)="canBuscar() &amp;&amp; onBuscar()" [disabled]="!canBuscar()" [sTooltip]="!canBuscar() ? 'Informe o Nome ou a Unidade de Trabalho (UTB) para realizar a busca' : 'Executar busca'" icon="search" variant="primary" >
+
                     <span>Buscar</span>
-                  </button>
+                  </s-button>
                 </div>
               </div>
 
               <!-- Tabela de Núcleos e Escolas Vinculados -->
               <div class="border border-siage-border rounded-lg overflow-hidden bg-siage-surface">
-                <table class="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr class="bg-slate-100/70 dark:bg-slate-800/50 border-b border-siage-border text-siage-text-secondary font-semibold">
-                      <th class="p-3">
-                        <button 
-                          type="button" 
-                          (click)="toggleSortSubordinadas()"
-                          class="inline-flex items-center gap-1.5 hover:text-siage-primary transition-colors cursor-pointer group"
-                        >
-                          <span>Tipo / Unidade Vinculada</span>
-                          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">
-                            {{ sortSubDirection() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                          </mat-icon>
-                        </button>
-                      </th>
-                      <th class="p-3">Chefia Imediata</th>
-                      <th class="p-3">Unidade de Trabalho (UTB)</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-siage-border/40">
-                    @for (sub of paginatedSubordinadas(); track sub.id) {
-                      <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                        <td class="p-3 font-medium text-siage-text-primary">
-                          <span class="text-[10px] uppercase font-bold text-siage-primary block">{{ sub.tipo }}</span>
-                          <span class="text-sm font-medium">{{ sub.nome }}</span>
-                        </td>
-                        <td class="p-3 text-sm text-siage-text-secondary">{{ sub.chefiaImediata }}</td>
-                        <td class="p-3 text-sm text-siage-text-secondary">{{ sub.utb }}</td>
-                      </tr>
-                    } @empty {
-                      <tr>
-                        <td colspan="3" class="p-6 text-center text-xs text-siage-text-secondary">
-                          Nenhum vínculo foi encontrado.
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
+                <s-table label="Unidades vinculadas" [columns]="colunasVinculos" [rows]="paginatedSubordinadas()"
+      [empty]="{variant: 'no-results', title: 'Nenhum vínculo foi encontrado.', description: '', actionLabel: ''}"
+      [page]="pageIndex() + 1" [pageSize]="pageIndexSize()" [total]="filteredSubordinadas().length"
+      (pageChange)="pageIndex.set($event - 1)" (pageSizeChange)="pageIndexSize.set($event); pageIndex.set(0)" (sortChange)="toggleSortSubordinadas()">
+      <ng-template sTableCell="nome" let-sub>
+                          <span class="text-[10px] uppercase font-bold text-siage-primary block">{{ sub['tipo'] }}</span>
+                          <span class="text-sm font-medium">{{ sub['nome'] }}</span>
+                        </ng-template>
+<ng-template sTableCell="chefiaImediata" let-sub>{{ sub['chefiaImediata'] }}</ng-template>
+<ng-template sTableCell="utb" let-sub>{{ sub['utb'] }}</ng-template>
+    </s-table>
 
-                <app-siage-paginator 
-                  [length]="filteredSubordinadas().length"
-                  [pageIndex]="pageIndex()"
-                  [pageSize]="10"
-                  (page)="onPageChange($event.pageIndex)"
-                />
+
               </div>
             </div>
 
             <!-- Card 4: Gestão de Normativas -->
             <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-6">
               <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">gavel</mat-icon>
+                <s-icon name="gavel" size="xs"  />
                 <span>4. Gestão de Normativas</span>
               </h3>
 
               <!-- BLOCO 1: NORMATIVA DE CRIAÇÃO -->
               <div class="flex flex-col gap-4">
                 <div class="flex items-center gap-2">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;" class="text-emerald-600">verified</mat-icon>
+                  <s-icon name="verified" size="xs" class="text-emerald-600" />
                   <span class="text-xs font-poppins font-bold uppercase tracking-wider text-siage-text-primary">
                     Normativa de Criação
                   </span>
@@ -3869,35 +2915,10 @@ export class GerenciaRegionalForm implements OnInit {
                   </div>
 
                   @if (gr.normativaCriacao.documento; as doc) {
-                    <div class="col-span-12 border border-siage-border rounded-lg overflow-hidden bg-siage-surface mt-2">
-                      <div class="flex items-center justify-between p-3.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                        <div class="flex items-center gap-3">
-                          <div class="w-8 h-8 rounded bg-siage-primary/10 text-siage-primary flex items-center justify-center shrink-0">
-                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">description</mat-icon>
-                          </div>
-                          <div class="flex flex-col">
-                            <span class="text-xs sm:text-sm font-medium text-siage-text-primary">{{ doc.nomeArquivo }}</span>
-                            <span class="text-[11px] text-siage-text-secondary">{{ doc.tamanho }} • Enviado em {{ doc.dataUpload }}</span>
-                          </div>
-                        </div>
-                        <div class="flex items-center gap-1">
-                          <button 
-                            type="button" 
-                            (click)="visualizarDoc(doc, 'Normativa de Criação')" 
-                            matTooltip="Visualizar anexo" 
-                            class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                          >
-                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                          </button>
-                          <button 
-                            type="button" 
-                            (click)="baixarDoc(doc)" 
-                            matTooltip="Baixar arquivo" 
-                            class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                          >
-                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-                          </button>
-                        </div>
+                    <div class="col-span-12">
+                      <div class="sg-anexo-com-arquivo flex items-center gap-2">
+                        <s-icon-button icon="visibility" type="button" (click)="visualizarDoc(doc, 'Normativa de Criação')" sTooltip="Visualizar anexo" label="Visualizar anexo" text size="sm" variant="info" />
+                      <s-file-upload appearance="button" [fileName]="doc.nomeArquivo" [fileId]="doc.id" [allowDownload]="true" [allowRemove]="false" (download)="baixarDoc(doc)" />
                       </div>
                     </div>
                   }
@@ -3908,7 +2929,7 @@ export class GerenciaRegionalForm implements OnInit {
               @if (gr.normativaExtincao && gr.normativaExtincao.documento) {
                 <div class="pt-4 border-t border-siage-border/40 flex flex-col gap-4">
                   <div class="flex items-center gap-2">
-                    <mat-icon style="font-size: 16px; width: 16px; height: 16px;" class="text-amber-600">history_edu</mat-icon>
+                    <s-icon name="history_edu" size="xs" class="text-amber-600" />
                     <span class="text-xs font-poppins font-bold uppercase tracking-wider text-siage-text-primary">
                       Normativa de Extinção
                     </span>
@@ -3929,35 +2950,10 @@ export class GerenciaRegionalForm implements OnInit {
                     </div>
 
                     @if (gr.normativaExtincao.documento; as docExt) {
-                      <div class="col-span-12 border border-siage-border rounded-lg overflow-hidden bg-siage-surface mt-2">
-                        <div class="flex items-center justify-between p-3.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                          <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded bg-siage-primary/10 text-siage-primary flex items-center justify-center shrink-0">
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">description</mat-icon>
-                            </div>
-                            <div class="flex flex-col">
-                              <span class="text-xs sm:text-sm font-medium text-siage-text-primary">{{ docExt.nomeArquivo }}</span>
-                              <span class="text-[11px] text-siage-text-secondary">{{ docExt.tamanho }} • Enviado em {{ docExt.dataUpload }}</span>
-                            </div>
-                          </div>
-                          <div class="flex items-center gap-1">
-                            <button 
-                              type="button" 
-                              (click)="visualizarDoc(docExt, 'Normativa de Extinção')" 
-                              matTooltip="Visualizar anexo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                            </button>
-                            <button 
-                              type="button" 
-                              (click)="baixarDoc(docExt)" 
-                              matTooltip="Baixar arquivo" 
-                              class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-                            </button>
-                          </div>
+                      <div class="col-span-12">
+                        <div class="sg-anexo-com-arquivo flex items-center gap-2">
+                          <s-icon-button icon="visibility" type="button" (click)="visualizarDoc(docExt, 'Normativa de Extinção')" sTooltip="Visualizar anexo" label="Visualizar anexo" text size="sm" variant="info" />
+                      <s-file-upload appearance="button" [fileName]="docExt.nomeArquivo" [fileId]="docExt.id" [allowDownload]="true" [allowRemove]="false" (download)="baixarDoc(docExt)" />
                         </div>
                       </div>
                     }
@@ -3972,12 +2968,13 @@ export class GerenciaRegionalForm implements OnInit {
   `
 })
 export class GerenciaRegionalView implements OnInit {
+  private readonly modalService = inject(SModalService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly service = inject(GerenciaRegionalService);
   readonly permissionService = inject(PermissionService);
   private readonly dialog = inject(MatDialog);
-  private readonly toast = inject(ToastService);
+  private readonly toast = inject(SToastService);
 
   readonly item = signal<GerenciaRegionalItem | undefined>(undefined);
 
@@ -3992,6 +2989,31 @@ export class GerenciaRegionalView implements OnInit {
   readonly sortSubDirection = signal<'asc' | 'desc'>('asc');
 
   readonly formatarDataParaExibicao = formatarDataParaExibicao;
+
+    readonly opcoesview_filtro_sub_utb = computed(() => {
+      const subs = this.item()?.subordinadas || [];
+      const set = new Set<string>();
+      subs.forEach(s => {
+        if (s.utb) set.add(s.utb);
+      });
+      return Array.from(set).map(utb => ({label: utb, value: utb}));
+    });
+    readonly pageIndexSize = signal(10);
+  readonly colunasVinculos: readonly STableColumn<GerenciaRegionalItem['subordinadas'][number]>[] = [{key: 'nome', label: 'Tipo / Unidade Vinculada', sortable: true},
+    {key: 'chefiaImediata', label: 'Chefia Imediata'},
+    {key: 'utb', label: 'Unidade de Trabalho (UTB)'}];
+    readonly estadofiltroNome = toSignal(this.filtroNome.valueChanges, {initialValue: this.filtroNome.value});
+  readonly estadofiltroUtb = toSignal(this.filtroUtb.valueChanges, {initialValue: this.filtroUtb.value});
+  readonly filtroUtbTexto = signal('');
+
+  onUtbInput(event: Event) {
+    const target = event.target as HTMLInputElement | null;
+    this.filtroUtbTexto.set(target?.value ?? '');
+  }
+
+  onUtbSelectionChange(selection: SAutocompleteSelection | null) {
+    this.filtroUtbTexto.set(selection?.label ?? '');
+  }
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -4013,14 +3035,14 @@ export class GerenciaRegionalView implements OnInit {
       if (s.utb) set.add(s.utb);
     });
     const all = Array.from(set);
-    const query = (this.filtroUtbVal() || '').trim().toLowerCase();
+    const query = (this.filtroUtbTexto() || this.filtroUtbVal() || '').trim().toLowerCase();
     if (!query) return all;
     return all.filter(u => u.toLowerCase().includes(query));
   });
 
   readonly canBuscar = computed(() => {
     const nome = (this.filtroNomeVal() || '').trim();
-    const utb = (this.filtroUtbVal() || '').trim();
+    const utb = (this.filtroUtbVal() || this.filtroUtbTexto() || '').trim();
     return nome.length > 0 || utb.length > 0;
   });
 
@@ -4043,8 +3065,8 @@ export class GerenciaRegionalView implements OnInit {
 
   readonly paginatedSubordinadas = computed(() => {
     const list = this.filteredSubordinadas();
-    const start = this.pageIndex() * 10;
-    return list.slice(start, start + 10);
+    const start = this.pageIndex() * this.pageIndexSize();
+    return list.slice(start, start + this.pageIndexSize());
   });
 
   toggleSortSubordinadas() {
@@ -4054,13 +3076,14 @@ export class GerenciaRegionalView implements OnInit {
 
   onBuscar() {
     this.appliedNome.set((this.filtroNome.value || '').trim());
-    this.appliedUtb.set((this.filtroUtb.value || '').trim());
+    this.appliedUtb.set((this.filtroUtb.value || this.filtroUtbTexto() || '').trim());
     this.pageIndex.set(0);
   }
 
   onLimpar() {
     this.filtroNome.setValue('');
     this.filtroUtb.setValue('');
+    this.filtroUtbTexto.set('');
     this.appliedNome.set('');
     this.appliedUtb.set('');
     this.pageIndex.set(0);
@@ -4072,6 +3095,7 @@ export class GerenciaRegionalView implements OnInit {
 
   limparFiltroUtb() {
     this.filtroUtb.setValue('');
+    this.filtroUtbTexto.set('');
   }
 
   onPageChange(newIndex: number) {
@@ -4104,30 +3128,21 @@ export class GerenciaRegionalView implements OnInit {
   abrirHistoricoAtos() {
     const gr = this.item();
     const atos = this.service.getHistoricoAtos(gr?.id, gr?.chefeImediato?.atoGovernamental, gr?.chefeImediato?.nome);
-    this.dialog.open(HistoricoAtosModal, {
-      width: '900px',
-      maxWidth: 'calc(100vw - 2.5rem)',
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      autoFocus: false,
-      data: { atos }
-    });
+    this.modalService.open(HistoricoAtosModal, {width: '900px',
+maxWidth: 'calc(100vw - 2.5rem)',
+autoFocus: false,
+data: { atos }});
   }
 
   visualizarDoc(doc: DocumentoAnexo, tipo?: string) {
-    this.dialog.open(VisualizarDocumentoModal, {
-      disableClose: true,
-      width: '780px',
-      maxWidth: 'calc(100vw - 2.5rem)',
-      height: '620px',
-      maxHeight: '82vh',
-      panelClass: 'siage-pdf-dialog-panel',
-      data: {
+    this.modalService.open(VisualizarDocumentoModal, {disableClose: true,
+width: '780px',
+maxWidth: 'calc(100vw - 2.5rem)',
+data: {
         documento: doc,
         titulo: 'Visualizar anexo',
         tipoDocumento: tipo
-      }
-    });
+      }});
   }
 
   baixarDoc(doc: DocumentoAnexo) {
@@ -4144,3 +3159,56 @@ export const gerenciaRegionalFormDeactivateGuard: CanDeactivateFn<GerenciaRegion
 ) => {
   return component.canDeactivate();
 };
+
+class DataFormulario {
+  readonly dateControl = new FormControl<Date | null>(null);
+  private digitada = '';
+  private atualizando = false;
+  private input: HTMLInputElement | null = null;
+
+  constructor(readonly control: FormControl<string | null>) {
+    this.aplicarErros(control.value);
+    control.valueChanges.pipe(takeUntilDestroyed()).subscribe(value => {
+      this.aplicarErros(value);
+      if (this.atualizando) return;
+      const data = normalizarDataParaBr(value || '');
+      const partes = data.split('/').map(Number);
+      this.dateControl.setValue(validarDataFormato(data) ? new Date(partes[2], partes[1] - 1, partes[0]) : null, {emitEvent: false});
+    });
+    this.dateControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(value => {
+      this.atualizando = true;
+      this.control.setValue(value ? value.toLocaleDateString('pt-BR') : this.digitada);
+      this.control.markAsDirty();
+      this.atualizando = false;
+      this.digitada = '';
+    });
+  }
+
+  private aplicarErros(valor: string | null) {
+    const limpo = (valor || '').trim();
+    const erro = !limpo ? {required: true} : !validarDataFormato(limpo) ? {dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.'} : null;
+    this.control.setErrors(erro);
+    this.dateControl.setErrors(erro);
+  }
+
+  onInput(event: Event) {
+    this.input = event.target as HTMLInputElement;
+    this.digitada = this.input.value;
+    this.atualizando = true;
+    this.control.setValue(this.digitada);
+    this.control.markAsDirty();
+    this.atualizando = false;
+  }
+
+  onFocusOut(event: FocusEvent) {
+    this.control.markAsTouched();
+    this.dateControl.markAsTouched();
+    this.aplicarErros(this.control.value);
+    if (event.target instanceof HTMLInputElement) {
+      this.input = event.target;
+      if (this.control.value && !validarDataFormato(this.control.value)) {
+        this.input.value = this.control.value;
+      }
+    }
+  }
+}
