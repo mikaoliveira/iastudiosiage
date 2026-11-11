@@ -11,22 +11,40 @@ import {Router, ActivatedRoute, CanDeactivateFn} from '@angular/router';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {toSignal} from '@angular/core/rxjs-interop';
+import {from} from 'rxjs';
 
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatTableModule} from '@angular/material/table';
-import {MatDialogModule, MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatSelectModule} from '@angular/material/select';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
-import {MatRadioModule} from '@angular/material/radio';
-import {MatCheckboxModule} from '@angular/material/checkbox';
+import {
+  SAutocompleteComponent,
+  SAutocompleteOption,
+  SAutocompleteSelection,
+  SBadgeComponent,
+  SButtonComponent,
+  SCheckboxComponent,
+  SFieldComponent,
+  SFilterCardComponent,
+  SIconComponent,
+  SInputComponent,
+  SModalComponent,
+  SModalFooterDirective,
+  SModalService,
+  SPageHeaderComponent,
+  SSelectComponent,
+  STableAction,
+  STableActionEvent,
+  STableCellDirective,
+  STableColumn,
+  STableComponent,
+  STableEmpty,
+  STextareaComponent,
+  SToastService,
+  STooltipDirective,
+  injectModalData,
+  injectModalRef,
+  type SBreadcrumb,
+  type SOption,
+  type STableSort
+} from '@siage/siage-ui';
 
-import {SiagePaginatorComponent} from './siage-paginator';
-import {ConfirmacaoDialog, ModalService} from './dialog';
-import {ToastService} from './toast';
 import {PermissionService} from './permission';
 import {AcessoRestritoComponent} from './acesso-restrito';
 import {SecretariaGeralService} from './secretaria-geral';
@@ -818,31 +836,23 @@ export class ExcecaoHierarquiaService {
 @Component({
   selector: 'app-detalhes-excecao-modal',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatDialogModule],
+  imports: [
+    CommonModule,
+    SModalComponent,
+    SModalFooterDirective,
+    SBadgeComponent,
+    SButtonComponent
+  ],
   template: `
-    <div 
-      class="relative w-[calc(100vw-2rem)] sm:w-[600px] max-w-full bg-siage-surface text-siage-text-primary rounded-lg border border-siage-border shadow-[var(--mat-sys-level3)] font-sans flex flex-col text-left box-border max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-full max-sm:rounded-b-none max-sm:rounded-t-2xl"
-      role="dialog"
-      aria-labelledby="detalhes-excecao-title"
+    <s-modal
+      title="Detalhes do Registro de Exceção"
+      description="Consulte os dados completos e o histórico de auditoria desta exceção."
+      width="600px"
+      [closable]="true"
+      (cancel)="fechar()"
+      (closed)="fechar()"
     >
-      <!-- Cabeçalho -->
-      <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b border-siage-border/40 shrink-0">
-        <h2 id="detalhes-excecao-title" class="text-base sm:text-lg font-poppins font-bold text-siage-text-primary tracking-tight leading-snug truncate pr-3 text-left">
-          Detalhes do Registro de Exceção
-        </h2>
-        <button 
-          type="button" 
-          (click)="fechar()" 
-          class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-lg flex items-center justify-center text-siage-text-secondary hover:text-siage-text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-          title="Fechar"
-          aria-label="Fechar modal"
-        >
-          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">close</mat-icon>
-        </button>
-      </div>
-
-      <!-- Conteúdo com dados completos e auditoria -->
-      <div class="px-5 py-4 overflow-y-auto max-h-[70vh] flex flex-col gap-4 font-sans text-left">
+      <div class="flex flex-col gap-4 font-sans text-left">
         <!-- Identificação do Aprovador -->
         <div class="border border-siage-border rounded-lg p-3.5 bg-slate-50/50 dark:bg-slate-800/30 flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-siage-primary/10 text-siage-primary flex items-center justify-center font-bold font-poppins shrink-0">
@@ -866,17 +876,11 @@ export class ExcecaoHierarquiaService {
             <span class="text-xs uppercase text-siage-text-secondary font-semibold">Situação do Registro</span>
             <div>
               @if (data.registro.situacao === 'ATIVO') {
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
-                  Ativo
-                </span>
+                <s-badge tone="success">Ativo</s-badge>
               } @else if (data.registro.situacao === 'SUBSTITUIDO') {
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-700 dark:text-slate-300 border border-slate-500/20">
-                  Substituído
-                </span>
+                <s-badge tone="secondary">Substituído</s-badge>
               } @else {
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
-                  Encerrado
-                </span>
+                <s-badge tone="warning" icon="history">Encerrado</s-badge>
               }
             </div>
           </div>
@@ -914,22 +918,15 @@ export class ExcecaoHierarquiaService {
         </div>
       </div>
 
-      <!-- Rodapé -->
-      <div class="flex items-center justify-end px-5 py-3.5 border-t border-siage-border/40 shrink-0 bg-siage-surface">
-        <button 
-          type="button" 
-          (click)="fechar()" 
-          class="h-10 px-5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-        >
-          Fechar
-        </button>
+      <div sModalFooter>
+        <s-button variant="primary" (click)="fechar()">Fechar</s-button>
       </div>
-    </div>
+    </s-modal>
   `
 })
 export class DetalhesExcecaoModal {
-  readonly dialogRef = inject(MatDialogRef<DetalhesExcecaoModal>);
-  readonly data = inject<{registro: RegistroHistoricoExcecao}>(MAT_DIALOG_DATA);
+  readonly dialogRef = injectModalRef<void, DetalhesExcecaoModal>();
+  readonly data = injectModalData<{registro: RegistroHistoricoExcecao}>();
 
   fechar() {
     this.dialogRef.close();
@@ -946,15 +943,15 @@ export class DetalhesExcecaoModal {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTableModule,
-    MatTooltipModule,
-    MatSelectModule,
-    MatAutocompleteModule,
-    SiagePaginatorComponent,
+    SPageHeaderComponent,
+    SFilterCardComponent,
+    SFieldComponent,
+    SInputComponent,
+    SSelectComponent,
+    STableComponent,
+    STableCellDirective,
+    SBadgeComponent,
+    STooltipDirective,
     AcessoRestritoComponent
   ],
   template: `
@@ -962,359 +959,168 @@ export class DetalhesExcecaoModal {
       <app-acesso-restrito backUrl="/configuracoes/hierarquia" />
     } @else {
       <div class="flex flex-col gap-6 max-w-7xl mx-auto w-full font-sans pb-12">
-        
-        <!-- Breadcrumb e Cabeçalho Principal -->
-        <div class="flex flex-col gap-2">
-          <!-- Breadcrumb: Início > Configurações > Hierarquia de Unidades e Cargos > Exceção de Hierarquia -->
-          <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-xs text-siage-text-secondary">
-            <span 
-              (click)="goHome()" 
-              (keydown.enter)="goHome()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Início
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goConfiguracoes()" 
-              (keydown.enter)="goConfiguracoes()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurações
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goHierarquia()" 
-              (keydown.enter)="goHierarquia()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Hierarquia de Unidades e Cargos
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span class="text-siage-primary font-semibold" aria-current="page">Exceção de Hierarquia</span>
-          </nav>
+        <!-- Cabeçalho Oficial SIAGE-UI -->
+        <s-page-header
+          [breadcrumbs]="breadcrumbs"
+          title="Exceção de Hierarquia"
+          description="Designação de aprovadores de exceção para fluxos de aprovação quando houver necessidade de sobreposição ou ausência da chefia imediata formal."
+          showBack
+          (back)="goHierarquia()"
+        />
 
-          <!-- Título com Botão Voltar e Descrição (Sem botão Adicionar) -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <button 
-                  mat-icon-button 
-                  type="button" 
-                  (click)="goHierarquia()" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                  title="Voltar para Hierarquia de Unidades e Cargos"
-                  aria-label="Voltar para Hierarquia de Unidades e Cargos"
-                >
-                  <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-                </button>
-                <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                  Exceção de Hierarquia
-                </h1>
-              </div>
+        <!-- Card de Filtros Oficial SIAGE-UI -->
+        <s-filter-card
+          [form]="filtroForm"
+          [showActiveFilters]="false"
+          disableSearchWithoutValue
+          (search)="onBuscar()"
+          (clear)="onLimpar()"
+        >
+          <ng-container [formGroup]="filtroForm">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start w-full">
+              <!-- Filtro 1: Unidade de Trabalho / Setor -->
+              <s-field label="Unidade de Trabalho / Setor" controlId="filter-setor">
+                <s-input
+                  formControlName="setor"
+                  placeholder="Buscar por nome ou código UTB"
+                  (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
+                />
+              </s-field>
 
-              <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-3xl">
-                Designação de aprovadores de exceção para fluxos de aprovação quando houver necessidade de sobreposição ou ausência da chefia imediata formal.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card de Filtros (Padrão exato da Gerência Regional com grid responsivo de campos) -->
-        <div class="bg-siage-surface border border-siage-border rounded-lg p-5 shadow-xs flex flex-col gap-4">
-          <form [formGroup]="filtroForm" (ngSubmit)="onBuscar()" class="flex flex-col gap-4">
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-              
-              <!-- Filtro 1: Unidade de Trabalho / Setor (input de texto simples) -->
-              <div class="form-field-group">
-                <label for="filter-setor" class="siage-field-label">Unidade de Trabalho / Setor</label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="filter-setor"
-                    type="text" 
-                    formControlName="setor" 
-                    placeholder="Buscar por nome ou código UTB" 
-                    (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
-                    class="text-sm"
-                  />
-                  @if (filtroSetorVal()) {
-                    <button mat-icon-button matSuffix type="button" (click)="filtroForm.get('setor')?.setValue('')" aria-label="Limpar campo">
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                    </button>
-                  }
-                </mat-form-field>
-              </div>
-
-              <!-- Filtro 2: Situação (Todos, Regular, Suprido, Descoberto, Necessita Troca) -->
-              <div class="form-field-group">
-                <label for="filter-situacao" class="siage-field-label">Situação</label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select id="filter-situacao" formControlName="situacao">
-                    <mat-option value="TODOS">Todos</mat-option>
-                    <mat-option value="REGULAR">Regular</mat-option>
-                    <mat-option value="SUPRIDO">Suprido</mat-option>
-                    <mat-option value="DESCOBERTO">Descoberto</mat-option>
-                    <mat-option value="NECESSITA_TROCA">Necessita Troca</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
+              <!-- Filtro 2: Situação -->
+              <s-field label="Situação" controlId="filter-situacao">
+                <s-select
+                  formControlName="situacao"
+                  [options]="situacaoOptions"
+                  [clearable]="false"
+                />
+              </s-field>
 
               <!-- Filtro 3: Chefia Imediata (Situação) -->
-              <div class="form-field-group">
-                <label for="filter-chefe-sit" class="siage-field-label">Chefia Imediata (Situação)</label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select id="filter-chefe-sit" formControlName="chefeSituacao">
-                    <mat-option value="TODOS">Todos</mat-option>
-                    <mat-option value="COM_CHEFE_ATIVO">Com Chefe Ativo</mat-option>
-                    <mat-option value="COM_CHEFE_INATIVO">Com Chefe Inativo</mat-option>
-                    <mat-option value="SEM_CHEFE">Sem Chefe Definido</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
+              <s-field label="Chefia Imediata (Situação)" controlId="filter-chefe-sit">
+                <s-select
+                  formControlName="chefeSituacao"
+                  [options]="chefeSituacaoOptions"
+                  [clearable]="false"
+                />
+              </s-field>
 
-              <!-- Filtro 4: Chefia Imediata (Nome) (input de texto simples) -->
-              <div class="form-field-group">
-                <label for="filter-chefe-nome" class="siage-field-label">Chefia Imediata (Nome)</label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="filter-chefe-nome"
-                    type="text" 
-                    formControlName="chefeNome" 
-                    placeholder="Buscar nome do chefe" 
-                    (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
-                    class="text-sm"
-                  />
-                  @if (filtroChefeNomeVal()) {
-                    <button mat-icon-button matSuffix type="button" (click)="filtroForm.get('chefeNome')?.setValue('')" aria-label="Limpar campo">
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                    </button>
-                  }
-                </mat-form-field>
-              </div>
+              <!-- Filtro 4: Chefia Imediata (Nome) -->
+              <s-field label="Chefia Imediata (Nome)" controlId="filter-chefe-nome">
+                <s-input
+                  formControlName="chefeNome"
+                  placeholder="Buscar nome do chefe"
+                  (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
+                />
+              </s-field>
 
               <!-- Filtro 5: Aprovador de Exceção (Situação) -->
-              <div class="form-field-group">
-                <label for="filter-aprov-sit" class="siage-field-label">Aprovador de Exceção (Situação)</label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select id="filter-aprov-sit" formControlName="aprovadorSituacao">
-                    <mat-option value="TODOS">Todos</mat-option>
-                    <mat-option value="COM_APROVADOR">Com Aprovador</mat-option>
-                    <mat-option value="SEM_APROVADOR">Sem Aprovador</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
+              <s-field label="Aprovador de Exceção (Situação)" controlId="filter-aprov-sit">
+                <s-select
+                  formControlName="aprovadorSituacao"
+                  [options]="aprovadorSituacaoOptions"
+                  [clearable]="false"
+                />
+              </s-field>
 
-              <!-- Filtro 6: Aprovador de Exceção (Nome) (input de texto simples) -->
-              <div class="form-field-group">
-                <label for="filter-aprov-nome" class="siage-field-label">Aprovador de Exceção (Nome)</label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="filter-aprov-nome"
-                    type="text" 
-                    formControlName="aprovadorNome" 
-                    placeholder="Buscar nome do aprovador" 
-                    (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
-                    class="text-sm"
-                  />
-                  @if (filtroAprovadorNomeVal()) {
-                    <button mat-icon-button matSuffix type="button" (click)="filtroForm.get('aprovadorNome')?.setValue('')" aria-label="Limpar campo">
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                    </button>
-                  }
-                </mat-form-field>
-              </div>
-
+              <!-- Filtro 6: Aprovador de Exceção (Nome) -->
+              <s-field label="Aprovador de Exceção (Nome)" controlId="filter-aprov-nome">
+                <s-input
+                  formControlName="aprovadorNome"
+                  placeholder="Buscar nome do aprovador"
+                  (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
+                />
+              </s-field>
             </div>
+          </ng-container>
+        </s-filter-card>
 
-            <!-- Botões Limpar e Buscar alinhados à direita -->
-            <div class="flex items-center justify-end gap-3 pt-3 border-t border-siage-border/40">
-              <button 
-                type="button" 
-                (click)="onLimpar()" 
-                class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-siage-primary/5 hover:border-siage-primary/30 active:scale-[0.99] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-              >
-                Limpar
-              </button>
+        <!-- Tabela Oficial SIAGE-UI -->
+        <s-table
+          label="Exceção de Hierarquia"
+          [columns]="tableColumns"
+          [rows]="paginatedSetores()"
+          [actions]="tableActions"
+          [sort]="tableSort()"
+          [page]="pageIndex() + 1"
+          [pageSize]="pageSize()"
+          [total]="filteredSetores().length"
+          [empty]="tableEmpty"
+          (sortChange)="onSortChange($event)"
+          (actionClick)="onTableAction($event)"
+          (pageChange)="onPageChange($event - 1)"
+          (pageSizeChange)="onPageSizeChange($event)"
+        >
+          <ng-template sTableCell="nome" let-setor>
+            @let s = asSetor(setor);
+            <span class="text-[10px] font-bold text-siage-primary uppercase tracking-wider block">
+              {{ s.tipoEntidade }}
+            </span>
+            <span class="text-sm font-semibold text-siage-text-primary block mt-0.5">
+              {{ s.nome }}
+            </span>
+          </ng-template>
 
-              <button 
-                type="submit" 
-                [disabled]="!canBuscar()"
-                [matTooltip]="!canBuscar() ? 'Informe ao menos um critério para realizar a busca' : 'Executar busca'"
-                class="inline-flex items-center justify-center gap-1.5 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-siage-primary"
-              >
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">search</mat-icon>
-                <span>Buscar</span>
-              </button>
-            </div>
+          <ng-template sTableCell="utbCodigo" let-setor>
+            @let s = asSetor(setor);
+            <span class="font-mono font-medium text-siage-text-primary">{{ s.utbCodigo }}</span>
+          </ng-template>
 
-          </form>
-        </div>
-
-        <!-- Tabela de Setores e Exceções -->
-        <div class="border border-siage-border rounded-lg overflow-hidden bg-siage-surface shadow-xs">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr class="bg-slate-100/70 dark:bg-slate-800/50 border-b border-siage-border text-siage-text-secondary font-semibold">
-                  <th class="p-3.5">
-                    <button 
-                      type="button" 
-                      (click)="toggleSort()" 
-                      class="inline-flex items-center gap-1.5 hover:text-siage-primary transition-colors cursor-pointer group"
-                    >
-                      <span>Nome do Setor</span>
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">
-                        {{ sortDirection() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                      </mat-icon>
-                    </button>
-                  </th>
-                  <th class="p-3.5">Unidade de Trabalho</th>
-                  <th class="p-3.5">Chefia Imediata</th>
-                  <th class="p-3.5">Aprovador de Exceção</th>
-                  <th class="p-3.5">Tipo de Atuação</th>
-                  <th class="p-3.5 whitespace-nowrap">Situação</th>
-                  <th class="p-3.5 text-right w-[110px]">Ações</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-siage-border/40">
-                @for (setor of paginatedSetores(); track setor.id) {
-                  @let situacao = getSituacao(setor);
-                  <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                    <!-- 1. Nome do Setor e Tipificação -->
-                    <td class="p-3.5">
-                      <span class="text-[10px] font-bold text-siage-primary uppercase tracking-wider block">
-                        {{ setor.tipoEntidade }}
-                      </span>
-                      <span class="text-sm font-semibold text-siage-text-primary block mt-0.5">
-                        {{ setor.nome }}
-                      </span>
-                    </td>
-
-                    <!-- 2. Unidade de Trabalho (estritamente o código UTB) -->
-                    <td class="p-3.5 text-xs">
-                      <span class="font-mono font-medium text-siage-text-primary">{{ setor.utbCodigo }}</span>
-                    </td>
-
-                    <!-- 3. Chefia Imediata (com distinção ativa/inativa/sem chefe) -->
-                    <td class="p-3.5 text-xs">
-                      @if (setor.chefeImediato; as chefe) {
-                        @let chefeInfo = getChefeStatusInfo(chefe);
-                        <div class="flex items-center gap-1.5 flex-wrap">
-                          <span class="font-medium text-siage-text-primary">{{ chefe.nome }}</span>
-                          @if (chefeInfo.status === 'INATIVO') {
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-500/10 text-slate-700 dark:text-slate-300 border border-slate-500/20 whitespace-nowrap">
-                              Inativo
-                            </span>
-                          }
-                        </div>
-                        <span class="text-siage-text-secondary block">Matrícula: {{ chefe.matricula }}</span>
-                      } @else {
-                        <span class="text-siage-text-secondary/70 italic">Sem Chefe Definido</span>
-                      }
-                    </td>
-
-                    <!-- 4. Aprovador de Exceção -->
-                    <td class="p-3.5 text-xs">
-                      @if (setor.aprovadorVigente) {
-                        <span class="font-medium text-siage-text-primary block">{{ setor.aprovadorVigente.nome }}</span>
-                        <span class="text-siage-text-secondary block">Matrícula: {{ setor.aprovadorVigente.matricula }}</span>
-                      } @else {
-                        <span class="text-siage-text-secondary/70 italic">Sem exceção cadastrada</span>
-                      }
-                    </td>
-
-                    <!-- 5. Tipo de Atuação -->
-                    <td class="p-3.5 text-xs text-siage-text-secondary">
-                      @if (setor.aprovadorVigente) {
-                        @if (setor.aprovadorVigente.modalidade === 'SOBREPOE_SEMPRE') {
-                          <span class="font-medium text-siage-text-primary block">Sempre sobrepõe chefia</span>
-                        } @else {
-                          <span class="font-medium text-siage-text-primary block">Suporte à chefia ausente</span>
-                        }
-                      } @else {
-                        <span class="text-siage-text-secondary/60">—</span>
-                      }
-                    </td>
-
-                    <!-- 6. Situação Calculada com Flags Semânticas Padronizadas (sem quebra de linha) -->
-                    <td class="p-3.5 whitespace-nowrap">
-                      @if (situacao === 'REGULAR') {
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
-                          Regular
-                        </span>
-                      } @else if (situacao === 'SUPRIDO') {
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20 whitespace-nowrap">
-                          Suprido
-                        </span>
-                      } @else if (situacao === 'DESCOBERTO') {
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20 whitespace-nowrap">
-                          Descoberto
-                        </span>
-                      } @else if (situacao === 'NECESSITA_TROCA') {
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 whitespace-nowrap" matTooltip="Aprovador ativo indisponível operacionalmente ou com situação impeditiva">
-                          Necessita Troca
-                        </span>
-                      }
-                    </td>
-
-                    <!-- 7. Ações (Visualizar e Editar/Configurar) -->
-                    <td class="p-3.5 text-right whitespace-nowrap">
-                      <div class="flex items-center justify-end gap-1">
-                        <!-- Visualizar -->
-                        <button 
-                          mat-icon-button 
-                          type="button" 
-                          (click)="onVisualizar(setor)" 
-                          class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer"
-                          matTooltip="Visualizar configuração"
-                          aria-label="Visualizar"
-                        >
-                          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                        </button>
-
-                        <!-- Editar/Configurar -->
-                        <button 
-                          mat-icon-button 
-                          type="button" 
-                          (click)="onConfigurar(setor)" 
-                          class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer"
-                          [matTooltip]="setor.aprovadorVigente ? 'Editar aprovador de exceção' : 'Configurar aprovador de exceção'"
-                          aria-label="Configurar exceção"
-                        >
-                          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">edit</mat-icon>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                } @empty {
-                  <tr>
-                    <td colspan="7" class="p-8 text-center text-xs text-siage-text-secondary">
-                      Nenhum setor encontrado para os filtros selecionados.
-                    </td>
-                  </tr>
+          <ng-template sTableCell="chefeImediato" let-setor>
+            @let s = asSetor(setor);
+            @if (s.chefeImediato; as chefe) {
+              @let chefeInfo = getChefeStatusInfo(chefe);
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-medium text-siage-text-primary">{{ chefe.nome }}</span>
+                @if (chefeInfo.status === 'INATIVO') {
+                  <s-badge tone="secondary">Inativo</s-badge>
                 }
-              </tbody>
-            </table>
-          </div>
+              </div>
+              <span class="text-siage-text-secondary block text-xs">Matrícula: {{ chefe.matricula }}</span>
+            } @else {
+              <span class="text-siage-text-secondary/70 italic text-xs">Sem Chefe Definido</span>
+            }
+          </ng-template>
 
-          <app-siage-paginator 
-            [length]="filteredSetores().length"
-            [pageIndex]="pageIndex()"
-            [pageSize]="10"
-            (page)="onPageChange($event.pageIndex)"
-          />
-        </div>
+          <ng-template sTableCell="aprovadorVigente" let-setor>
+            @let s = asSetor(setor);
+            @if (s.aprovadorVigente; as ap) {
+              <span class="font-medium text-siage-text-primary block">{{ ap.nome }}</span>
+              <span class="text-siage-text-secondary block text-xs">Matrícula: {{ ap.matricula }}</span>
+            } @else {
+              <span class="text-siage-text-secondary/70 italic text-xs">Sem exceção cadastrada</span>
+            }
+          </ng-template>
 
+          <ng-template sTableCell="tipoEntidade" let-setor>
+            @let s = asSetor(setor);
+            @if (s.aprovadorVigente; as ap) {
+              @if (ap.modalidade === 'SOBREPOE_SEMPRE') {
+                <span class="font-medium text-siage-text-primary block text-xs">Sempre sobrepõe chefia</span>
+              } @else {
+                <span class="font-medium text-siage-text-primary block text-xs">Suporte à chefia ausente</span>
+              }
+            } @else {
+              <span class="text-siage-text-secondary/60 text-xs">—</span>
+            }
+          </ng-template>
+
+          <ng-template sTableCell="id" let-setor>
+            @let s = asSetor(setor);
+            @let situacao = getSituacao(s);
+            @if (situacao === 'REGULAR') {
+              <s-badge tone="success">Regular</s-badge>
+            } @else if (situacao === 'SUPRIDO') {
+              <s-badge tone="info">Suprido</s-badge>
+            } @else if (situacao === 'DESCOBERTO') {
+              <s-badge tone="destructive" icon="error">Descoberto</s-badge>
+            } @else if (situacao === 'NECESSITA_TROCA') {
+              <s-badge tone="warning" icon="warning" sTooltip="Aprovador ativo indisponível operacionalmente ou com situação impeditiva">
+                Necessita Troca
+              </s-badge>
+            }
+          </ng-template>
+        </s-table>
       </div>
     }
   `
@@ -1324,7 +1130,15 @@ export class ExcecaoHierarquiaList {
   readonly service = inject(ExcecaoHierarquiaService);
   readonly permissionService = inject(PermissionService);
 
+  readonly breadcrumbs: readonly SBreadcrumb[] = [
+    { label: 'Início', routerLink: '/inicio' },
+    { label: 'Configurações', routerLink: '/configuracoes' },
+    { label: 'Hierarquia de Unidades e Cargos', routerLink: '/configuracoes/hierarquia' },
+    { label: 'Exceção de Hierarquia' }
+  ];
+
   readonly pageIndex = signal(0);
+  readonly pageSize = signal(10);
   readonly sortDirection = signal<'asc' | 'desc'>('asc');
 
   // Formulário de Filtros
@@ -1352,6 +1166,60 @@ export class ExcecaoHierarquiaList {
   readonly filtroChefeNomeVal = toSignal(this.filtroForm.controls.chefeNome.valueChanges, { initialValue: '' });
   readonly filtroAprovadorSituacaoVal = toSignal(this.filtroForm.controls.aprovadorSituacao.valueChanges, { initialValue: 'TODOS' });
   readonly filtroAprovadorNomeVal = toSignal(this.filtroForm.controls.aprovadorNome.valueChanges, { initialValue: '' });
+
+  readonly situacaoOptions: readonly SOption<string>[] = [
+    { value: 'TODOS', label: 'Todos' },
+    { value: 'REGULAR', label: 'Regular' },
+    { value: 'SUPRIDO', label: 'Suprido' },
+    { value: 'DESCOBERTO', label: 'Descoberto' },
+    { value: 'NECESSITA_TROCA', label: 'Necessita Troca' }
+  ];
+
+  readonly chefeSituacaoOptions: readonly SOption<string>[] = [
+    { value: 'TODOS', label: 'Todos' },
+    { value: 'COM_CHEFE_ATIVO', label: 'Com Chefe Ativo' },
+    { value: 'COM_CHEFE_INATIVO', label: 'Com Chefe Inativo' },
+    { value: 'SEM_CHEFE', label: 'Sem Chefe Definido' }
+  ];
+
+  readonly aprovadorSituacaoOptions: readonly SOption<string>[] = [
+    { value: 'TODOS', label: 'Todos' },
+    { value: 'COM_APROVADOR', label: 'Com Aprovador' },
+    { value: 'SEM_APROVADOR', label: 'Sem Aprovador' }
+  ];
+
+  readonly tableColumns: readonly STableColumn<SetorHierarquia>[] = [
+    { key: 'nome', label: 'Nome do Setor', sortable: true },
+    { key: 'utbCodigo', label: 'Unidade de Trabalho' },
+    { key: 'chefeImediato', label: 'Chefia Imediata' },
+    { key: 'aprovadorVigente', label: 'Aprovador de Exceção' },
+    { key: 'tipoEntidade', label: 'Tipo de Atuação' },
+    { key: 'id', label: 'Situação', align: 'center' }
+  ];
+
+  readonly tableEmpty: STableEmpty = {
+    title: 'Nenhum setor encontrado',
+    description: 'Nenhum setor corresponde aos critérios de busca selecionados.'
+  };
+
+  readonly tableActions: readonly STableAction<SetorHierarquia>[] = [
+    {
+      id: 'visualizar',
+      label: 'Visualizar',
+      icon: 'visibility'
+    },
+    {
+      id: 'configurar',
+      label: (row: SetorHierarquia) => row.aprovadorVigente ? 'Editar aprovador de exceção' : 'Configurar aprovador de exceção',
+      icon: 'edit'
+    }
+  ];
+
+  readonly tableSort = signal<STableSort | null>({ key: 'nome', direction: 'asc' });
+
+  asSetor(val: unknown): SetorHierarquia {
+    return val as SetorHierarquia;
+  }
 
   // Botão Buscar: habilitado quando pelo menos um filtro possuir valor diferente do padrão
   readonly canBuscar = computed(() => {
@@ -1436,7 +1304,8 @@ export class ExcecaoHierarquiaList {
     }
 
     // Ordenação Alfabética por Nome do Setor
-    const dir = this.sortDirection() === 'asc' ? 1 : -1;
+    const sort = this.tableSort();
+    const dir = sort?.direction === 'desc' ? -1 : 1;
     list.sort((a, b) => dir * a.nome.localeCompare(b.nome, 'pt-BR'));
 
     return list;
@@ -1444,9 +1313,30 @@ export class ExcecaoHierarquiaList {
 
   readonly paginatedSetores = computed(() => {
     const list = this.filteredSetores();
-    const start = this.pageIndex() * 10;
-    return list.slice(start, start + 10);
+    const start = this.pageIndex() * this.pageSize();
+    return list.slice(start, start + this.pageSize());
   });
+
+  onSortChange(sort: STableSort | null) {
+    this.tableSort.set(sort);
+    if (sort) {
+      this.sortDirection.set(sort.direction);
+    }
+    this.pageIndex.set(0);
+  }
+
+  onTableAction(event: STableActionEvent<SetorHierarquia>) {
+    if (event.action === 'visualizar') {
+      this.onVisualizar(event.row);
+    } else if (event.action === 'configurar') {
+      this.onConfigurar(event.row);
+    }
+  }
+
+  onPageSizeChange(newSize: number) {
+    this.pageSize.set(newSize);
+    this.pageIndex.set(0);
+  }
 
   onBuscar() {
     this.appliedSetor.set((this.filtroForm.get('setor')?.value || '').trim());
@@ -1473,11 +1363,6 @@ export class ExcecaoHierarquiaList {
     this.appliedChefeNome.set('');
     this.appliedAprovadorSituacao.set('TODOS');
     this.appliedAprovadorNome.set('');
-    this.pageIndex.set(0);
-  }
-
-  toggleSort() {
-    this.sortDirection.update(d => (d === 'asc' ? 'desc' : 'asc'));
     this.pageIndex.set(0);
   }
 
@@ -1522,15 +1407,18 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTableModule,
-    MatTooltipModule,
-    MatAutocompleteModule,
-    MatRadioModule,
-    MatCheckboxModule,
+    SPageHeaderComponent,
+    SFieldComponent,
+    SInputComponent,
+    STextareaComponent,
+    SAutocompleteComponent,
+    SCheckboxComponent,
+    SBadgeComponent,
+    SButtonComponent,
+    STableComponent,
+    STableCellDirective,
+    SIconComponent,
+    STooltipDirective,
     AcessoRestritoComponent
   ],
   template: `
@@ -1543,79 +1431,14 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
     } @else {
       @let s = setor()!;
       <div class="flex flex-col gap-6 max-w-7xl mx-auto w-full font-sans pb-16">
-        
-        <!-- Breadcrumb e Cabeçalho Principal -->
-        <div class="flex flex-col gap-2">
-          <!-- Breadcrumb: Início > Configurações > Hierarquia de Unidades e Cargos > Exceção de Hierarquia > Configurar -->
-          <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-xs text-siage-text-secondary">
-            <span 
-              (click)="goHome()" 
-              (keydown.enter)="goHome()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Início
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goConfiguracoes()" 
-              (keydown.enter)="goConfiguracoes()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurações
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goHierarquia()" 
-              (keydown.enter)="goHierarquia()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Hierarquia de Unidades e Cargos
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="onCancelar()" 
-              (keydown.enter)="onCancelar()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Exceção de Hierarquia
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span class="text-siage-primary font-semibold" aria-current="page">Configurar</span>
-          </nav>
-
-          <!-- Título com Botão Voltar -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <button 
-                  mat-icon-button 
-                  type="button" 
-                  (click)="onCancelar()" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                  title="Voltar para a listagem"
-                  aria-label="Voltar para a listagem"
-                >
-                  <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-                </button>
-                <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                  Configurar Exceção de Hierarquia
-                </h1>
-              </div>
-
-              <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-2xl">
-                Defina o aprovador de exceção, tipo de atuação e portaria regulamentadora para o setor selecionado.
-              </p>
-            </div>
-          </div>
-        </div>
+        <!-- Cabeçalho Oficial SIAGE-UI -->
+        <s-page-header
+          [breadcrumbs]="breadcrumbs()"
+          title="Configurar Exceção de Hierarquia"
+          description="Defina o aprovador de exceção, tipo de atuação e portaria regulamentadora para o setor selecionado."
+          showBack
+          (back)="onCancelar()"
+        />
 
         <!-- FORMULÁRIO EM CARDS -->
         <form [formGroup]="form" class="flex flex-col gap-6">
@@ -1626,18 +1449,14 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
           <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
             <div class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 border-b border-siage-border/40 pb-2">
               <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2">
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">domain</mat-icon>
+                <s-icon name="domain" size="xs" />
                 <span>1. Identificação do Setor</span>
               </h3>
               <div>
                 @if (s.aprovadorVigente) {
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20 whitespace-nowrap">
-                    Suprido por Exceção
-                  </span>
+                  <s-badge tone="info">Suprido por Exceção</s-badge>
                 } @else {
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-700 dark:text-slate-300 border border-slate-500/20 whitespace-nowrap">
-                    Sem Exceção Cadastrada
-                  </span>
+                  <s-badge tone="secondary">Sem Exceção Cadastrada</s-badge>
                 }
               </div>
             </div>
@@ -1660,9 +1479,7 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
               <div class="flex flex-col gap-1">
                 <span class="text-xs uppercase text-siage-text-secondary font-semibold">Tipificação</span>
                 <div>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-siage-primary/10 text-siage-primary border border-siage-primary/20">
-                    {{ s.tipoEntidade }}
-                  </span>
+                  <s-badge tone="info">{{ s.tipoEntidade }}</s-badge>
                 </div>
               </div>
             </div>
@@ -1673,94 +1490,49 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
           <!-- ============================================== -->
           <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
             <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">person</mat-icon>
+              <s-icon name="person" size="xs" />
               <span>2. Aprovador de Exceção</span>
             </h3>
 
-            <div class="form-field-group max-w-3xl">
-              <label for="form-aprovador" class="siage-field-label">
-                Indicar Aprovador de Exceção <span class="required-marker">*</span>
-              </label>
-
-              @if (selectedServidor(); as serv) {
+            <div class="max-w-3xl">
+              @if (selectedServidor()) {
                 <!-- Campo Bloqueado com Servidor Atual + Botão Trocar Servidor ao lado -->
                 <div class="flex items-start gap-3 w-full">
-                  <mat-form-field appearance="outline" class="flex-1" subscriptSizing="fixed">
-                    <input 
-                      matInput 
-                      id="form-aprovador"
-                      type="text" 
-                      [value]="serv.nome + ' - Matrícula: ' + serv.matricula + ' (' + serv.cargo + ')'"
-                      disabled
-                      readonly
-                      class="text-sm cursor-not-allowed font-medium text-siage-text-primary"
-                    />
-                    <mat-icon matPrefix class="text-siage-text-secondary mr-2">person</mat-icon>
-                  </mat-form-field>
+                  <s-field label="Indicar Aprovador de Exceção" class="flex-1">
+                    <s-input [formControl]="servidorSelecionadoControl" />
+                  </s-field>
 
-                  <button 
-                    type="button" 
-                    (click)="trocarServidor()" 
-                    class="inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg border border-siage-border bg-siage-surface hover:bg-black/5 dark:hover:bg-white/5 text-xs font-semibold text-siage-text-primary transition-colors cursor-pointer shrink-0 mt-0.5"
-                    matTooltip="Substituir servidor aprovador de exceção"
-                  >
-                    <mat-icon style="font-size: 18px; width: 18px; height: 18px;">sync</mat-icon>
-                    <span>Trocar Servidor</span>
-                  </button>
+                  <div class="pt-6">
+                    <s-button
+                      type="button"
+                      (click)="trocarServidor()"
+                      variant="secondary"
+                      outlined
+                      icon="sync"
+                      sTooltip="Substituir servidor aprovador de exceção"
+                    >
+                      Trocar Servidor
+                    </s-button>
+                  </div>
                 </div>
-                <span class="text-xs text-siage-text-secondary mt-1">
+                <span class="text-xs text-siage-text-secondary mt-1 block">
                   Servidor aprovador de exceção atualmente designado para o setor.
                 </span>
               } @else {
                 <!-- Campo de Busca de Servidor Habilitado com Autocomplete -->
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="form-aprovador"
-                    type="text" 
-                    [formControl]="servidorBuscaControl"
-                    placeholder="Digite o nome ou a matrícula do servidor" 
-                    [matAutocomplete]="autoServidores"
-                    #autoServTrigger="matAutocompleteTrigger"
-                    (focus)="autoServTrigger.openPanel()"
-                    class="text-sm"
+                <s-field
+                  label="Indicar Aprovador de Exceção"
+                  required
+                  [error]="servidorAutocompleteControl.invalid && servidorAutocompleteControl.touched ? 'É obrigatório selecionar um servidor aprovador.' : null"
+                >
+                  <s-autocomplete
+                    [options]="servidorOptions()"
+                    placeholder="Digite o nome ou a matrícula do servidor"
+                    (input)="onServidorInput($event)"
+                    (selectionChange)="onServidorSelectionChange($event)"
                   />
-                  <mat-autocomplete #autoServidores="matAutocomplete" [displayWith]="displayServidorFn" (optionSelected)="onServidorSelected($event.option.value)">
-                    @for (serv of filteredServidoresSugestoes(); track serv.matricula) {
-                      @let disponivel = isElegivel(serv) && !serv.indisponibilidade;
-                      <mat-option [value]="serv">
-                        <div class="flex items-center justify-between gap-3 w-full">
-                          <div class="flex flex-col min-w-0 pr-2">
-                            <span class="font-medium text-xs text-siage-text-primary truncate">{{ serv.nome }}</span>
-                            <span class="text-[11px] text-siage-text-secondary truncate">{{ serv.cargo }} • Matrícula: {{ serv.matricula }}</span>
-                          </div>
-                          @if (disponivel) {
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
-                              Elegível
-                            </span>
-                          } @else {
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 shrink-0">
-                              Indisponível
-                            </span>
-                          }
-                        </div>
-                      </mat-option>
-                    }
-                  </mat-autocomplete>
-                  @if (servidorBuscaControl.value) {
-                    <button mat-icon-button matSuffix type="button" (click)="servidorBuscaControl.setValue('')" aria-label="Limpar">
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                    </button>
-                  } @else {
-                    <button mat-icon-button matSuffix type="button" (click)="autoServTrigger.openPanel()" aria-label="Abrir sugestões">
-                      <mat-icon class="text-siage-text-secondary">arrow_drop_down</mat-icon>
-                    </button>
-                  }
-                  @if (servidorBuscaControl.hasError('required') && servidorBuscaControl.touched) {
-                    <mat-error>É obrigatório selecionar um servidor aprovador.</mat-error>
-                  }
-                </mat-form-field>
-                <span class="text-xs text-siage-text-secondary mt-1">
+                </s-field>
+                <span class="text-xs text-siage-text-secondary -mt-2 block">
                   Pesquise servidores ativos no SIAGE-RH em toda a estrutura do Estado.
                 </span>
               }
@@ -1774,21 +1546,34 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
             @let elegivel = isElegivel(serv);
             <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
               <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">verified_user</mat-icon>
+                <s-icon name="verified_user" size="xs" />
                 <span>3. Checagem de Elegibilidade Regimental</span>
               </h3>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
                 <!-- Camada 1: Situação Funcional -->
-                <div class="border rounded-lg p-4 flex flex-col gap-2" [class.border-emerald-500/30]="elegivel" [class.bg-emerald-500/5]="elegivel" [class.border-red-500/30]="!elegivel" [class.bg-red-500/5]="!elegivel">
+                <div
+                  class="border rounded-lg p-4 flex flex-col gap-2"
+                  [class.border-emerald-500/30]="elegivel"
+                  [class.bg-emerald-500/5]="elegivel"
+                  [class.border-red-500/30]="!elegivel"
+                  [class.bg-red-500/5]="!elegivel"
+                >
                   <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-wider" [class.text-emerald-700]="elegivel" [class.dark:text-emerald-400]="elegivel" [class.text-red-700]="!elegivel" [class.dark:text-red-400]="!elegivel">
+                    <span
+                      class="text-xs font-bold uppercase tracking-wider"
+                      [class.text-emerald-700]="elegivel"
+                      [class.dark:text-emerald-400]="elegivel"
+                      [class.text-red-700]="!elegivel"
+                      [class.dark:text-red-400]="!elegivel"
+                    >
                       Camada 1 — Situação Funcional
                     </span>
-                    <mat-icon style="font-size: 20px; width: 20px; height: 20px;" [class.text-emerald-600]="elegivel" [class.text-red-600]="!elegivel">
-                      {{ elegivel ? 'check_circle' : 'cancel' }}
-                    </mat-icon>
+                    <s-icon
+                      [name]="elegivel ? 'check_circle' : 'cancel'"
+                      [color]="elegivel ? 'text-emerald-600' : 'text-red-600'"
+                      size="sm"
+                    />
                   </div>
                   <span class="text-sm font-semibold text-siage-text-primary">
                     {{ serv.situacaoFuncionalDescricao }}
@@ -1804,14 +1589,28 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
 
                 <!-- Camada 2: Disponibilidade Operacional -->
                 @let indisponivel = serv.indisponibilidade;
-                <div class="border rounded-lg p-4 flex flex-col gap-2" [class.border-emerald-500/30]="!indisponivel" [class.bg-emerald-500/5]="!indisponivel" [class.border-amber-500/30]="indisponivel" [class.bg-amber-500/5]="indisponivel">
+                <div
+                  class="border rounded-lg p-4 flex flex-col gap-2"
+                  [class.border-emerald-500/30]="!indisponivel"
+                  [class.bg-emerald-500/5]="!indisponivel"
+                  [class.border-amber-500/30]="indisponivel"
+                  [class.bg-amber-500/5]="indisponivel"
+                >
                   <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-wider" [class.text-emerald-700]="!indisponivel" [class.dark:text-emerald-400]="!indisponivel" [class.text-amber-700]="indisponivel" [class.dark:text-amber-400]="indisponivel">
+                    <span
+                      class="text-xs font-bold uppercase tracking-wider"
+                      [class.text-emerald-700]="!indisponivel"
+                      [class.dark:text-emerald-400]="!indisponivel"
+                      [class.text-amber-700]="indisponivel"
+                      [class.dark:text-amber-400]="indisponivel"
+                    >
                       Camada 2 — Disponibilidade Operacional
                     </span>
-                    <mat-icon style="font-size: 20px; width: 20px; height: 20px;" [class.text-emerald-600]="!indisponivel" [class.text-amber-600]="indisponivel">
-                      {{ !indisponivel ? 'check_circle' : 'warning' }}
-                    </mat-icon>
+                    <s-icon
+                      [name]="!indisponivel ? 'check_circle' : 'warning'"
+                      [color]="!indisponivel ? 'text-emerald-600' : 'text-amber-600'"
+                      size="sm"
+                    />
                   </div>
 
                   @if (!indisponivel) {
@@ -1831,16 +1630,15 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
 
                     <!-- Checkbox de Confirmação de Ciência obrigatório se indisponível -->
                     <div class="pt-2 mt-1 border-t border-amber-500/20">
-                      <mat-checkbox [formControl]="form.controls.cienteAlerta" color="primary" class="text-xs font-medium text-siage-text-primary">
-                        <span class="text-xs font-semibold text-siage-text-primary">Confirmar designação ciente do alerta</span>
-                      </mat-checkbox>
-                      <span class="text-[11px] text-amber-700 dark:text-amber-400 block mt-0.5">
+                      <s-checkbox [formControl]="form.controls.cienteAlerta">
+                        Confirmar designação ciente do alerta
+                      </s-checkbox>
+                      <span class="text-[11px] text-amber-700 dark:text-amber-400 block mt-1">
                         A situação do setor será classificada como "Necessita Troca" até a regularização do período.
                       </span>
                     </div>
                   }
                 </div>
-
               </div>
             </div>
           }
@@ -1850,137 +1648,139 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
           <!-- ============================================== -->
           <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-5">
             <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">tune</mat-icon>
+              <s-icon name="tune" size="xs" />
               <span>4. Tipo de Atuação e Justificativa</span>
             </h3>
 
-            <!-- Tipo de Atuação / Modalidade (Radio buttons) -->
+            <!-- Tipo de Atuação / Modalidade (Custom Cards) -->
             <div class="flex flex-col gap-2" role="group" aria-labelledby="label-modalidade">
-              <span id="label-modalidade" class="siage-field-label">
-                Tipo de Atuação / Modalidade <span class="required-marker">*</span>
+              <span id="label-modalidade" class="text-xs font-semibold text-siage-text-secondary uppercase tracking-wider">
+                Tipo de Atuação / Modalidade <span class="text-red-500">*</span>
               </span>
-              
-              <mat-radio-group [formControl]="form.controls.modalidade" class="flex flex-col gap-3">
-                
-                <div class="border border-siage-border rounded-lg p-3.5 hover:border-siage-primary/40 transition-colors">
-                  <mat-radio-button value="SOBREPOE_SEMPRE" color="primary" class="w-full">
-                    <div class="flex flex-col text-left pl-1">
-                      <span class="text-sm font-semibold text-siage-text-primary">Sempre sobrepõe o chefe imediato</span>
-                      <span class="text-xs text-siage-text-secondary leading-normal mt-0.5">
-                        O aprovador recebe os fluxos de aprovação de férias, licenças e afastamentos do setor, independentemente da disponibilidade da chefia formal.
-                      </span>
-                    </div>
-                  </mat-radio-button>
-                </div>
 
-                <div class="border border-siage-border rounded-lg p-3.5 hover:border-siage-primary/40 transition-colors">
-                  <mat-radio-button value="APENAS_INDISPONIVEL" color="primary" class="w-full">
-                    <div class="flex flex-col text-left pl-1">
-                      <span class="text-sm font-semibold text-siage-text-primary">Atua somente quando indisponível ou não definido</span>
-                      <span class="text-xs text-siage-text-secondary leading-normal mt-0.5">
-                        O aprovador funciona como alternativa quando a chefia imediata estiver ausente, afastada, em férias ou ainda não cadastrada.
-                      </span>
-                    </div>
-                  </mat-radio-button>
-                </div>
+              <div class="flex flex-col gap-3">
+                <label
+                  class="border rounded-lg p-3.5 flex items-start gap-3 cursor-pointer transition-colors"
+                  [class.border-siage-primary]="form.controls.modalidade.value === 'SOBREPOE_SEMPRE'"
+                  [class.bg-siage-primary/5]="form.controls.modalidade.value === 'SOBREPOE_SEMPRE'"
+                  [class.border-siage-border]="form.controls.modalidade.value !== 'SOBREPOE_SEMPRE'"
+                >
+                  <input
+                    type="radio"
+                    name="modalidade"
+                    value="SOBREPOE_SEMPRE"
+                    [formControl]="form.controls.modalidade"
+                    class="mt-1 h-4 w-4 text-siage-primary border-siage-border focus:ring-siage-primary/40 cursor-pointer"
+                  />
+                  <div class="flex flex-col text-left">
+                    <span class="text-sm font-semibold text-siage-text-primary">Sempre sobrepõe o chefe imediato</span>
+                    <span class="text-xs text-siage-text-secondary leading-normal mt-0.5">
+                      O aprovador recebe os fluxos de aprovação de férias, licenças e afastamentos do setor, independentemente da disponibilidade da chefia formal.
+                    </span>
+                  </div>
+                </label>
 
-              </mat-radio-group>
+                <label
+                  class="border rounded-lg p-3.5 flex items-start gap-3 cursor-pointer transition-colors"
+                  [class.border-siage-primary]="form.controls.modalidade.value === 'APENAS_INDISPONIVEL'"
+                  [class.bg-siage-primary/5]="form.controls.modalidade.value === 'APENAS_INDISPONIVEL'"
+                  [class.border-siage-border]="form.controls.modalidade.value !== 'APENAS_INDISPONIVEL'"
+                >
+                  <input
+                    type="radio"
+                    name="modalidade"
+                    value="APENAS_INDISPONIVEL"
+                    [formControl]="form.controls.modalidade"
+                    class="mt-1 h-4 w-4 text-siage-primary border-siage-border focus:ring-siage-primary/40 cursor-pointer"
+                  />
+                  <div class="flex flex-col text-left">
+                    <span class="text-sm font-semibold text-siage-text-primary">Atua somente quando indisponível ou não definido</span>
+                    <span class="text-xs text-siage-text-secondary leading-normal mt-0.5">
+                      O aprovador funciona como alternativa quando a chefia imediata estiver ausente, afastada, em férias ou ainda não cadastrada.
+                    </span>
+                  </div>
+                </label>
+              </div>
+
+              @if (form.controls.modalidade.invalid && form.controls.modalidade.touched) {
+                <span class="text-xs text-red-600 dark:text-red-400">O Tipo de Atuação é obrigatório.</span>
+              }
             </div>
 
-            <!-- Portaria Regulamentadora (Opcional) -->
-            <div class="form-field-group max-w-xl">
-              <label for="form-portaria" class="siage-field-label">
-                Portaria Regulamentadora / Ato Oficial
-              </label>
-              <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                <input 
-                  matInput 
-                  id="form-portaria" 
-                  [formControl]="form.controls.portaria" 
-                  maxlength="100"
+            <!-- Portaria Regulamentadora -->
+            <div class="max-w-xl">
+              <s-field label="Portaria Regulamentadora / Ato Oficial" controlId="form-portaria">
+                <s-input
+                  [formControl]="form.controls.portaria"
+                  [maxlength]="100"
                   placeholder="Ex: Portaria SEAD nº 104/2024"
-                  class="text-sm"
                 />
-              </mat-form-field>
-              <span class="text-xs text-siage-text-secondary mt-1">
+              </s-field>
+              <span class="text-xs text-siage-text-secondary -mt-2 block">
                 Informe o número ou identificação do ato que autorizou a designação de exceção.
               </span>
             </div>
 
-            <!-- Justificativa da Exceção Fundamentada (Obrigatória) -->
-            <div class="form-field-group">
-              <label for="form-justificativa" class="siage-field-label">
-                Justificativa da Exceção Fundamentada <span class="required-marker">*</span>
-              </label>
-              <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                <textarea 
-                  matInput 
-                  id="form-justificativa" 
-                  [formControl]="form.controls.justificativa" 
-                  rows="4" 
-                  maxlength="1000"
+            <!-- Justificativa da Exceção Fundamentada -->
+            <div>
+              <s-field
+                label="Justificativa da Exceção Fundamentada"
+                controlId="form-justificativa"
+                required
+                showCharCounter
+                [error]="getJustificativaError()"
+              >
+                <s-textarea
+                  [formControl]="form.controls.justificativa"
+                  [maxlength]="1000"
                   placeholder="Descreva detalhadamente a fundamentação e a necessidade regimental para a designação do aprovador de exceção..."
-                  class="text-sm"
-                ></textarea>
-                <mat-hint align="end" class="text-xs text-siage-text-secondary">
-                  {{ (form.controls.justificativa.value || '').length }} / 1000
-                </mat-hint>
-                @if (form.controls.justificativa.hasError('required') && form.controls.justificativa.touched) {
-                  <mat-error>A Justificativa da Exceção é obrigatória.</mat-error>
-                } @else if (form.controls.justificativa.hasError('emptyWhitespace') && form.controls.justificativa.touched) {
-                  <mat-error>A justificativa não pode conter apenas espaços em branco.</mat-error>
-                }
-              </mat-form-field>
+                />
+              </s-field>
             </div>
-
           </div>
 
           <!-- ============================================== -->
           <!-- RODAPÉ DE AÇÕES DO FORMULÁRIO                  -->
           <!-- ============================================== -->
           <div class="flex items-center justify-between pt-4 border-t border-siage-border/40">
-            <!-- Ação Revogar à esquerda quando houver aprovador ativo -->
             <div>
               @if (temAprovadorAtivo()) {
-                <button 
-                  type="button" 
-                  (click)="onRevogarExcecao()" 
-                  class="inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-lg border border-red-300 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 text-red-600 dark:text-red-400 hover:bg-red-100/50 font-sans font-semibold text-sm transition-all cursor-pointer"
+                <s-button
+                  type="button"
+                  variant="destructive"
+                  outlined
+                  icon="block"
+                  (click)="onRevogarExcecao()"
                 >
-                  <mat-icon style="font-size: 18px; width: 18px; height: 18px;">block</mat-icon>
-                  <span>Revogar Exceção</span>
-                </button>
+                  Revogar Exceção
+                </s-button>
               }
             </div>
 
-            <!-- Botões Cancelar e Salvar/Atualizar à direita -->
             <div class="flex items-center gap-3">
-              <button 
-                type="button" 
-                (click)="onCancelar()" 
-                class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer"
+              <s-button
+                type="button"
+                variant="secondary"
+                outlined
+                (click)="onCancelar()"
               >
                 Cancelar
-              </button>
+              </s-button>
 
-              <button 
-                type="button" 
-                (click)="onSalvar()" 
+              <s-button
+                type="button"
+                variant="primary"
                 [disabled]="isSaving() || !canSalvar()"
-                [matTooltip]="!canSalvar() ? 'Preencha todos os campos obrigatórios e verifique a elegibilidade' : ''"
-                class="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                [loading]="isSaving()"
+                loadingText="Salvando..."
+                [icon]="temAprovadorAtivo() ? 'check' : 'add'"
+                [sTooltip]="!canSalvar() ? 'Preencha todos os campos obrigatórios e verifique a elegibilidade' : ''"
+                (click)="onSalvar()"
               >
-                @if (isSaving()) {
-                  <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                  <span>Salvando...</span>
-                } @else {
-                  <mat-icon style="font-size: 18px; width: 18px; height: 18px;">{{ temAprovadorAtivo() ? 'check' : 'add' }}</mat-icon>
-                  <span>{{ temAprovadorAtivo() ? 'Atualizar Aprovador' : 'Adicionar Aprovador' }}</span>
-                }
-              </button>
+                {{ temAprovadorAtivo() ? 'Atualizar Aprovador' : 'Adicionar Aprovador' }}
+              </s-button>
             </div>
           </div>
-
         </form>
 
         <!-- ============================================== -->
@@ -1988,84 +1788,63 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
         <!-- ============================================== -->
         <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4 mt-6">
           <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">history</mat-icon>
+            <s-icon name="history" size="xs" />
             <span>Histórico de Aprovadores do Setor</span>
           </h3>
 
-          <div class="border border-siage-border rounded-lg overflow-hidden bg-siage-surface">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr class="bg-slate-100/70 dark:bg-slate-800/50 border-b border-siage-border text-siage-text-secondary font-semibold">
-                    <th class="p-3">Aprovador</th>
-                    <th class="p-3">Tipo de Atuação</th>
-                    <th class="p-3">Portaria</th>
-                    <th class="p-3">Vigência</th>
-                    <th class="p-3">Situação</th>
-                    <th class="p-3">Modificado por</th>
-                    <th class="p-3">Data/Hora Modificação</th>
-                    <th class="p-3 text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-siage-border/40">
-                  @for (reg of s.historico; track reg.id) {
-                    <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                      <td class="p-3 font-medium text-siage-text-primary">
-                        <span class="block text-sm">{{ reg.servidorNome }}</span>
-                        <span class="text-xs text-siage-text-secondary">Matrícula: {{ reg.servidorMatricula }}</span>
-                      </td>
-                      <td class="p-3 text-xs text-siage-text-secondary">
-                        {{ reg.modalidade === 'SOBREPOE_SEMPRE' ? 'Sempre sobrepõe o chefe' : 'Quando indisponível' }}
-                      </td>
-                      <td class="p-3 text-xs text-siage-text-secondary">
-                        {{ reg.portaria || '-' }}
-                      </td>
-                      <td class="p-3 text-xs text-siage-text-secondary font-medium">
-                        {{ reg.vigenciaFormatada }}
-                      </td>
-                      <td class="p-3">
-                        @if (reg.situacao === 'ATIVO') {
-                          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
-                            Ativo
-                          </span>
-                        } @else if (reg.situacao === 'SUBSTITUIDO') {
-                          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-700 dark:text-slate-300 border border-slate-500/20">
-                            Substituído
-                          </span>
-                        } @else {
-                          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
-                            Encerrado
-                          </span>
-                        }
-                      </td>
-                      <td class="p-3 text-xs text-siage-text-secondary">{{ reg.modificadoPor }}</td>
-                      <td class="p-3 text-xs text-siage-text-secondary">{{ reg.dataHoraModificacao }}</td>
-                      <td class="p-3 text-right">
-                        <button 
-                          mat-icon-button 
-                          type="button" 
-                          (click)="abrirDetalhesRegistro(reg)" 
-                          class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer"
-                          matTooltip="Detalhes da exceção"
-                          aria-label="Ver detalhes"
-                        >
-                          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                        </button>
-                      </td>
-                    </tr>
-                  } @empty {
-                    <tr>
-                      <td colspan="8" class="p-6 text-center text-xs text-siage-text-secondary">
-                        Este setor não possui nenhum aprovador de exceção registrado em seu histórico.
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+          <s-table
+            label="Histórico de Aprovadores do Setor"
+            [columns]="historicoColumns"
+            [rows]="s.historico"
+            [actions]="historicoActions"
+            [empty]="historicoEmpty"
+            (actionClick)="onHistoricoAction($event)"
+          >
+            <ng-template sTableCell="servidorNome" let-reg>
+              @let r = asHistorico(reg);
+              <span class="block text-sm font-medium text-siage-text-primary">{{ r.servidorNome }}</span>
+              <span class="text-xs text-siage-text-secondary">Matrícula: {{ r.servidorMatricula }}</span>
+            </ng-template>
 
+            <ng-template sTableCell="modalidade" let-reg>
+              @let r = asHistorico(reg);
+              <span class="text-xs text-siage-text-secondary">
+                {{ r.modalidade === 'SOBREPOE_SEMPRE' ? 'Sempre sobrepõe o chefe' : 'Quando indisponível' }}
+              </span>
+            </ng-template>
+
+            <ng-template sTableCell="portaria" let-reg>
+              @let r = asHistorico(reg);
+              <span class="text-xs text-siage-text-secondary">{{ r.portaria || '-' }}</span>
+            </ng-template>
+
+            <ng-template sTableCell="vigenciaFormatada" let-reg>
+              @let r = asHistorico(reg);
+              <span class="text-xs text-siage-text-secondary font-medium">{{ r.vigenciaFormatada }}</span>
+            </ng-template>
+
+            <ng-template sTableCell="situacao" let-reg>
+              @let r = asHistorico(reg);
+              @if (r.situacao === 'ATIVO') {
+                <s-badge tone="success">Ativo</s-badge>
+              } @else if (r.situacao === 'SUBSTITUIDO') {
+                <s-badge tone="secondary">Substituído</s-badge>
+              } @else {
+                <s-badge tone="warning" icon="history">Encerrado</s-badge>
+              }
+            </ng-template>
+
+            <ng-template sTableCell="modificadoPor" let-reg>
+              @let r = asHistorico(reg);
+              <span class="text-xs text-siage-text-secondary">{{ r.modificadoPor }}</span>
+            </ng-template>
+
+            <ng-template sTableCell="dataHoraModificacao" let-reg>
+              @let r = asHistorico(reg);
+              <span class="text-xs text-siage-text-secondary">{{ r.dataHoraModificacao }}</span>
+            </ng-template>
+          </s-table>
+        </div>
       </div>
     }
   `
@@ -2075,16 +1854,16 @@ export class ExcecaoHierarquiaForm implements OnInit {
   private readonly router = inject(Router);
   readonly service = inject(ExcecaoHierarquiaService);
   readonly permissionService = inject(PermissionService);
-  private readonly dialog = inject(MatDialog);
-  private readonly modalService = inject(ModalService);
-  private readonly toastService = inject(ToastService);
+  private readonly modalService = inject(SModalService);
+  private readonly toastService = inject(SToastService);
 
   readonly setorId = signal<string>('');
   readonly setor = computed(() => this.service.getSetor(this.setorId()));
 
   readonly selectedServidor = signal<ServidorSimulado | undefined>(undefined);
-  readonly servidorBuscaControl = new FormControl<string | ServidorSimulado>('', [Validators.required]);
-  readonly servidorBuscaVal = toSignal(this.servidorBuscaControl.valueChanges, { initialValue: '' });
+  readonly servidorBuscaTexto = signal('');
+  readonly servidorAutocompleteControl = new FormControl<string | null>(null, [Validators.required]);
+  readonly servidorSelecionadoControl = new FormControl({ value: '', disabled: true });
   readonly isSaving = signal(false);
 
   private initialSnapshotJson = '';
@@ -2101,29 +1880,76 @@ export class ExcecaoHierarquiaForm implements OnInit {
     cienteAlerta: new FormControl(false)
   });
 
+  readonly breadcrumbs = computed<SBreadcrumb[]>(() => [
+    { label: 'Início', routerLink: '/inicio' },
+    { label: 'Configurações', routerLink: '/configuracoes' },
+    { label: 'Hierarquia de Unidades e Cargos', routerLink: '/configuracoes/hierarquia' },
+    { label: 'Exceção de Hierarquia', routerLink: '/configuracoes/hierarquia/excecao-hierarquia' },
+    { label: 'Configurar' }
+  ]);
+
   readonly temAprovadorAtivo = computed(() => {
     return !!this.setor()?.aprovadorVigente && this.setor()?.aprovadorVigente?.situacao === 'ATIVO';
   });
 
-  displayServidorFn(serv?: ServidorSimulado | string): string {
-    if (!serv) return '';
-    return typeof serv === 'string' ? serv : serv.nome;
-  }
-
-  // Autocomplete de Servidores (filtragem reativa por digitação de nome ou matrícula, máximo 10)
-  readonly filteredServidoresSugestoes = computed(() => {
-    const raw = this.servidorBuscaVal();
-    const query = (typeof raw === 'string' ? raw : raw?.nome || '').trim().toLowerCase();
+  readonly servidorOptions = computed<SAutocompleteOption<string>[]>(() => {
+    const raw = this.servidorBuscaTexto().trim().toLowerCase();
     const list = this.service.getServidores();
-    if (!query) return list.slice(0, 10);
-    return list.filter(s =>
-      s.nome.toLowerCase().includes(query) ||
-      s.matricula.includes(query)
-    ).slice(0, 10);
+    const filtered = !raw
+      ? list.slice(0, 10)
+      : list.filter(s =>
+          s.nome.toLowerCase().includes(raw) ||
+          s.matricula.includes(raw) ||
+          s.cargo.toLowerCase().includes(raw)
+        ).slice(0, 10);
+
+    return filtered.map(serv => {
+      const disponivel = this.isElegivel(serv) && !serv.indisponibilidade;
+      const tag = disponivel ? 'Elegível' : 'Indisponível';
+      return {
+        label: `${serv.nome} — Matrícula: ${serv.matricula} (${serv.cargo}) • ${tag}`,
+        value: serv.matricula
+      };
+    });
   });
+
+  readonly historicoColumns: readonly STableColumn<RegistroHistoricoExcecao>[] = [
+    { key: 'servidorNome', label: 'Aprovador' },
+    { key: 'modalidade', label: 'Tipo de Atuação' },
+    { key: 'portaria', label: 'Portaria' },
+    { key: 'vigenciaFormatada', label: 'Vigência' },
+    { key: 'situacao', label: 'Situação', align: 'center' },
+    { key: 'modificadoPor', label: 'Modificado por' },
+    { key: 'dataHoraModificacao', label: 'Data/Hora Modificação' }
+  ];
+
+  readonly historicoEmpty: STableEmpty = {
+    title: 'Sem histórico registrado',
+    description: 'Este setor não possui nenhum aprovador de exceção registrado em seu histórico.'
+  };
+
+  readonly historicoActions: readonly STableAction<RegistroHistoricoExcecao>[] = [
+    {
+      id: 'visualizar',
+      label: 'Detalhes da exceção',
+      icon: 'visibility'
+    }
+  ];
+
+  asHistorico(val: unknown): RegistroHistoricoExcecao {
+    return val as RegistroHistoricoExcecao;
+  }
 
   isElegivel(servidor: ServidorSimulado): boolean {
     return this.service.isServidorElegivel(servidor);
+  }
+
+  getJustificativaError(): string | null {
+    const c = this.form.controls.justificativa;
+    if (!c.touched) return null;
+    if (c.hasError('required')) return 'A Justificativa da Exceção é obrigatória.';
+    if (c.hasError('emptyWhitespace')) return 'A justificativa não pode conter apenas espaços em branco.';
+    return null;
   }
 
   canSalvar(): boolean {
@@ -2156,7 +1982,8 @@ export class ExcecaoHierarquiaForm implements OnInit {
       const serv = this.service.getServidor(s.aprovadorVigente.matricula);
       if (serv) {
         this.selectedServidor.set(serv);
-        this.servidorBuscaControl.setValue(serv);
+        this.servidorAutocompleteControl.setValue(serv.matricula);
+        this.servidorSelecionadoControl.setValue(`${serv.nome} - Matrícula: ${serv.matricula} (${serv.cargo})`);
       }
       this.form.patchValue({
         modalidade: s.aprovadorVigente.modalidade,
@@ -2174,27 +2001,36 @@ export class ExcecaoHierarquiaForm implements OnInit {
     this.initialSnapshotJson = this.getCurrentSnapshotJson();
   }
 
-  onServidorSelected(serv: ServidorSimulado) {
-    this.selectedServidor.set(serv);
-    this.servidorBuscaControl.setValue(serv);
+  onServidorInput(event: Event) {
+    if (event.target instanceof HTMLInputElement) {
+      this.servidorBuscaTexto.set(event.target.value);
+    }
+  }
+
+  onServidorSelectionChange(selection: SAutocompleteSelection<string>) {
+    if (selection && selection.value) {
+      const serv = this.service.getServidor(selection.value);
+      if (serv) {
+        this.selectedServidor.set(serv);
+        this.servidorAutocompleteControl.setValue(serv.matricula);
+        this.servidorSelecionadoControl.setValue(`${serv.nome} - Matrícula: ${serv.matricula} (${serv.cargo})`);
+      }
+    }
   }
 
   trocarServidor() {
-    const dialogRef = this.dialog.open(ConfirmacaoDialog, {
-      disableClose: true,
-      data: {
-        title: 'Trocar Servidor?',
-        message: 'Ao trocar o servidor selecionado, os dados específicos da designação (tipo de atuação, portaria e justificativa) serão limpos. Deseja continuar?',
-        cancelLabel: 'Não',
-        actionLabel: 'Sim',
-        actionType: 'primary'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
+    from(this.modalService.confirm({
+      title: 'Trocar Servidor?',
+      description: 'Ao trocar o servidor selecionado, os dados específicos da designação (tipo de atuação, portaria e justificativa) serão limpos. Deseja continuar?',
+      confirmLabel: 'Sim',
+      cancelLabel: 'Não',
+      variant: 'default'
+    })).subscribe((confirmado: boolean) => {
       if (confirmado) {
         this.selectedServidor.set(undefined);
-        this.servidorBuscaControl.setValue('');
+        this.servidorAutocompleteControl.setValue(null);
+        this.servidorBuscaTexto.set('');
+        this.servidorSelecionadoControl.setValue('');
         this.form.controls.modalidade.setValue(null);
         this.form.controls.portaria.setValue('');
         this.form.controls.justificativa.setValue('');
@@ -2234,18 +2070,13 @@ export class ExcecaoHierarquiaForm implements OnInit {
     const s = this.setor();
     if (!s || !s.aprovadorVigente) return;
 
-    const dialogRef = this.dialog.open(ConfirmacaoDialog, {
-      disableClose: true,
-      data: {
-        title: 'Revogar Exceção de Hierarquia?',
-        message: `Deseja encerrar a designação de ${s.aprovadorVigente.nome} como aprovador de exceção para o setor ${s.nome}? O registro será arquivado no histórico.`,
-        cancelLabel: 'Cancelar',
-        actionLabel: 'Sim, revogar',
-        actionType: 'destructive'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
+    from(this.modalService.confirm({
+      title: 'Revogar Exceção de Hierarquia?',
+      description: `Deseja encerrar a designação de ${s.aprovadorVigente.nome} como aprovador de exceção para o setor ${s.nome}? O registro será arquivado no histórico.`,
+      confirmLabel: 'Sim, revogar',
+      cancelLabel: 'Cancelar',
+      variant: 'destructive'
+    })).subscribe((confirmado: boolean) => {
       if (confirmado) {
         this.service.revogarExcecao(s.id);
         this.isSavedSuccessfully = true;
@@ -2255,10 +2086,16 @@ export class ExcecaoHierarquiaForm implements OnInit {
     });
   }
 
+  onHistoricoAction(event: STableActionEvent<RegistroHistoricoExcecao>) {
+    if (event.action === 'visualizar') {
+      this.abrirDetalhesRegistro(event.row);
+    }
+  }
+
   abrirDetalhesRegistro(reg: RegistroHistoricoExcecao) {
-    this.dialog.open(DetalhesExcecaoModal, {
-      disableClose: true,
-      data: { registro: reg }
+    this.modalService.open(DetalhesExcecaoModal, {
+      data: { registro: reg },
+      width: '600px'
     });
   }
 
@@ -2279,9 +2116,18 @@ export class ExcecaoHierarquiaForm implements OnInit {
 
   canDeactivate(): Promise<boolean> | boolean {
     if (!this.hasPendingChanges()) return true;
+    return this.confirmarCancelamento();
+  }
+
+  private confirmarCancelamento(): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
-      const dialogRef = this.modalService.confirmarCancelamento();
-      dialogRef.afterClosed().subscribe((confirmado: boolean) => {
+      from(this.modalService.confirm({
+        title: 'Tem certeza que deseja cancelar?',
+        description: 'As alterações não salvas serão perdidas.',
+        confirmLabel: 'Sim, cancelar',
+        cancelLabel: 'Não',
+        variant: 'default'
+      })).subscribe((confirmado: boolean) => {
         if (confirmado) {
           this.isDiscarded = true;
           resolve(true);
@@ -2292,46 +2138,37 @@ export class ExcecaoHierarquiaForm implements OnInit {
     });
   }
 
-  onCancelar() {
+  async onCancelar() {
     if (!this.hasPendingChanges()) {
       this.router.navigate(['/configuracoes/hierarquia/excecao-hierarquia']);
       return;
     }
-    const dialogRef = this.modalService.confirmarCancelamento();
-    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
-      if (confirmado) {
-        this.isDiscarded = true;
-        this.router.navigate(['/configuracoes/hierarquia/excecao-hierarquia']);
-      }
-    });
+    const confirmado = await this.confirmarCancelamento();
+    if (confirmado) {
+      this.router.navigate(['/configuracoes/hierarquia/excecao-hierarquia']);
+    }
   }
 
-  goHome() {
+  async goHome() {
     if (!this.hasPendingChanges()) {
       this.router.navigate(['/inicio']);
       return;
     }
-    const dialogRef = this.modalService.confirmarCancelamento();
-    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
-      if (confirmado) {
-        this.isDiscarded = true;
-        this.router.navigate(['/inicio']);
-      }
-    });
+    const confirmado = await this.confirmarCancelamento();
+    if (confirmado) {
+      this.router.navigate(['/inicio']);
+    }
   }
 
-  goConfiguracoes() {
+  async goConfiguracoes() {
     if (!this.hasPendingChanges()) {
       this.router.navigate(['/configuracoes']);
       return;
     }
-    const dialogRef = this.modalService.confirmarCancelamento();
-    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
-      if (confirmado) {
-        this.isDiscarded = true;
-        this.router.navigate(['/configuracoes']);
-      }
-    });
+    const confirmado = await this.confirmarCancelamento();
+    if (confirmado) {
+      this.router.navigate(['/configuracoes']);
+    }
   }
 
   goHierarquia() {
@@ -2348,10 +2185,13 @@ export class ExcecaoHierarquiaForm implements OnInit {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTableModule,
-    MatTooltipModule,
+    SPageHeaderComponent,
+    SBadgeComponent,
+    SButtonComponent,
+    STableComponent,
+    STableCellDirective,
+    SIconComponent,
+    STooltipDirective,
     AcessoRestritoComponent
   ],
   template: `
@@ -2364,91 +2204,20 @@ export class ExcecaoHierarquiaForm implements OnInit {
     } @else {
       @let s = setor()!;
       <div class="flex flex-col gap-6 max-w-7xl mx-auto w-full font-sans pb-16">
-        
-        <!-- Breadcrumb e Cabeçalho Principal -->
-        <div class="flex flex-col gap-2">
-          <!-- Breadcrumb: Início > Configurações > Hierarquia de Unidades e Cargos > Exceção de Hierarquia > Visualizar -->
-          <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-xs text-siage-text-secondary">
-            <span 
-              (click)="goHome()" 
-              (keydown.enter)="goHome()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Início
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goConfiguracoes()" 
-              (keydown.enter)="goConfiguracoes()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Configurações
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goHierarquia()" 
-              (keydown.enter)="goHierarquia()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Hierarquia de Unidades e Cargos
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goListagem()" 
-              (keydown.enter)="goListagem()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Exceção de Hierarquia
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span class="text-siage-primary font-semibold" aria-current="page">Visualizar</span>
-          </nav>
-
-          <!-- Título com Botão Voltar e Botão Editar/Configurar -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <button 
-                  mat-icon-button 
-                  type="button" 
-                  (click)="goListagem()" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                  title="Voltar para a listagem"
-                  aria-label="Voltar para a listagem"
-                >
-                  <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-                </button>
-                <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                  Visualizar Exceção de Hierarquia
-                </h1>
-              </div>
-
-              <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-2xl">
-                Consulte as informações do setor, chefia imediata, aprovador de exceção designado e o histórico de alterações.
-              </p>
-            </div>
-
-            <!-- Botão Configurar / Editar -->
-            <div class="shrink-0 pl-8 sm:pl-0">
-              <button 
-                type="button" 
-                (click)="onEditar()" 
-                class="inline-flex items-center justify-center gap-2 h-10 px-5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-              >
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">edit</mat-icon>
-                <span>{{ s.aprovadorVigente ? 'Editar Aprovador' : 'Configurar Exceção' }}</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <!-- Cabeçalho Oficial SIAGE-UI -->
+        <s-page-header
+          [breadcrumbs]="breadcrumbs"
+          title="Visualizar Exceção de Hierarquia"
+          description="Consulte as informações do setor, chefia imediata, aprovador de exceção designado e o histórico de alterações."
+          showBack
+          (back)="goListagem()"
+        >
+          @if (permissionService.canCreate()) {
+            <s-button action variant="primary" icon="edit" (click)="onEditar()">
+              {{ s.aprovadorVigente ? 'Editar Aprovador' : 'Configurar Exceção' }}
+            </s-button>
+          }
+        </s-page-header>
 
         <!-- CARDS DE VISUALIZAÇÃO -->
         <div class="flex flex-col gap-6">
@@ -2457,18 +2226,14 @@ export class ExcecaoHierarquiaForm implements OnInit {
           <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
             <div class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 border-b border-siage-border/40 pb-2">
               <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2">
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">domain</mat-icon>
+                <s-icon name="domain" size="xs" />
                 <span>1. Identificação do Setor</span>
               </h3>
               <div>
                 @if (s.aprovadorVigente) {
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20 whitespace-nowrap">
-                    Suprido por Exceção
-                  </span>
+                  <s-badge tone="info">Suprido por Exceção</s-badge>
                 } @else {
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-700 dark:text-slate-300 border border-slate-500/20 whitespace-nowrap">
-                    Sem Exceção Cadastrada
-                  </span>
+                  <s-badge tone="secondary">Sem Exceção Cadastrada</s-badge>
                 }
               </div>
             </div>
@@ -2488,9 +2253,7 @@ export class ExcecaoHierarquiaForm implements OnInit {
               <div class="flex flex-col gap-1">
                 <span class="text-xs uppercase text-siage-text-secondary font-semibold">Tipificação</span>
                 <div>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-siage-primary/10 text-siage-primary border border-siage-primary/20">
-                    {{ s.tipoEntidade }}
-                  </span>
+                  <s-badge tone="info">{{ s.tipoEntidade }}</s-badge>
                 </div>
               </div>
             </div>
@@ -2499,7 +2262,7 @@ export class ExcecaoHierarquiaForm implements OnInit {
           <!-- CARD 2: CHEFIA IMEDIATA FORMAL -->
           <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
             <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">badge</mat-icon>
+              <s-icon name="badge" size="xs" />
               <span>2. Chefia Imediata Formal</span>
             </h3>
 
@@ -2517,13 +2280,11 @@ export class ExcecaoHierarquiaForm implements OnInit {
                 </div>
                 <div>
                   @if (chefeInfo.status === 'ATIVO') {
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
-                      Ativo
-                    </span>
+                    <s-badge tone="success">Ativo</s-badge>
                   } @else {
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 whitespace-nowrap" [title]="chefeInfo.detalhe ? 'Motivo: ' + chefeInfo.detalhe : 'Chefia inativa'">
+                    <s-badge tone="warning" icon="warning" [sTooltip]="chefeInfo.detalhe ? 'Motivo: ' + chefeInfo.detalhe : 'Chefia inativa'">
                       Inativo{{ chefeInfo.detalhe ? ' — ' + chefeInfo.detalhe : '' }}
-                    </span>
+                    </s-badge>
                   }
                 </div>
               </div>
@@ -2537,7 +2298,7 @@ export class ExcecaoHierarquiaForm implements OnInit {
           <!-- CARD 3: APROVADOR DE EXCEÇÃO VIGENTE -->
           <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
             <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">verified_user</mat-icon>
+              <s-icon name="verified_user" size="xs" />
               <span>3. Aprovador de Exceção Vigente</span>
             </h3>
 
@@ -2546,7 +2307,6 @@ export class ExcecaoHierarquiaForm implements OnInit {
               @let elegivel = serv ? isElegivel(serv) : true;
               @let indisponivel = serv?.indisponibilidade;
               <div class="border border-siage-border rounded-lg p-5 bg-slate-50/50 dark:bg-slate-800/30 flex flex-col gap-4">
-                
                 <!-- Identificação do Aprovador -->
                 <div class="flex items-center gap-3">
                   <div class="w-12 h-12 rounded-full bg-siage-primary/10 text-siage-primary flex items-center justify-center font-bold font-poppins text-lg shrink-0">
@@ -2559,19 +2319,32 @@ export class ExcecaoHierarquiaForm implements OnInit {
                   </div>
                 </div>
 
-                <!-- Camadas de Elegibilidade Regimental (Estrutura idêntica ao formulário, somente consulta) -->
+                <!-- Camadas de Elegibilidade Regimental -->
                 @if (serv) {
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                    
                     <!-- Camada 1: Situação Funcional -->
-                    <div class="border rounded-lg p-4 flex flex-col gap-2" [class.border-emerald-500/30]="elegivel" [class.bg-emerald-500/5]="elegivel" [class.border-red-500/30]="!elegivel" [class.bg-red-500/5]="!elegivel">
+                    <div
+                      class="border rounded-lg p-4 flex flex-col gap-2"
+                      [class.border-emerald-500/30]="elegivel"
+                      [class.bg-emerald-500/5]="elegivel"
+                      [class.border-red-500/30]="!elegivel"
+                      [class.bg-red-500/5]="!elegivel"
+                    >
                       <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider" [class.text-emerald-700]="elegivel" [class.dark:text-emerald-400]="elegivel" [class.text-red-700]="!elegivel" [class.dark:text-red-400]="!elegivel">
+                        <span
+                          class="text-xs font-bold uppercase tracking-wider"
+                          [class.text-emerald-700]="elegivel"
+                          [class.dark:text-emerald-400]="elegivel"
+                          [class.text-red-700]="!elegivel"
+                          [class.dark:text-red-400]="!elegivel"
+                        >
                           Camada 1 — Situação Funcional
                         </span>
-                        <mat-icon style="font-size: 20px; width: 20px; height: 20px;" [class.text-emerald-600]="elegivel" [class.text-red-600]="!elegivel">
-                          {{ elegivel ? 'check_circle' : 'cancel' }}
-                        </mat-icon>
+                        <s-icon
+                          [name]="elegivel ? 'check_circle' : 'cancel'"
+                          [color]="elegivel ? 'text-emerald-600' : 'text-red-600'"
+                          size="sm"
+                        />
                       </div>
                       <span class="text-sm font-semibold text-siage-text-primary">
                         {{ serv.situacaoFuncionalDescricao }}
@@ -2586,14 +2359,28 @@ export class ExcecaoHierarquiaForm implements OnInit {
                     </div>
 
                     <!-- Camada 2: Disponibilidade Operacional -->
-                    <div class="border rounded-lg p-4 flex flex-col gap-2" [class.border-emerald-500/30]="!indisponivel" [class.bg-emerald-500/5]="!indisponivel" [class.border-amber-500/30]="indisponivel" [class.bg-amber-500/5]="indisponivel">
+                    <div
+                      class="border rounded-lg p-4 flex flex-col gap-2"
+                      [class.border-emerald-500/30]="!indisponivel"
+                      [class.bg-emerald-500/5]="!indisponivel"
+                      [class.border-amber-500/30]="indisponivel"
+                      [class.bg-amber-500/5]="indisponivel"
+                    >
                       <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider" [class.text-emerald-700]="!indisponivel" [class.dark:text-emerald-400]="!indisponivel" [class.text-amber-700]="indisponivel" [class.dark:text-amber-400]="indisponivel">
+                        <span
+                          class="text-xs font-bold uppercase tracking-wider"
+                          [class.text-emerald-700]="!indisponivel"
+                          [class.dark:text-emerald-400]="!indisponivel"
+                          [class.text-amber-700]="indisponivel"
+                          [class.dark:text-amber-400]="indisponivel"
+                        >
                           Camada 2 — Disponibilidade Operacional
                         </span>
-                        <mat-icon style="font-size: 20px; width: 20px; height: 20px;" [class.text-emerald-600]="!indisponivel" [class.text-amber-600]="indisponivel">
-                          {{ !indisponivel ? 'check_circle' : 'warning' }}
-                        </mat-icon>
+                        <s-icon
+                          [name]="!indisponivel ? 'check_circle' : 'warning'"
+                          [color]="!indisponivel ? 'text-emerald-600' : 'text-amber-600'"
+                          size="sm"
+                        />
                       </div>
 
                       @if (!indisponivel) {
@@ -2611,9 +2398,8 @@ export class ExcecaoHierarquiaForm implements OnInit {
                           Período: {{ indisponivel.dataInicio }} {{ indisponivel.dataTermino ? 'a ' + indisponivel.dataTermino : '(indeterminado)' }}.
                         </span>
 
-                        <!-- Informação discreta de ciência prévia registrada (sem interação) -->
                         <div class="pt-2 mt-1 border-t border-amber-500/20 flex items-center gap-1.5 text-xs text-amber-800 dark:text-amber-300">
-                          <mat-icon style="font-size: 16px; width: 16px; height: 16px;" class="text-amber-600 shrink-0">info</mat-icon>
+                          <s-icon name="info" color="text-amber-600" size="xs" />
                           <span>
                             @if (ap.cienteAlertaIndisponibilidade) {
                               Ciência de indisponibilidade operacional registrada na designação.
@@ -2624,7 +2410,6 @@ export class ExcecaoHierarquiaForm implements OnInit {
                         </div>
                       }
                     </div>
-
                   </div>
                 }
 
@@ -2651,12 +2436,11 @@ export class ExcecaoHierarquiaForm implements OnInit {
                   </p>
                 </div>
 
-                <!-- Metadados Discretos de Auditoria (Modificado por) -->
+                <!-- Auditoria -->
                 <div class="pt-3 border-t border-siage-border/40 text-xs text-siage-text-secondary flex items-center gap-1.5">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;" class="text-siage-text-secondary/70 shrink-0">history</mat-icon>
+                  <s-icon name="history" size="xs" color="text-siage-text-secondary/70" />
                   <span>Última atualização por <strong class="font-medium text-siage-text-primary">{{ ap.modificadoPor }}</strong> em {{ ap.dataHoraModificacao }}.</span>
                 </div>
-
               </div>
             } @else {
               <div class="py-6 text-center text-xs text-siage-text-secondary border border-dashed border-siage-border rounded-lg flex flex-col items-center justify-center gap-2">
@@ -2669,86 +2453,64 @@ export class ExcecaoHierarquiaForm implements OnInit {
           <!-- CARD 4: HISTÓRICO DE APROVADORES DO SETOR -->
           <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
             <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">history</mat-icon>
+              <s-icon name="history" size="xs" />
               <span>4. Histórico de Aprovadores do Setor</span>
             </h3>
 
-            <div class="border border-siage-border rounded-lg overflow-hidden bg-siage-surface">
-              <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr class="bg-slate-100/70 dark:bg-slate-800/50 border-b border-siage-border text-siage-text-secondary font-semibold">
-                      <th class="p-3">Aprovador</th>
-                      <th class="p-3">Tipo de Atuação</th>
-                      <th class="p-3">Portaria</th>
-                      <th class="p-3">Vigência</th>
-                      <th class="p-3">Situação</th>
-                      <th class="p-3">Modificado por</th>
-                      <th class="p-3">Data/Hora Modificação</th>
-                      <th class="p-3 text-right">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-siage-border/40">
-                    @for (reg of s.historico; track reg.id) {
-                      <tr class="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                        <td class="p-3 font-medium text-siage-text-primary">
-                          <span class="block text-sm">{{ reg.servidorNome }}</span>
-                          <span class="text-xs text-siage-text-secondary">Matrícula: {{ reg.servidorMatricula }}</span>
-                        </td>
-                        <td class="p-3 text-xs text-siage-text-secondary">
-                          {{ reg.modalidade === 'SOBREPOE_SEMPRE' ? 'Sempre sobrepõe o chefe' : 'Quando indisponível' }}
-                        </td>
-                        <td class="p-3 text-xs text-siage-text-secondary">
-                          {{ reg.portaria || '-' }}
-                        </td>
-                        <td class="p-3 text-xs text-siage-text-secondary font-medium">
-                          {{ reg.vigenciaFormatada }}
-                        </td>
-                        <td class="p-3">
-                          @if (reg.situacao === 'ATIVO') {
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
-                              Ativo
-                            </span>
-                          } @else if (reg.situacao === 'SUBSTITUIDO') {
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-700 dark:text-slate-300 border border-slate-500/20">
-                              Substituído
-                            </span>
-                          } @else {
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
-                              Encerrado
-                            </span>
-                          }
-                        </td>
-                        <td class="p-3 text-xs text-siage-text-secondary">{{ reg.modificadoPor }}</td>
-                        <td class="p-3 text-xs text-siage-text-secondary">{{ reg.dataHoraModificacao }}</td>
-                        <td class="p-3 text-right">
-                          <button 
-                            mat-icon-button 
-                            type="button" 
-                            (click)="abrirDetalhesRegistro(reg)" 
-                            class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer"
-                            matTooltip="Detalhes da exceção"
-                            aria-label="Ver detalhes"
-                          >
-                            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                          </button>
-                        </td>
-                      </tr>
-                    } @empty {
-                      <tr>
-                        <td colspan="8" class="p-6 text-center text-xs text-siage-text-secondary">
-                          Este setor não possui nenhum aprovador de exceção registrado em seu histórico.
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <s-table
+              label="Histórico de Aprovadores do Setor"
+              [columns]="historicoColumns"
+              [rows]="s.historico"
+              [actions]="historicoActions"
+              [empty]="historicoEmpty"
+              (actionClick)="onHistoricoAction($event)"
+            >
+              <ng-template sTableCell="servidorNome" let-reg>
+                @let r = asHistorico(reg);
+                <span class="block text-sm font-medium text-siage-text-primary">{{ r.servidorNome }}</span>
+                <span class="text-xs text-siage-text-secondary">Matrícula: {{ r.servidorMatricula }}</span>
+              </ng-template>
+
+              <ng-template sTableCell="modalidade" let-reg>
+                @let r = asHistorico(reg);
+                <span class="text-xs text-siage-text-secondary">
+                  {{ r.modalidade === 'SOBREPOE_SEMPRE' ? 'Sempre sobrepõe o chefe' : 'Quando indisponível' }}
+                </span>
+              </ng-template>
+
+              <ng-template sTableCell="portaria" let-reg>
+                @let r = asHistorico(reg);
+                <span class="text-xs text-siage-text-secondary">{{ r.portaria || '-' }}</span>
+              </ng-template>
+
+              <ng-template sTableCell="vigenciaFormatada" let-reg>
+                @let r = asHistorico(reg);
+                <span class="text-xs text-siage-text-secondary font-medium">{{ r.vigenciaFormatada }}</span>
+              </ng-template>
+
+              <ng-template sTableCell="situacao" let-reg>
+                @let r = asHistorico(reg);
+                @if (r.situacao === 'ATIVO') {
+                  <s-badge tone="success">Ativo</s-badge>
+                } @else if (r.situacao === 'SUBSTITUIDO') {
+                  <s-badge tone="secondary">Substituído</s-badge>
+                } @else {
+                  <s-badge tone="warning" icon="history">Encerrado</s-badge>
+                }
+              </ng-template>
+
+              <ng-template sTableCell="modificadoPor" let-reg>
+                @let r = asHistorico(reg);
+                <span class="text-xs text-siage-text-secondary">{{ r.modificadoPor }}</span>
+              </ng-template>
+
+              <ng-template sTableCell="dataHoraModificacao" let-reg>
+                @let r = asHistorico(reg);
+                <span class="text-xs text-siage-text-secondary">{{ r.dataHoraModificacao }}</span>
+              </ng-template>
+            </s-table>
           </div>
-
         </div>
-
       </div>
     }
   `
@@ -2758,11 +2520,46 @@ export class ExcecaoHierarquiaView implements OnInit {
   private readonly router = inject(Router);
   readonly service = inject(ExcecaoHierarquiaService);
   readonly permissionService = inject(PermissionService);
-  private readonly dialog = inject(MatDialog);
-  private readonly toastService = inject(ToastService);
+  private readonly modalService = inject(SModalService);
+  private readonly toastService = inject(SToastService);
 
   readonly setorId = signal<string>('');
   readonly setor = computed(() => this.service.getSetor(this.setorId()));
+
+  readonly breadcrumbs: readonly SBreadcrumb[] = [
+    { label: 'Início', routerLink: '/inicio' },
+    { label: 'Configurações', routerLink: '/configuracoes' },
+    { label: 'Hierarquia de Unidades e Cargos', routerLink: '/configuracoes/hierarquia' },
+    { label: 'Exceção de Hierarquia', routerLink: '/configuracoes/hierarquia/excecao-hierarquia' },
+    { label: 'Visualizar' }
+  ];
+
+  readonly historicoColumns: readonly STableColumn<RegistroHistoricoExcecao>[] = [
+    { key: 'servidorNome', label: 'Aprovador' },
+    { key: 'modalidade', label: 'Tipo de Atuação' },
+    { key: 'portaria', label: 'Portaria' },
+    { key: 'vigenciaFormatada', label: 'Vigência' },
+    { key: 'situacao', label: 'Situação', align: 'center' },
+    { key: 'modificadoPor', label: 'Modificado por' },
+    { key: 'dataHoraModificacao', label: 'Data/Hora Modificação' }
+  ];
+
+  readonly historicoEmpty: STableEmpty = {
+    title: 'Sem histórico registrado',
+    description: 'Este setor não possui nenhum aprovador de exceção registrado em seu histórico.'
+  };
+
+  readonly historicoActions: readonly STableAction<RegistroHistoricoExcecao>[] = [
+    {
+      id: 'visualizar',
+      label: 'Detalhes da exceção',
+      icon: 'visibility'
+    }
+  ];
+
+  asHistorico(val: unknown): RegistroHistoricoExcecao {
+    return val as RegistroHistoricoExcecao;
+  }
 
   getSituacao(setor: SetorHierarquia): SituacaoSetor {
     return this.service.calcularSituacaoSetor(setor);
@@ -2796,10 +2593,16 @@ export class ExcecaoHierarquiaView implements OnInit {
     }
   }
 
+  onHistoricoAction(event: STableActionEvent<RegistroHistoricoExcecao>) {
+    if (event.action === 'visualizar') {
+      this.abrirDetalhesRegistro(event.row);
+    }
+  }
+
   abrirDetalhesRegistro(reg: RegistroHistoricoExcecao) {
-    this.dialog.open(DetalhesExcecaoModal, {
-      disableClose: true,
-      data: { registro: reg }
+    this.modalService.open(DetalhesExcecaoModal, {
+      data: { registro: reg },
+      width: '600px'
     });
   }
 
