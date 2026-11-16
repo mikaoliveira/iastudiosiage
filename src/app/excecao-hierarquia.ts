@@ -27,6 +27,7 @@ import {
   SModalComponent,
   SModalFooterDirective,
   SModalService,
+  SOptionTemplateDirective,
   SPageHeaderComponent,
   SSelectComponent,
   STableAction,
@@ -1402,6 +1403,12 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
 @Component({
   selector: 'app-excecao-hierarquia-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [`
+    ::ng-deep .mat-mdc-option:has(.servidor-sugestao) > .mdc-list-item__primary-text {
+      flex: 1;
+      min-width: 0;
+    }
+  `],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -1410,6 +1417,7 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
     SInputComponent,
     STextareaComponent,
     SAutocompleteComponent,
+    SOptionTemplateDirective,
     SCheckboxComponent,
     SBadgeComponent,
     SButtonComponent,
@@ -1496,7 +1504,7 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
               @if (selectedServidor()) {
                 <!-- Campo Bloqueado com Servidor Atual + Botão Trocar Servidor ao lado -->
                 <div class="flex items-start gap-3 w-full">
-                  <s-field label="Indicar Aprovador de Exceção" class="flex-1">
+                  <s-field label="Buscar Servidor do Setor" class="flex-1">
                     <s-input [formControl]="servidorSelecionadoControl" />
                   </s-field>
 
@@ -1519,7 +1527,7 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
               } @else {
                 <!-- Campo de Busca de Servidor Habilitado com Autocomplete -->
                 <s-field
-                  label="Indicar Aprovador de Exceção"
+                  label="Buscar Servidor do Setor"
                   required
                   [error]="servidorAutocompleteControl.invalid && servidorAutocompleteControl.touched ? 'É obrigatório selecionar um servidor aprovador.' : null"
                 >
@@ -1528,7 +1536,24 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
                     placeholder="Digite o nome ou a matrícula do servidor"
                     (input)="onServidorInput($event)"
                     (selectionChange)="onServidorSelectionChange($event)"
-                  />
+                  >
+                    <ng-template sOption [sOptionOf]="servidorOptions()" let-opcao>
+                      @if (service.getServidor(opcao.value); as servidor) {
+                        <div class="servidor-sugestao flex items-center justify-between gap-3 w-full py-2">
+                          <div class="flex flex-col min-w-0 text-left">
+                            <span class="text-sm font-semibold text-siage-text-primary">{{ servidor.nome }}</span>
+                            <span class="text-xs text-siage-text-secondary">{{ servidor.cargo }} • Matrícula: {{ servidor.matricula }}</span>
+                          </div>
+                          <s-badge
+                            [tone]="isElegivel(servidor) && !servidor.indisponibilidade ? 'success' : 'warning'"
+                            [icon]="isElegivel(servidor) && !servidor.indisponibilidade ? '' : 'warning'"
+                          >
+                            {{ isElegivel(servidor) && !servidor.indisponibilidade ? 'Elegível' : 'Indisponível' }}
+                          </s-badge>
+                        </div>
+                      }
+                    </ng-template>
+                  </s-autocomplete>
                 </s-field>
                 <span class="text-xs text-siage-text-secondary -mt-2 block">
                   Pesquise servidores ativos no SIAGE-RH em toda a estrutura do Estado.
@@ -2046,6 +2071,7 @@ export class ExcecaoHierarquiaForm implements OnInit {
 
     const serv = this.selectedServidor()!;
     const val = this.form.getRawValue();
+    const atualizacao = this.temAprovadorAtivo();
 
     this.isSaving.set(true);
 
@@ -2060,7 +2086,7 @@ export class ExcecaoHierarquiaForm implements OnInit {
 
       this.isSavedSuccessfully = true;
       this.isSaving.set(false);
-      this.toastService.success(this.temAprovadorAtivo() ? 'Aprovador de exceção atualizado com sucesso.' : 'Aprovador de exceção designado com sucesso.');
+      this.toastService.success(atualizacao ? 'Aprovador de exceção atualizado com sucesso.' : 'Aprovador de exceção designado com sucesso.');
       this.router.navigate(['/configuracoes/hierarquia/excecao-hierarquia']);
     }, 150);
   }
@@ -2262,7 +2288,7 @@ export class ExcecaoHierarquiaForm implements OnInit {
           <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
             <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
               <s-icon name="badge" size="xs" />
-              <span>2. Chefia Imediata Formal</span>
+              <span>2. Chefia Imediata Atual</span>
             </h3>
 
             @if (s.chefeImediato; as chefe) {
@@ -2281,7 +2307,7 @@ export class ExcecaoHierarquiaForm implements OnInit {
                   @if (chefeInfo.status === 'ATIVO') {
                     <s-badge tone="success">Ativo</s-badge>
                   } @else {
-                    <s-badge tone="warning" icon="warning" [sTooltip]="chefeInfo.detalhe ? 'Motivo: ' + chefeInfo.detalhe : 'Chefia inativa'">
+                    <s-badge tone="secondary" icon="warning" [sTooltip]="chefeInfo.detalhe ? 'Motivo: ' + chefeInfo.detalhe : 'Chefia inativa'">
                       Inativo{{ chefeInfo.detalhe ? ' — ' + chefeInfo.detalhe : '' }}
                     </s-badge>
                   }

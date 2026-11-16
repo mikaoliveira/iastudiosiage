@@ -1,6 +1,6 @@
 import {TestBed} from '@angular/core/testing';
 import {provideRouter, Router, ActivatedRoute, convertToParamMap} from '@angular/router';
-import {signal} from '@angular/core';
+import {provideZonelessChangeDetection, signal} from '@angular/core';
 import {SModalService, SToastService} from '@siage/siage-ui';
 import {vi, describe, it, expect, beforeEach, afterEach} from 'vitest';
 import {
@@ -148,6 +148,7 @@ describe('Exceção de Hierarquia - Formulário e Regras de Negócio (Form)', ()
     await TestBed.configureTestingModule({
       imports: [ExcecaoHierarquiaForm],
       providers: [
+        provideZonelessChangeDetection(),
         provideRouter([
           {path: 'configuracoes/hierarquia/excecao-hierarquia', component: ExcecaoHierarquiaList},
           {path: 'configuracoes/hierarquia/excecao-hierarquia/:id/configurar', component: ExcecaoHierarquiaForm}
@@ -245,6 +246,7 @@ describe('Exceção de Hierarquia - Formulário e Regras de Negócio (Form)', ()
   it('executa fluxo de trocar servidor limpando os campos após confirmação', async () => {
     vi.spyOn(modalService, 'confirm').mockResolvedValue(true);
     const fixture = TestBed.createComponent(ExcecaoHierarquiaForm);
+    fixture.detectChanges();
     const component = fixture.componentInstance;
     component.setorId.set('sec-geral-1');
 
@@ -279,6 +281,41 @@ describe('Exceção de Hierarquia - Formulário e Regras de Negócio (Form)', ()
 
     expect(modalService.confirm).toHaveBeenCalled();
     expect(revogarSpy).toHaveBeenCalledWith('sec-geral-1');
+    expect(TestBed.inject(SToastService).success).toHaveBeenCalledWith('Exceção de hierarquia revogada com sucesso.');
+  });
+
+  it.each([
+    {nova: true, mensagem: 'Aprovador de exceção designado com sucesso.'},
+    {nova: false, mensagem: 'Aprovador de exceção atualizado com sucesso.'}
+  ])('informa a operação de salvamento antes de alterar o setor: $mensagem', ({nova, mensagem}) => {
+    if (nova) service.revogarExcecao('sec-geral-1');
+    const fixture = TestBed.createComponent(ExcecaoHierarquiaForm);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.selectedServidor.set(service.getServidor('170'));
+    component.form.patchValue({modalidade: 'SOBREPOE_SEMPRE', justificativa: 'Justificativa válida.'});
+
+    vi.useFakeTimers();
+    try {
+      component.onSalvar();
+      vi.advanceTimersByTime(150);
+      expect(service.getSetor('sec-geral-1')?.aprovadorVigente?.situacao).toBe('ATIVO');
+      expect(TestBed.inject(SToastService).success).toHaveBeenCalledWith(mensagem);
+      expect(modalService.open).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('mantém a busca por matrícula e a seleção do servidor', () => {
+    const fixture = TestBed.createComponent(ExcecaoHierarquiaForm);
+    const component = fixture.componentInstance;
+    component.servidorBuscaTexto.set('185');
+    const opcao = component.servidorOptions()[0];
+
+    expect(opcao.value).toBe('185');
+    component.onServidorSelectionChange(opcao);
+    expect(component.selectedServidor()?.matricula).toBe('185');
   });
 
   it('bloqueia saída sem confirmação quando há alterações pendentes (canDeactivate)', async () => {
