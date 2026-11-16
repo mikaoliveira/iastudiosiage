@@ -52,6 +52,7 @@ import {
   ImpedimentoInativacaoModal,
   AnexarNormativaExtincaoModal,
   validarDataFormato,
+  dataFutura,
   normalizarDataParaBr,
   formatarDataParaExibicao,
   parseDataBrParaTimestamp,
@@ -572,7 +573,7 @@ export class GerenciaExecutivaService {
               <!-- Filtro: Nome (máximo de 200 caracteres) -->
               <div class="form-field-group">
 
-                <s-field label="Nome" controlId="filter-nome"><s-input type="text" formControlName="nome" [maxlength]="200" placeholder="Buscar por nome" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" (focusout)="filtroForm.controls.nome.markAsTouched(); " />
+                <s-field label="Nome" controlId="filter-nome"><s-input type="text" formControlName="nome" [maxlength]="200" placeholder="Digite o Nome" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" (focusout)="filtroForm.controls.nome.markAsTouched(); " />
 @if (filtroForm.controls.nome.value) { <s-icon-button icon="close" label="Limpar campo" text size="sm" (click)="limparFiltroNome()" /> }</s-field>
               </div>
 
@@ -1002,7 +1003,7 @@ data: {
               <!-- Nome da Gerência Executiva -->
               <div class="md:col-span-2 form-field-group">
 
-                <s-field label="Nome da Gerência Executiva" controlId="form-nome" required [error]="(form.get('nome')?.hasError('required') &amp;&amp; form.get('nome')?.touched) ? 'O Nome da Gerência Executiva é obrigatório.' : (form.get('nome')?.hasError('duplicado')) ? 'Já existe uma Gerência Executiva cadastrada com este nome.' : ''"><s-input formControlName="nome" [maxlength]="200" placeholder="Ex: Gerência Executiva de Seleção e Desenvolvimento de Talentos" (focusout)="form.controls.nome.markAsTouched(); " /></s-field><span align="end" class="text-xs text-siage-text-secondary">
+                <s-field label="Nome da Gerência Executiva" controlId="form-nome" required [error]="(form.get('nome')?.hasError('required') &amp;&amp; form.get('nome')?.touched) ? 'O Nome da Gerência Executiva é obrigatório.' : (form.get('nome')?.hasError('duplicado')) ? 'Já existe uma Gerência Executiva cadastrada com este nome.' : ''"><s-input formControlName="nome" [maxlength]="200" placeholder="Digite o Nome da Gerência Executiva" (focusout)="form.controls.nome.markAsTouched(); " /></s-field><span align="end" class="text-xs text-siage-text-secondary">
                     {{ (form.get('nome')?.value || '').length }} / 200
                   </span>
               </div>
@@ -1109,7 +1110,7 @@ data: {
                     <!-- Número do Ato (limitado a 20 caracteres) -->
                     <div class="form-field-group">
 
-                      <s-field label="Número do Ato Governamental" controlId="form-ato-numero" required [error]="(atoNumeroControl.hasError('required') &amp;&amp; atoNumeroControl.touched) ? 'O Número do Ato Governamental é obrigatório.' : (atoNumeroControl.hasError('maxlength') &amp;&amp; atoNumeroControl.touched) ? 'O Número do Ato Governamental deve ter no máximo 20 caracteres.' : ''"><s-input [formControl]="atoNumeroControl" [maxlength]="20" placeholder="Ex: Ato nº 2.100/2024" (focusout)="atoNumeroControl.markAsTouched(); " /></s-field>
+                      <s-field label="Número do Ato Governamental" controlId="form-ato-numero" required [error]="(atoNumeroControl.hasError('required') &amp;&amp; atoNumeroControl.touched) ? 'O Número do Ato Governamental é obrigatório.' : (atoNumeroControl.hasError('maxlength') &amp;&amp; atoNumeroControl.touched) ? 'O Número do Ato Governamental deve ter no máximo 20 caracteres.' : ''"><s-input [formControl]="atoNumeroControl" [maxlength]="20" placeholder="Digite o Número do Ato Governamental" (focusout)="atoNumeroControl.markAsTouched(); " /></s-field>
                     </div>
 
                     <!-- Data da Publicação -->
@@ -1193,7 +1194,7 @@ data: {
                   <!-- Nome da Normativa de Criação -->
                   <div class="md:col-span-3 form-field-group">
 
-                    <s-field label="Nome da Normativa de Criação" controlId="form-norm-criacao-nome" required [error]="(normCriacaoNomeControl.hasError('required') &amp;&amp; normCriacaoNomeControl.touched) ? 'O Nome da Normativa de Criação é obrigatório.' : (normCriacaoNomeControl.hasError('maxlength') &amp;&amp; normCriacaoNomeControl.touched) ? 'O Nome da Normativa de Criação deve ter no máximo 100 caracteres.' : ''"><s-input [formControl]="normCriacaoNomeControl" [maxlength]="100" placeholder="Ex: Decreto Estadual nº 42.165/2023 - Estrutura da Gerência de Seleção" (focusout)="normCriacaoNomeControl.markAsTouched(); " /></s-field><span align="end" class="text-xs text-siage-text-secondary">
+                    <s-field label="Nome da Normativa de Criação" controlId="form-norm-criacao-nome" required [error]="(normCriacaoNomeControl.hasError('required') &amp;&amp; normCriacaoNomeControl.touched) ? 'O Nome da Normativa de Criação é obrigatório.' : (normCriacaoNomeControl.hasError('maxlength') &amp;&amp; normCriacaoNomeControl.touched) ? 'O Nome da Normativa de Criação deve ter no máximo 100 caracteres.' : ''"><s-input [formControl]="normCriacaoNomeControl" [maxlength]="100" placeholder="Digite o Nome da Normativa de Criação" (focusout)="normCriacaoNomeControl.markAsTouched(); " /></s-field><span align="end" class="text-xs text-siage-text-secondary">
                         {{ (normCriacaoNomeControl.value || '').length }} / 100
                       </span>
                   </div>
@@ -1201,7 +1202,7 @@ data: {
                   <!-- Número da Normativa -->
                   <div class="form-field-group">
 
-                    <s-field label="Número da Normativa de Criação" controlId="form-norm-criacao-numero" required [error]="(normCriacaoNumeroControl.hasError('required') &amp;&amp; normCriacaoNumeroControl.touched) ? 'O Número da Normativa de Criação é obrigatório.' : (normCriacaoNumeroControl.hasError('maxlength') &amp;&amp; normCriacaoNumeroControl.touched) ? 'O Número da Normativa de Criação deve ter no máximo 20 caracteres.' : ''"><s-input [formControl]="normCriacaoNumeroControl" [maxlength]="20" placeholder="Ex: 42.165" (focusout)="normCriacaoNumeroControl.markAsTouched(); " /></s-field>
+                    <s-field label="Número da Normativa de Criação" controlId="form-norm-criacao-numero" required [error]="(normCriacaoNumeroControl.hasError('required') &amp;&amp; normCriacaoNumeroControl.touched) ? 'O Número da Normativa de Criação é obrigatório.' : (normCriacaoNumeroControl.hasError('maxlength') &amp;&amp; normCriacaoNumeroControl.touched) ? 'O Número da Normativa de Criação deve ter no máximo 20 caracteres.' : ''"><s-input [formControl]="normCriacaoNumeroControl" [maxlength]="20" placeholder="Digite o Número da Normativa de Criação" (focusout)="normCriacaoNumeroControl.markAsTouched(); " /></s-field>
                   </div>
 
                   <!-- Data da Publicação -->
@@ -1275,14 +1276,14 @@ data: {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border border-siage-border rounded-lg p-4 bg-slate-50/30 dark:bg-slate-900/20">
                   <div class="md:col-span-3 form-field-group">
 
-                    <s-field label="Nome da Normativa de Extinção" controlId="form-norm-ext-nome" required [error]="(normExtincaoNomeControl.hasError('required') &amp;&amp; normExtincaoNomeControl.touched) ? 'O Nome da Normativa de Extinção é obrigatório.' : (normExtincaoNomeControl.hasError('maxlength') &amp;&amp; normExtincaoNomeControl.touched) ? 'O Nome da Normativa de Extinção deve ter no máximo 100 caracteres.' : ''"><s-input [formControl]="normExtincaoNomeControl" [maxlength]="100" placeholder="Ex: Lei Complementar nº 185/2023 - Extinção da Gerência" (focusout)="normExtincaoNomeControl.markAsTouched(); " /></s-field><span align="end" class="text-xs text-siage-text-secondary">
+                    <s-field label="Nome da Normativa de Extinção" controlId="form-norm-ext-nome" required [error]="(normExtincaoNomeControl.hasError('required') &amp;&amp; normExtincaoNomeControl.touched) ? 'O Nome da Normativa de Extinção é obrigatório.' : (normExtincaoNomeControl.hasError('maxlength') &amp;&amp; normExtincaoNomeControl.touched) ? 'O Nome da Normativa de Extinção deve ter no máximo 100 caracteres.' : ''"><s-input [formControl]="normExtincaoNomeControl" [maxlength]="100" placeholder="Digite o Nome da Normativa de Extinção" (focusout)="normExtincaoNomeControl.markAsTouched(); " /></s-field><span align="end" class="text-xs text-siage-text-secondary">
                         {{ (normExtincaoNomeControl.value || '').length }} / 100
                       </span>
                   </div>
 
                   <div class="form-field-group">
 
-                    <s-field label="Número da Normativa de Extinção" controlId="form-norm-ext-numero" required [error]="(normExtincaoNumeroControl.hasError('required') &amp;&amp; normExtincaoNumeroControl.touched) ? 'O Número da Normativa de Extinção é obrigatório.' : (normExtincaoNumeroControl.hasError('maxlength') &amp;&amp; normExtincaoNumeroControl.touched) ? 'O Número da Normativa de Extinção deve ter no máximo 20 caracteres.' : ''"><s-input [formControl]="normExtincaoNumeroControl" [maxlength]="20" placeholder="Ex: 185" (focusout)="normExtincaoNumeroControl.markAsTouched(); " /></s-field>
+                    <s-field label="Número da Normativa de Extinção" controlId="form-norm-ext-numero" required [error]="(normExtincaoNumeroControl.hasError('required') &amp;&amp; normExtincaoNumeroControl.touched) ? 'O Número da Normativa de Extinção é obrigatório.' : (normExtincaoNumeroControl.hasError('maxlength') &amp;&amp; normExtincaoNumeroControl.touched) ? 'O Número da Normativa de Extinção deve ter no máximo 20 caracteres.' : ''"><s-input [formControl]="normExtincaoNumeroControl" [maxlength]="20" placeholder="Digite o Número da Normativa de Extinção" (focusout)="normExtincaoNumeroControl.markAsTouched(); " /></s-field>
                   </div>
 
                   <div class="md:col-span-2 form-field-group">
@@ -1335,7 +1336,7 @@ data: {
                   <!-- Filtro: Nome -->
                   <div class="form-field-group">
 
-                    <s-field label="Nome" controlId="filtro-sub-nome"><s-input type="text" [formControl]="filtroSubordinadaNome" [maxlength]="200" placeholder="Digite o nome" (keydown.enter)="$event.preventDefault(); canBuscarSubordinadas() &amp;&amp; onBuscarSubordinadas()" (focusout)="filtroSubordinadaNome.markAsTouched(); " />
+                    <s-field label="Nome" controlId="filtro-sub-nome"><s-input type="text" [formControl]="filtroSubordinadaNome" [maxlength]="200" placeholder="Digite o Nome" (keydown.enter)="$event.preventDefault(); canBuscarSubordinadas() &amp;&amp; onBuscarSubordinadas()" (focusout)="filtroSubordinadaNome.markAsTouched(); " />
 @if (filtroSubordinadaNome.value) { <s-icon-button icon="close" label="Limpar campo" text size="sm" (click)="limparFiltroSubNome()" /> }</s-field>
                   </div>
 
@@ -1522,7 +1523,7 @@ export class GerenciaExecutivaForm implements OnInit {
     this.estadoatoDataControl();
     const num = (this.atoNumeroControl.value || '').trim();
     const data = (this.atoDataControl.value || '').trim();
-    return num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data);
+    return num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data) && !dataFutura(data);
   });
 
   // Habilita anexação da Normativa de Criação apenas se Nome, Número e Data válidos
@@ -1533,7 +1534,7 @@ export class GerenciaExecutivaForm implements OnInit {
     const nome = (this.normCriacaoNomeControl.value || '').trim();
     const num = (this.normCriacaoNumeroControl.value || '').trim();
     const data = (this.normCriacaoDataControl.value || '').trim();
-    return nome.length > 0 && nome.length <= 100 && num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data);
+    return nome.length > 0 && nome.length <= 100 && num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data) && !dataFutura(data);
   });
 
   // Habilita anexação da Normativa de Extinção apenas se Nome, Número e Data válidos
@@ -1544,7 +1545,7 @@ export class GerenciaExecutivaForm implements OnInit {
     const nome = (this.normExtincaoNomeControl.value || '').trim();
     const num = (this.normExtincaoNumeroControl.value || '').trim();
     const data = (this.normExtincaoDataControl.value || '').trim();
-    return nome.length > 0 && nome.length <= 100 && num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data);
+    return nome.length > 0 && nome.length <= 100 && num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data) && !dataFutura(data);
   });
 
   readonly opcoesform_sec_exec = computed(() => {
@@ -1608,11 +1609,7 @@ export class GerenciaExecutivaForm implements OnInit {
   readonly estadofiltroSubordinadaNome = toSignal(this.filtroSubordinadaNome.valueChanges, {initialValue: this.filtroSubordinadaNome.value});
   readonly estadofiltroSubordinadaUtb = toSignal(this.filtroSubordinadaUtb.valueChanges, {initialValue: this.filtroSubordinadaUtb.value});
   readonly estadoFormularioOficial = toSignal(this.form.valueChanges, {initialValue: this.form.value});
-  onCliqueDownloadLocal(event: MouseEvent, arquivo: File | null, doc: DocumentoAnexo | undefined) {
-    if (arquivo && doc && (event.target as Element).closest('button[aria-label="Baixar arquivo"]')) {
-      this.toastService.success(`Download de "${doc.nomeArquivo}" iniciado.`);
-    }
-  }
+  onCliqueDownloadLocal(_event: MouseEvent, _arquivo: File | null, _doc: DocumentoAnexo | undefined) {}
   onFileUploadError(error: SFileError) {
     if (error.kind === 'size') this.toastService.warning('O arquivo excede o limite máximo permitido de 10 MB.');
     else this.toastService.warning('Formato não suportado. Utilize PDF, JPG, JPEG ou PNG.');
@@ -1682,7 +1679,7 @@ export class GerenciaExecutivaForm implements OnInit {
   readonly normCriacaoDataPicker = new DataFormulario(this.normCriacaoDataControl);
   readonly normExtincaoDataPicker = new DataFormulario(this.normExtincaoDataControl);
   readonly dataMinima = new Date(1900, 0, 1);
-  readonly dataMaxima = new Date(2100, 11, 31);
+  readonly dataMaxima = new Date();
   private lastValidUtbCodigo = '';
 
   ngOnInit() {
@@ -2245,8 +2242,8 @@ data: {
       this.normExtincaoDataControl.markAsTouched();
       hasError = true;
       if (!firstInvalidId) firstInvalidId = 'form-norm-ext-data';
-    } else if (!validarDataFormato(data)) {
-      this.normExtincaoDataControl.setErrors({ dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
+    } else if (!validarDataFormato(data) || dataFutura(data)) {
+      this.normExtincaoDataControl.setErrors(dataFutura(data) ? { dataRange: 'A data não pode ser futura.' } : { dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
       this.normExtincaoDataControl.markAsTouched();
       hasError = true;
       if (!firstInvalidId) firstInvalidId = 'form-norm-ext-data';
@@ -2321,9 +2318,7 @@ data: {
       }});
   }
 
-  baixarDoc(doc: DocumentoAnexo) {
-    this.toastService.success(`Download de "${doc.nomeArquivo}" iniciado.`);
-  }
+  baixarDoc(_doc: DocumentoAnexo) {}
 
   // Métodos de Subordinadas (Subgerências) no modo edição
   readonly filteredSubUtbsList = computed(() => {
@@ -2505,8 +2500,8 @@ data: {
         this.normExtincaoDataControl.markAsTouched();
         hasError = true;
         if (!firstInvalidId) firstInvalidId = 'form-norm-ext-data';
-      } else if (!validarDataFormato(extData)) {
-        this.normExtincaoDataControl.setErrors({ dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
+      } else if (!validarDataFormato(extData) || dataFutura(extData)) {
+        this.normExtincaoDataControl.setErrors(dataFutura(extData) ? { dataRange: 'A data não pode ser futura.' } : { dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
         this.normExtincaoDataControl.markAsTouched();
         hasError = true;
         if (!firstInvalidId) firstInvalidId = 'form-norm-ext-data';
@@ -2589,8 +2584,8 @@ data: {
         this.atoDataControl.markAsTouched();
         hasError = true;
         if (!firstInvalidId) firstInvalidId = 'form-ato-data';
-      } else if (!validarDataFormato(atoData)) {
-        this.atoDataControl.setErrors({ dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
+      } else if (!validarDataFormato(atoData) || dataFutura(atoData)) {
+        this.atoDataControl.setErrors(dataFutura(atoData) ? { dataRange: 'A data não pode ser futura.' } : { dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
         this.atoDataControl.markAsTouched();
         hasError = true;
         if (!firstInvalidId) firstInvalidId = 'form-ato-data';
@@ -2643,8 +2638,8 @@ data: {
         this.normCriacaoDataControl.markAsTouched();
         hasError = true;
         if (!firstInvalidId) firstInvalidId = 'form-norm-criacao-data';
-      } else if (!validarDataFormato(normCriaData)) {
-        this.normCriacaoDataControl.setErrors({ dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
+      } else if (!validarDataFormato(normCriaData) || dataFutura(normCriaData)) {
+        this.normCriacaoDataControl.setErrors(dataFutura(normCriaData) ? { dataRange: 'A data não pode ser futura.' } : { dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
         this.normCriacaoDataControl.markAsTouched();
         hasError = true;
         if (!firstInvalidId) firstInvalidId = 'form-norm-criacao-data';
@@ -2955,7 +2950,7 @@ data: {
                   <!-- Filtro: Nome -->
                   <div class="form-field-group">
 
-                    <s-field label="Nome" controlId="view-filtro-sub-nome"><s-input type="text" [formControl]="filtroNome" [maxlength]="200" placeholder="Digite o nome" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" (focusout)="filtroNome.markAsTouched(); " />
+                    <s-field label="Nome" controlId="view-filtro-sub-nome"><s-input type="text" [formControl]="filtroNome" [maxlength]="200" placeholder="Digite o Nome" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" (focusout)="filtroNome.markAsTouched(); " />
 @if (filtroNome.value) { <s-icon-button icon="close" label="Limpar campo" text size="sm" (click)="limparFiltroNome()" /> }</s-field>
                   </div>
 
@@ -3248,9 +3243,7 @@ data: {
       }});
   }
 
-  baixarDoc(doc: DocumentoAnexo) {
-    this.toast.success(`Download de "${doc.nomeArquivo}" iniciado.`);
-  }
+  baixarDoc(_doc: DocumentoAnexo) {}
 }
 
 // ==========================================
@@ -3289,7 +3282,7 @@ class DataFormulario {
 
   private aplicarErros(valor: string | null) {
     const limpo = (valor || '').trim();
-    const erro = !limpo ? {required: true} : !validarDataFormato(limpo) ? {dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.'} : null;
+    const erro = !limpo ? {required: true} : !validarDataFormato(limpo) ? {dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.'} : dataFutura(limpo) ? {dataRange: 'A data não pode ser futura.'} : null;
     this.control.setErrors(erro);
     this.dateControl.setErrors(erro);
   }

@@ -981,7 +981,7 @@ export class DetalhesExcecaoModal {
               <s-field label="Unidade de Trabalho / Setor" controlId="filter-setor">
                 <s-input
                   formControlName="setor"
-                  placeholder="Buscar por nome ou código UTB"
+                  placeholder="Digite a Unidade de Trabalho / Setor"
                   (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
                 />
               </s-field>
@@ -1008,7 +1008,7 @@ export class DetalhesExcecaoModal {
               <s-field label="Chefia Imediata (Nome)" controlId="filter-chefe-nome">
                 <s-input
                   formControlName="chefeNome"
-                  placeholder="Buscar nome do chefe"
+                  placeholder="Digite o Nome da Chefia Imediata"
                   (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
                 />
               </s-field>
@@ -1026,7 +1026,7 @@ export class DetalhesExcecaoModal {
               <s-field label="Aprovador de Exceção (Nome)" controlId="filter-aprov-nome">
                 <s-input
                   formControlName="aprovadorNome"
-                  placeholder="Buscar nome do aprovador"
+                  placeholder="Digite o Nome do Aprovador de Exceção"
                   (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
                 />
               </s-field>
@@ -1711,7 +1711,7 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
                 <s-input
                   [formControl]="form.controls.portaria"
                   [maxlength]="100"
-                  placeholder="Ex: Portaria SEAD nº 104/2024"
+                  placeholder="Digite a Portaria Regulamentadora / Ato Oficial"
                 />
               </s-field>
               <span class="text-xs text-siage-text-secondary -mt-2 block">
@@ -1731,7 +1731,7 @@ export const excecaoHierarquiaFormDeactivateGuard: CanDeactivateFn<ExcecaoHierar
                 <s-textarea
                   [formControl]="form.controls.justificativa"
                   [maxlength]="1000"
-                  placeholder="Descreva detalhadamente a fundamentação e a necessidade regimental para a designação do aprovador de exceção..."
+                  placeholder="Digite a Justificativa da Exceção Fundamentada"
                 />
               </s-field>
             </div>

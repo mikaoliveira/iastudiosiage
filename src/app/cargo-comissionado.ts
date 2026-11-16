@@ -16,6 +16,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatCardModule} from '@angular/material/card';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {CommonModule} from '@angular/common';
+import {SEmptyStateComponent} from '@siage/siage-ui';
 
 import {ConfirmacaoDialog, ResultadoDialog, VinculoUsoItem, VINCULOS_USO_MUITOS, ModalService} from './dialog';
 import {ToastService} from './toast';
@@ -143,7 +144,8 @@ export class CargoComissionadoService {
     MatSelectModule,
     AcessoRestritoComponent,
     CommonModule,
-    SiagePaginatorComponent
+    SiagePaginatorComponent,
+    SEmptyStateComponent
   ],
   template: `
     @if (!hasAccess()) {
@@ -332,25 +334,13 @@ export class CargoComissionadoService {
 
         <!-- ESTADO 2: ERRO DE CARREGAMENTO -->
         @else if (isErro()) {
-          <div class="py-14 px-6 flex flex-col items-center justify-center text-center gap-3">
-            <div class="w-12 h-12 rounded-lg bg-siage-destructive/10 text-siage-destructive flex items-center justify-center">
-              <mat-icon style="font-size: 24px; width: 24px; height: 24px;">error_outline</mat-icon>
-            </div>
-            <div class="flex flex-col gap-1 max-w-md">
-              <h3 class="text-base font-poppins font-semibold text-siage-text-primary">Erro ao carregar dados</h3>
-              <p class="text-xs sm:text-sm text-siage-text-secondary">
-                Não foi possível carregar as informações desta funcionalidade. Verifique sua conexão e tente novamente.
-              </p>
-            </div>
-            <button 
-              type="button" 
-              (click)="carregarDados()" 
-              class="mt-2 inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-            >
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">refresh</mat-icon>
-              <span>Tentar novamente</span>
-            </button>
-          </div>
+          <s-empty-state
+            variant="error"
+            title="Erro ao carregar dados"
+            description="Não foi possível carregar as informações desta funcionalidade. Verifique sua conexão e tente novamente."
+            actionLabel="Tentar novamente"
+            (action)="carregarDados()"
+          />
         }
 
         <!-- ESTADO 3: SEM REGISTROS NO SISTEMA (BANCO VAZIO) -->

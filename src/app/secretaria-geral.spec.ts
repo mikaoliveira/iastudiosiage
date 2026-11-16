@@ -30,6 +30,7 @@ describe('Secretaria Geral', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it('mantém filtros, bloqueio de inclusão e navegação da listagem', () => {
@@ -185,6 +186,30 @@ describe('Secretaria Geral', () => {
     fixture.destroy();
   });
 
+  it('baixa documentos nos modais compartilhados sem toast de início', () => {
+    const documento = {id: 'doc', nomeArquivo: 'doc.pdf', tamanho: '1 KB', tipo: 'pdf' as const, dataUpload: '01/01/2025', urlSimulada: '/doc.pdf'};
+    const ato = {id: 'ato', numero: '1', chefeImediato: 'Chefe', dataPublicacao: '01/01/2025', dataImportacao: '01/01/2025', responsavelImportacao: 'Responsável', documento};
+    const createObjectURL = vi.fn().mockReturnValue('blob:ato');
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal('URL', Object.assign(class extends URL {}, {createObjectURL, revokeObjectURL}));
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    TestBed.overrideProvider(MAT_DIALOG_DATA, {useValue: {documento, atos: [ato]}});
+    TestBed.overrideProvider(MatDialogRef, {useValue: {close: vi.fn()}});
+    const success = vi.spyOn(TestBed.inject(SToastService), 'success');
+
+    const visualizacao = TestBed.createComponent(VisualizarDocumentoModal);
+    visualizacao.componentInstance.baixar();
+    expect(click).toHaveBeenCalledOnce();
+    const historico = TestBed.createComponent(HistoricoAtosModal);
+    historico.componentInstance.baixar(ato);
+    expect(click).toHaveBeenCalledTimes(2);
+    expect(createObjectURL).toHaveBeenCalledOnce();
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:ato');
+    expect(success).not.toHaveBeenCalled();
+    visualizacao.destroy();
+    historico.destroy();
+  });
+
   it.each(['histórico', 'normativa'] as const)('isola o documento aberto de %s e fecha apenas com Escape', origem => {
     const teclado = new Subject<KeyboardEvent>();
     const fechado = new Subject<void>();
@@ -290,6 +315,31 @@ describe('Secretaria Geral', () => {
     expect(input.value).toBe('31/02/2025');
     expect(fixture.nativeElement.querySelector('s-field[controlid="form-norm-criacao-data"]').textContent)
       .toContain('Informe uma data válida no formato DD/MM/AAAA.');
+    fixture.destroy();
+  });
+
+  it('impede data futura digitada e revalida ao salvar', () => {
+    const fixture = TestBed.createComponent(SecretariaGeralForm);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    vi.spyOn(component, 'focusPrimeiroCampoInvalido');
+    const add = vi.spyOn(TestBed.inject(SecretariaGeralService), 'add');
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const input = fixture.nativeElement.querySelector('s-field[controlid="form-norm-criacao-data"] input') as HTMLInputElement;
+    input.value = tomorrow.toLocaleDateString('pt-BR');
+    input.dispatchEvent(new Event('input', {bubbles: true}));
+    input.dispatchEvent(new Event('change', {bubbles: true}));
+    input.dispatchEvent(new FocusEvent('blur'));
+    input.dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
+    component.onSalvar();
+    fixture.detectChanges();
+    expect(component.normCriacaoDataControl.getError('dataRange')).toBe('A data não pode ser futura.');
+    expect(fixture.nativeElement.querySelector('s-field[controlid="form-norm-criacao-data"]').textContent).toContain('A data não pode ser futura.');
+    expect(add).not.toHaveBeenCalled();
+    expect(component.dataMaxima.toDateString()).toBe(new Date().toDateString());
+    component.normCriacaoDataControl.setValue(new Date().toLocaleDateString('pt-BR'));
+    expect(component.normCriacaoDataControl.hasError('dataRange')).toBe(false);
     fixture.destroy();
   });
 
@@ -444,7 +494,7 @@ describe('Secretaria Geral', () => {
     (fixture.nativeElement.querySelector('s-icon-button button[aria-label="Visualizar anexo"]') as HTMLButtonElement).click();
     expect(dialog).toHaveBeenCalledWith(VisualizarDocumentoModal, expect.objectContaining({data: expect.objectContaining({tipoDocumento: 'Ato Governamental'})}));
     (fixture.nativeElement.querySelector('s-file-upload button[aria-label="Baixar arquivo"]') as HTMLButtonElement).click();
-    expect(success).toHaveBeenCalledWith('Download de "ato_nomeacao_chefe_1420_2024.pdf" iniciado.');
+    expect(success).not.toHaveBeenCalled();
     (fixture.nativeElement.querySelector('s-button[icon="history"] button') as HTMLButtonElement).click();
     expect(dialog).toHaveBeenLastCalledWith(HistoricoAtosModal, expect.any(Object));
 
@@ -488,6 +538,32 @@ describe('Anexar normativa de extinção compartilhado', () => {
     input.dispatchEvent(new Event('input', {bubbles: true}));
     input.dispatchEvent(new Event('change', {bubbles: true}));
     expect(fixture.componentInstance.form.controls.dataPublicacao.value).toBe('15/01/2025');
+    fixture.destroy();
+  });
+
+  it('bloqueia a conclusão com data futura', async () => {
+    const close = vi.fn();
+    await TestBed.configureTestingModule({
+      imports: [AnexarNormativaExtincaoModal],
+      providers: [
+        {provide: MAT_DIALOG_DATA, useValue: {nome: 'Secretaria'}},
+        {provide: MatDialogRef, useValue: {close}}
+      ]
+    }).compileComponents();
+    vi.spyOn(TestBed.inject(SToastService), 'warning').mockReturnValue(0);
+    const fixture = TestBed.createComponent(AnexarNormativaExtincaoModal);
+    fixture.detectChanges();
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    fixture.componentInstance.form.patchValue({nome: 'Normativa', numero: '123', dataPublicacao: tomorrow.toLocaleDateString('pt-BR')});
+    fixture.componentInstance.documento.set({id: 'doc', nomeArquivo: 'ato.pdf', tamanho: '1 KB', tipo: 'pdf', dataUpload: '01/01/2025'});
+    vi.spyOn(fixture.componentInstance, 'focusPrimeiroCampoInvalidoModal');
+    fixture.componentInstance.concluir();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.form.controls.dataPublicacao.getError('dataRange')).toBe('A data não pode ser futura.');
+    expect(fixture.nativeElement.textContent).toContain('A data não pode ser futura.');
+    expect(close).not.toHaveBeenCalled();
+    await fixture.whenStable();
     fixture.destroy();
   });
 });

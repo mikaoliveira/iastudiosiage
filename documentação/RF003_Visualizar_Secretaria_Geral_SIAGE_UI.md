@@ -1,0 +1,215 @@
+﻿# [RF003] Visualizar - Configurar Secretaria Geral
+
+## 1) Histórico
+| Data | Versão | Descrição | Autor | Versão mind | Sprint de desenvolvimento |
+| --- | --- | --- | --- | --- | --- |
+| 28 de out. de 2026 | 1.0 | Criação da funcionalidade | Mikael Oliveira | 01 | SPXXX |
+
+## 2) História de Usuário
+Eu, como usuário do SIAGE-RH, na qualidade de Administrador ou usuário com permissão de acesso,
+Quero acessar a funcionalidade de Visualizar Secretaria Geral,
+Para consultar as informações cadastrais, Chefia Imediata, Ato Governamental, unidades subordinadas e normativas vinculadas ao registro, sem alterá-las.
+
+## 3) Fluxo de acesso à funcionalidade
+Login >> Selecionar Matrícula, quando aplicável >> Página Inicial >> Configurações >> Hierarquia de Unidades e Cargos >> Configurar Secretaria Geral >> Visualizar
+**Pré-condições:**
+- O usuário deverá estar autenticado no SIAGE-RH e possuir matrícula ativa em contexto, quando aplicável.
+- O usuário deverá possuir permissão específica para visualizar Secretaria Geral ou perfil Administrador.
+- O registro a ser consultado deverá existir e estar acessível ao usuário, independentemente de sua situação Ativo ou Inativo.
+
+## 4) Critérios de Aceite
+
+### 4.1 Acesso e permissões
+- O acesso deverá ser permitido ao Administrador e aos usuários com permissão específica para Visualizar Secretaria Geral.
+- O sistema deverá validar a permissão antes de disponibilizar os dados da funcionalidade; Administradores terão acesso conforme a regra geral de permissionamento.
+- A tentativa de acesso por rota direta sem permissão deverá apresentar a tela global de “Acesso restrito”, sem expor informações do registro.
+- A ação Editar, quando exibida, deverá respeitar a permissão correspondente e as condições de edição do registro; a consulta não deverá modificar seus dados.
+
+### 4.2 Regras gerais
+
+#### 4.2.1 Estrutura e apresentação da tela
+- A tela deverá apresentar breadcrumbs navegáveis, botão Voltar, título “Visualizar Secretaria Geral”, descrição da consulta, ação Editar quando permitida e quatro cards informativos.
+- Os cards deverão ser exibidos na sequência: 1. Identificação da Secretaria Geral; 2. Chefia Imediata e Ato Governamental; 3. Secretarias Executivas e Gerências Regionais Vinculadas; 4. Gestão de Normativas.
+- Os dados deverão ser apresentados em formato somente leitura, com rótulos e valores organizados e com quebra de linha para informações extensas, sem campos editáveis ou indicadores de obrigatoriedade.
+- A tela deverá exibir informações de autoria e auditoria e oferecer retorno à listagem pelo botão Voltar.
+- **A interface deverá seguir os padrões de acessibilidade definidos nas Padronizações do SIAGE-RH e os comportamentos acessíveis disponibilizados pelos componentes da biblioteca SIAGE-UI. Particularidades deverão ser especificadas no detalhamento dos respectivos elementos.**
+
+#### 4.2.2 Identificação da Secretaria Geral
+- O sistema deverá apresentar Nome da Secretaria Geral e Unidade de Trabalho (UTB), lado a lado, seguidos por Situação, Criador / Editor e Data de Criação.
+- A UTB deverá ser apresentada no formato Código + Nome, conforme informação cadastrada.
+- Situação deverá retornar “Ativo” ou “Inativo” como informação textual, sem permitir alteração na tela de visualização.
+- Criador / Editor deverá identificar o responsável cadastrado para o registro, e Data de Criação deverá apresentar data e hora.
+
+#### 4.2.3 Chefia Imediata, Ato Governamental e histórico
+- Quando existir Chefe Imediato vinculado, apresentar Nome, Cargo, Matrícula, CPF e Situação Funcional como informações textuais; Situação Funcional não deverá utilizar badge.
+- Exibir o Ato Governamental de Nomeação vinculado à chefia, com Número do Ato Governamental, Data da Publicação, identificação do documento e ações Visualizar e Baixar.
+- Quando não houver chefe vinculado, exibir “Nenhum Chefe Imediato vinculado no momento.”, sem apresentar campos do Ato atual.
+- A ação “Consultar histórico” deverá ficar disponível inclusive quando não houver Chefe Imediato atual e abrir modal específico de histórico de Atos Governamentais.
+- O histórico deverá relacionar cada ato ao respectivo Chefe Imediato, exibir Número, Data da Publicação, Data do Cadastro, Responsável pelo Cadastro e ações Visualizar/Baixar, em tabela de no máximo 5 registros por página.
+- As entradas históricas serão apresentadas da mais recente para a mais antiga. Quando não houver histórico, apresentar “Nenhum ato governamental encontrado.”; o histórico não permitirá edição, inclusão ou exclusão.
+
+#### 4.2.4 Secretarias Executivas e Gerências Regionais Vinculadas
+- A consulta deverá apresentar a relação das unidades subordinadas à Secretaria Geral, distinguindo Secretarias Executivas e Gerências Regionais.
+- O card deverá apresentar o texto “Buscar por:” e os filtros Nome e Unidade de Trabalho (UTB), permitindo pesquisa por um ou ambos os critérios.
+- O filtro Nome deverá aceitar pesquisa por parte da denominação e sem diferenciação entre maiúsculas e minúsculas; o limite funcional é de 200 caracteres.
+- O filtro Unidade de Trabalho (UTB) deverá restringir a consulta às unidades vinculadas à Secretaria Geral selecionada, considerando código ou nome da UTB.
+- A tabela deverá apresentar, nessa ordem: Tipo / Unidade Vinculada, Chefia Imediata e Unidade de Trabalho (UTB). Quando a unidade não possuir chefia, não exibir nome de servidor na respectiva coluna.
+- Os resultados deverão ser paginados em até 10 registros por página. Quando não houver unidades vinculadas ou resultados, apresentar mensagem informativa de listagem vazia.
+- O comportamento funcional de ordenação agrupa Secretarias Executivas antes de Gerências Regionais e ordena alfabeticamente os registros; a consulta deverá preservar a possibilidade de examinar os vínculos sem modificá-los.
+
+#### 4.2.5 Gestão de Normativas e anexos
+- A seção Normativa de Criação deverá exibir Nome, Número, Data da Publicação e documento anexado, sem permitir edição ou exclusão.
+- A seção Normativa de Extinção deverá ser exibida somente quando houver documento de extinção cadastrado; na ausência dele, o bloco completo deverá permanecer oculto na tela Visualizar.
+- Quando exibida, a Normativa de Extinção deverá apresentar Nome, Número, Data da Publicação e documento correspondente, também somente para consulta.
+- As informações de documentos deverão apresentar nome do arquivo, tamanho e data/hora do envio quando disponíveis, com ações Visualizar e Baixar.
+- A pré-visualização deverá ocorrer no modal “Visualizar anexo”, utilizando visualizador de PDF ou imagem, com controles de fechamento e download; a consulta não deverá remover nem substituir documentos.
+- O documento deverá ser disponibilizado para download no formato em que foi cadastrado, observadas as permissões de acesso.
+
+#### 4.2.6 Ações, navegação e feedback
+- O botão Voltar, tanto no cabeçalho quanto no rodapé, deverá retornar à [RF001] Listar / Inativar – Configurar Secretaria Geral, sem alterar dados.
+- O botão Editar deverá encaminhar para a funcionalidade correspondente somente quando a ação estiver permitida para o usuário e a situação do registro.
+- Os modais de histórico e visualização de anexos deverão possuir título, botão X no cabeçalho e ação de fechamento, sem afetar a consulta.
+- Quando o registro solicitado não existir, informar a indisponibilidade e retornar à listagem. Em caso de falha genérica, apresentar a comunicação de erro conforme padrão global.
+
+
+## 5) Detalhamento da funcionalidade
+
+### **5.1 Cabeçalho e navegação**
+
+| Nome do campo | Detalhamento do campo |
+| --- | --- |
+| <strong>Breadcrumbs</strong> | <ul><li><strong>Tipo:</strong> Navegação contextual.</li><li><strong>Componente SIAGE-UI:</strong> SPageHeaderComponent (s-page-header: breadcrumbs).</li><li><strong>Exibição:</strong> Início / Configurações / Hierarquia de Unidades e Cargos / Configurar Secretaria Geral / Visualizar.</li><li><strong>Comportamentos:</strong><ul><li>Deve representar a hierarquia de páginas reais da aplicação.</li><li>Início, Configurações, Hierarquia de Unidades e Cargos e Configurar Secretaria Geral devem ser apresentados como níveis anteriores e ser navegáveis.</li><li>O último nível representa a página atual e não deve ser navegável.</li></ul></li></ul> |
+| <strong>Voltar</strong> | <ul><li><strong>Label:</strong> “Voltar”.</li><li><strong>Tipo:</strong> IconButton.</li><li><strong>Componente SIAGE-UI:</strong> SPageHeaderComponent (s-page-header: showBack).</li><li><strong>Formato:</strong> Ação secundária.</li><li><strong>Habilitação:</strong> Sempre habilitado.</li><li><strong>Aria-label:</strong> “Voltar”.</li><li><strong>Comportamentos:</strong> Retorna à [RF001] Listar / Inativar – Configurar Secretaria Geral, sem modificar o registro.</li></ul> |
+| <strong>Título e descrição</strong> | <ul><li><strong>Título:</strong> “Visualizar Secretaria Geral”.</li><li><strong>Tipo:</strong> Título de página e texto descritivo.</li><li><strong>Componente SIAGE-UI:</strong> SPageHeaderComponent (s-page-header: title e description).</li><li><strong>Descrição:</strong> “Consulte as informações, dados de chefia, normativas e unidades subordinadas da Secretaria Geral.”</li><li><strong>Comportamentos:</strong> Apresenta o contexto da funcionalidade no bloco inicial da tela.</li></ul> |
+
+
+### **5.2 Bloco 1 — Identificação da Secretaria Geral**
+
+| Nome do campo | Detalhamento do campo |
+| --- | --- |
+| **Card de Identificação da Secretaria Geral** | <ul><li><strong>Tipo:</strong> Bloco informativo somente leitura.</li><li><strong>Componente SIAGE-UI:</strong> SCardComponent (s-card).</li><li><strong>Comportamentos:</strong><ul><li>Primeiro card. </li><li>Organiza Nome da Secretaria Geral e UTB lado a lado, com Situação, Criador / Editor e Data de Criação na sequência.</li></ul></li></ul> |
+| <strong>Nome da Secretaria Geral</strong> | <ul><li><strong>Label:</strong> “Nome da Secretaria Geral”.</li><li><strong>Tipo:</strong> Campo informativo textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Obrigatoriedade:</strong> Não se aplica.</li><li><strong>Comportamentos:</strong><ul><li>Exibe o nome cadastrado para o registro, sem edição;</li><li>valores extensos devem quebrar linha sem sobreposição.</li></ul></li></ul> |
+| <strong>Unidade de Trabalho (UTB)</strong> | <ul><li><strong>Label:</strong> “Unidade de Trabalho (UTB)”.</li><li><strong>Tipo:</strong> Campo informativo textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Obrigatoriedade:</strong> Não se aplica.</li><li><strong>Comportamentos:</strong> Exibe o código e o nome da Unidade de Trabalho associada ao registro, lado a lado com o Nome da Secretaria Geral.</li></ul> |
+| <strong>Situação</strong> | <ul><li><strong>Label:</strong> “Situação”.</li><li><strong>Tipo:</strong> Campo informativo textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Apresentação:</strong> “Ativo” ou “Inativo”.</li><li><strong>Comportamentos:</strong> Retorna a situação atual sem oferecer alteração nessa tela.</li></ul> |
+| <strong>Criador / Editor</strong> | <ul><li><strong>Label:</strong> “Criador / Editor”.</li><li><strong>Tipo:</strong> Campo informativo textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Apresenta o usuário responsável pela criação ou última edição, conforme dados registrados.</li></ul> |
+| <strong>Data de Criação</strong> | <ul><li><strong>Label:</strong> “Data de Criação”.</li><li><strong>Tipo:</strong> Campo informativo de data e hora.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Formato:</strong> DD/MM/AAAA HH:MM.</li><li><strong>Comportamentos:</strong> Retorna a data e a hora de criação, compondo a mesma linha de Situação e Criador / Editor.</li></ul> |
+
+
+### **5.3 Bloco 2 — Chefia Imediata e Ato Governamental**
+
+| Nome do campo | Detalhamento do campo |
+| --- | --- |
+| **Card de Chefia Imediata e Ato Governamental** | <ul><li><strong>Tipo:</strong> Bloco informativo somente leitura.</li><li><strong>Componente SIAGE-UI:</strong> SCardComponent (s-card).</li><li><strong>Comportamentos:</strong><ul><li>Segundo card. </li><li>Reúne os dados do Chefe Imediato e do Ato Governamental atual em um único bloco;</li><li> disponibiliza Consultar histórico inclusive sem chefia atual.</li></ul></li></ul> |
+| <strong>Chefia Imediata</strong> | <ul><li><strong>Label:</strong> “Chefia Imediata”.</li><li><strong>Tipo:</strong> Bloco informativo de servidor vinculado.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong><ul><li>Quando houver chefe, apresenta sua identificação, avatar e dados funcionais em formato somente leitura.</li><li>Sem chefe, exibe “Nenhum Chefe Imediato vinculado no momento.”, preservando o acesso a Consultar histórico.</li></ul></li></ul> |
+| **Avatar do Chefe Imediato** | <ul><li><strong>Tipo:</strong> Identificação visual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica.</li><li><strong>Comportamentos:</strong> Apresenta a inicial do nome do chefe quando houver vínculo.</li></ul> |
+| <strong>Nome do Chefe Imediato</strong> | <ul><li><strong>Label:</strong> Nome do servidor vinculado.</li><li><strong>Tipo:</strong> Informação textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Retorna o nome do Chefe Imediato cadastrado para a Secretaria Geral.</li></ul> |
+| <strong>Matrícula</strong> | <ul><li><strong>Label:</strong> “Matrícula”.</li><li><strong>Tipo:</strong> Campo informativo.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Exibe a matrícula do Chefe Imediato, sem alteração ou máscara de campo editável.</li></ul> |
+| <strong>CPF</strong> | <ul><li><strong>Label:</strong> “CPF”.</li><li><strong>Tipo:</strong> Campo informativo.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Exibe o CPF do Chefe Imediato no formato de apresentação do sistema.</li></ul> |
+| <strong>Cargo</strong> | <ul><li><strong>Label:</strong> “Cargo”.</li><li><strong>Tipo:</strong> Campo informativo textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Retorna o cargo associado ao servidor vinculado.</li></ul> |
+| <strong>Situação Funcional</strong> | <ul><li><strong>Label:</strong> “Situação Funcional”.</li><li><strong>Tipo:</strong> Campo informativo textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Apresentação:</strong> Texto comum, sem badge.</li><li><strong>Comportamentos:</strong> Exibe a situação funcional do Chefe Imediato conforme cadastro.</li></ul> |
+| <strong>Ato Governamental de Nomeação</strong> | <ul><li><strong>Tipo:</strong> Sub-bloco informativo vinculado à Chefia Imediata.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong><ul><li>Quando existir chefe, apresenta o Ato Governamental atual junto aos dados do servidor;</li><li>não o separa em card independente.</li><li>Quando não houver chefia, não exibe os dados do Ato atual.</li></ul></li></ul> |
+| <strong>Número do Ato Governamental</strong> | <ul><li><strong>Label:</strong> “Número do Ato Governamental”.</li><li><strong>Tipo:</strong> Campo informativo textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Retorna a identificação do Ato Governamental vinculado à chefia, sem permitir alteração.</li></ul> |
+| <strong>Data da Publicação — Ato Governamental</strong> | <ul><li><strong>Label:</strong> “Data da Publicação”.</li><li><strong>Tipo:</strong> Campo informativo de data.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Formato:</strong> DD/MM/AAAA.</li><li><strong>Comportamentos:</strong><ul><li>Retorna a data de publicação do Ato Governamental;</li><li>seu alinhamento horizontal deve coincidir com a coluna CPF da chefia.</li></ul></li></ul> |
+| <strong>Documento do Ato Governamental</strong> | <ul><li><strong>Tipo:</strong> Informação de anexo/documento.</li><li><strong>Componente SIAGE-UI:</strong> SFileUploadComponent (s-file-upload: fileName, fileId, allowDownload true e allowRemove false).</li><li><strong>Apresentação:</strong> Nome do arquivo, tamanho e data/hora de envio quando disponíveis.</li><li><strong>Comportamentos:</strong><ul><li>Exibe o documento vinculado ao Ato Governamental atual.</li><li>Disponibiliza somente Visualizar e Baixar, sem opção de editar ou excluir o anexo.</li></ul></li></ul> |
+| <strong>Consultar histórico</strong> | <ul><li><strong>Label:</strong> “Consultar histórico”.</li><li><strong>Tipo:</strong> Button.</li><li><strong>Componente SIAGE-UI:</strong> SButtonComponent (s-button: variant secondary, outlined, icon history) e STooltipDirective (sTooltip).</li><li><strong>Formato:</strong> Ação secundária.</li><li><strong>Habilitação:</strong> Disponível com ou sem chefe atual.</li><li><strong>Comportamentos:</strong><ul><li>Abre o modal “Histórico de Atos Governamentais” para consulta de documentos anteriores e atual, quando disponíveis.</li><li>Não altera o vínculo de chefia nem os documentos.</li></ul></li></ul> |
+| <strong>Visualizar anexo — Ato Governamental</strong> | <ul><li><strong>Label:</strong> “Visualizar anexo”.</li><li><strong>Tipo:</strong> IconButton.</li><li><strong>Componente SIAGE-UI:</strong> SIconButtonComponent (s-icon-button: icon visibility, variant info, text) e STooltipDirective (sTooltip).</li><li><strong>Formato:</strong> Ação ghost.</li><li><strong>Visibilidade:</strong> Somente quando houver documento do Ato Governamental.</li><li><strong>Comportamentos:</strong> Abre o modal “Visualizar anexo” com pré-visualização do documento selecionado.</li></ul> |
+| <strong>Baixar anexo — Ato Governamental</strong> | <ul><li><strong>Label:</strong> “Baixar arquivo”.</li><li><strong>Tipo:</strong> IconButton.</li><li><strong>Componente SIAGE-UI:</strong> SFileUploadComponent (s-file-upload: allowDownload true), com ação integrada.</li><li><strong>Formato:</strong> Ação ghost.</li><li><strong>Visibilidade:</strong> Somente quando houver documento do Ato Governamental.</li><li><strong>Comportamentos:</strong> Inicia o download do documento correspondente em seu formato de origem.</li></ul> |
+
+
+### **5.4 Bloco 3 — Secretarias Executivas e Gerências Regionais Vinculadas**
+
+| Nome do campo | Detalhamento do campo |
+| --- | --- |
+| **Card de unidades vinculadas** | <ul><li><strong>Tipo:</strong> Bloco de consulta de unidades subordinadas.</li><li><strong>Componente SIAGE-UI:</strong> SCardComponent (s-card).</li><li><strong>Comportamentos:</strong><ul><li>Terceiro card. </li><li>Reúne os filtros e a listagem de Secretarias Executivas e Gerências Regionais vinculadas à Secretaria Geral em visualização, sem permitir alterações de vínculos.</li></ul></li></ul> |
+| <strong>Buscar por</strong> | <ul><li><strong>Label:</strong> “Buscar por:”.</li><li><strong>Tipo:</strong> Texto informativo do grupo de filtros.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong><ul><li>Identifica os filtros de consulta das unidades vinculadas;</li><li>não é um campo de entrada.</li></ul></li></ul> |
+| **Bloco de filtros** | <ul><li><strong>Tipo:</strong> Grupo de filtros da listagem de unidades vinculadas.</li><li><strong>Componente SIAGE-UI:</strong> SFilterCardComponent (s-filter-card), com SFieldComponent e SButtonComponent.</li><li><strong>Comportamentos:</strong> Agrupa Nome, Unidade de Trabalho (UTB), Buscar e Limpar dentro do card de unidades vinculadas.</li></ul> |
+| <strong>Nome</strong> | <ul><li><strong>Label:</strong> “Nome”.</li><li><strong>Tipo:</strong> Campo de texto alfanumérico e caracteres especiais.</li><li><strong>Componente SIAGE-UI:</strong> SFieldComponent (s-field) e SInputComponent (s-input: maxlength 200).</li><li><strong>Obrigatoriedade:</strong> Opcional.</li><li><strong>Placeholder:</strong> “Digite o nome”.</li><li><strong>Limite de caracteres:</strong> 200.</li><li><strong>Comportamentos:</strong><ul><li>Permite pesquisa parcial por nome das Secretarias Executivas e Gerências Regionais vinculadas, sem diferenciar letras maiúsculas de minúsculas.</li><li>Participa da pesquisa por meio de Buscar ou da tecla ENTER, isoladamente ou em conjunto com Unidade de Trabalho (UTB).</li></ul></li></ul> |
+| <strong>Unidade de Trabalho (UTB) — filtro</strong> | <ul><li><strong>Label:</strong> “Unidade de Trabalho (UTB)”.</li><li><strong>Tipo:</strong> Select com autocomplete.</li><li><strong>Componente SIAGE-UI:</strong> SFieldComponent (s-field) e SAutocompleteComponent (s-autocomplete).</li><li><strong>Obrigatoriedade:</strong> Opcional.</li><li><strong>Placeholder:</strong> “Selecione ou busque uma unidade de trabalho”.</li><li><strong>Opções:</strong> Somente UTBs vinculadas às Secretarias Executivas e Gerências Regionais da Secretaria Geral em visualização; exibição Código + Nome da UTB, em ordem crescente de código.</li><li><strong>Comportamentos:</strong><ul><li>Permite consultar e selecionar UTBs pelo código ou nome, sem listar UTBs não vinculadas à Secretaria Geral consultada.</li><li>Participa da pesquisa por meio de Buscar ou da tecla ENTER, isoladamente ou em conjunto com Nome.</li></ul></li></ul> |
+| <strong>Buscar</strong> | <ul><li><strong>Label:</strong> “Buscar”.</li><li><strong>Tipo:</strong> Button.</li><li><strong>Componente SIAGE-UI:</strong> SButtonComponent (s-button: variant primary, icon search) e STooltipDirective (sTooltip).</li><li><strong>Formato:</strong> Ação primária.</li><li><strong>Habilitação:</strong> Desabilitado quando Nome e Unidade de Trabalho (UTB) estiverem vazios; habilitado quando pelo menos um dos filtros possuir valor.</li><li><strong>Comportamentos:</strong><ul><li>Executa a pesquisa das unidades vinculadas por Nome e/ou Unidade de Trabalho (UTB), considerando somente os critérios informados.</li><li>Pressionar ENTER com um critério preenchido deverá executar a mesma pesquisa;</li><li>sem critérios, não executa.</li><li>Ao pesquisar, retorna à primeira página da listagem e, se não houver correspondência, apresenta “Nenhum vínculo foi encontrado.”</li></ul></li></ul> |
+| <strong>Limpar</strong> | <ul><li><strong>Label:</strong> “Limpar”.</li><li><strong>Tipo:</strong> Button.</li><li><strong>Componente SIAGE-UI:</strong> SButtonComponent (s-button: variant secondary, outlined).</li><li><strong>Formato:</strong> Ação secundária.</li><li><strong>Habilitação:</strong> Sempre habilitado.</li><li><strong>Comportamentos:</strong><ul><li>Limpa simultaneamente os filtros Nome e Unidade de Trabalho (UTB), restaurando a listagem completa das unidades vinculadas e retornando à primeira página.</li><li>Quando os filtros já estiverem vazios, não executa alteração adicional.</li></ul></li></ul> |
+| <strong>Listagem</strong> | <ul><li><strong>Tipo:</strong> Tabela paginada.</li><li><strong>Componente SIAGE-UI:</strong> STableComponent (s-table; configuração STableColumn).</li><li><strong>Paginação:</strong> Máximo de 10 registros por página.</li><li><strong>Comportamentos:</strong><ul><li>Apresenta Secretarias Executivas e Gerências Regionais vinculadas ao registro, conforme filtros informados.</li><li>Exibe a identificação do tipo de unidade e os dados correspondentes em três colunas.</li><li>Preserva a ordenação funcional das Secretarias Executivas antes das Gerências Regionais, com nomes em ordem alfabética.</li><li>Os estados de ausência de vínculos e pesquisa sem resultados estão detalhados na seção 5.7.</li></ul></li></ul> |
+| <strong>Tipo / Unidade Vinculada</strong> | <ul><li><strong>Label:</strong> “Tipo / Unidade Vinculada”.</li><li><strong>Tipo:</strong> Coluna textual informativa.</li><li><strong>Componente SIAGE-UI:</strong> STableComponent (s-table; configuração STableColumn).</li><li><strong>Comportamentos:</strong> Exibe o tipo “Secretaria Executiva” ou “Gerência Regional” e o nome da unidade subordinada.</li></ul> |
+| <strong>Chefia Imediata — coluna</strong> | <ul><li><strong>Label:</strong> “Chefia Imediata”.</li><li><strong>Tipo:</strong> Coluna textual informativa.</li><li><strong>Componente SIAGE-UI:</strong> STableComponent (s-table; configuração STableColumn).</li><li><strong>Comportamentos:</strong><ul><li>Retorna o nome do Chefe Imediato da unidade subordinada, quando existente;</li><li>não exibe informação de chefia quando não houver vínculo.</li></ul></li></ul> |
+| <strong>Unidade de Trabalho (UTB) — coluna</strong> | <ul><li><strong>Label:</strong> “Unidade de Trabalho (UTB)”.</li><li><strong>Tipo:</strong> Coluna textual informativa.</li><li><strong>Componente SIAGE-UI:</strong> STableComponent (s-table; configuração STableColumn).</li><li><strong>Comportamentos:</strong> Exibe a identificação da UTB associada à unidade subordinada.</li></ul> |
+| **Paginação de unidades vinculadas** | <ul><li><strong>Tipo:</strong> Controle de paginação da listagem.</li><li><strong>Componente SIAGE-UI:</strong> SPaginationComponent (s-pagination), integrado ao STableComponent (s-table).</li><li><strong>Paginação:</strong> Até 10 registros por página.</li><li><strong>Comportamentos:</strong><ul><li>Permite navegar pelas páginas de registros, apresentando a quantidade correspondente no paginador.</li><li>Ao pesquisar ou limpar os filtros, retorna à primeira página.</li></ul></li></ul> |
+
+
+### **5.5 Bloco 4 — Gestão de Normativas**
+
+| Nome do campo | Detalhamento do campo |
+| --- | --- |
+| **Card de Gestão de Normativas** | <ul><li><strong>Tipo:</strong> Bloco informativo de normativas vinculadas.</li><li><strong>Componente SIAGE-UI:</strong> SCardComponent (s-card).</li><li><strong>Comportamentos:</strong><ul><li>Quarto card. </li><li>Apresenta sempre a Normativa de Criação e apresenta a Normativa de Extinção somente quando houver documento cadastrado;</li><li> mantém os dados somente leitura.</li></ul></li></ul> |
+| <strong>Normativa de Criação</strong> | <ul><li><strong>Tipo:</strong> Sub-bloco informativo de normativa de criação.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Exibição:</strong> Sempre, para registro cadastrado.</li><li><strong>Comportamentos:</strong> Apresenta os dados da normativa obrigatória no cadastro, sem permitir edição.</li></ul> |
+| <strong>Nome da Normativa — Criação</strong> | <ul><li><strong>Label:</strong> “Nome da Normativa”.</li><li><strong>Tipo:</strong> Campo informativo textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Exibe a denominação da Normativa de Criação no formato cadastrado, com quebra de linha quando necessário.</li></ul> |
+| <strong>Número da Normativa — Criação</strong> | <ul><li><strong>Label:</strong> “Número da Normativa”.</li><li><strong>Tipo:</strong> Campo informativo textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Exibe o identificador da normativa, sem edição.</li></ul> |
+| <strong>Data da Publicação — Criação</strong> | <ul><li><strong>Label:</strong> “Data da Publicação”.</li><li><strong>Tipo:</strong> Campo informativo de data.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Formato:</strong> DD/MM/AAAA.</li><li><strong>Comportamentos:</strong> Exibe a data da publicação da Normativa de Criação.</li></ul> |
+| <strong>Documento da Normativa de Criação</strong> | <ul><li><strong>Tipo:</strong> Informação de documento anexado.</li><li><strong>Componente SIAGE-UI:</strong> SFileUploadComponent (s-file-upload: fileName, fileId, allowDownload true e allowRemove false).</li><li><strong>Apresentação:</strong> Nome, tamanho e data/hora do envio quando disponíveis.</li><li><strong>Comportamentos:</strong> Apresenta o arquivo cadastrado e as ações Visualizar e Baixar, sem opção de remoção.</li></ul> |
+| <strong>Visualizar anexo — Criação</strong> | <ul><li><strong>Label:</strong> “Visualizar anexo”.</li><li><strong>Tipo:</strong> IconButton.</li><li><strong>Componente SIAGE-UI:</strong> SIconButtonComponent (s-icon-button: icon visibility, variant info, text) e STooltipDirective (sTooltip).</li><li><strong>Formato:</strong> Ação ghost.</li><li><strong>Visibilidade:</strong> Quando existir documento.</li><li><strong>Comportamentos:</strong> Abre o modal “Visualizar anexo” para consultar o arquivo da Normativa de Criação.</li></ul> |
+| <strong>Baixar anexo — Criação</strong> | <ul><li><strong>Label:</strong> “Baixar arquivo”.</li><li><strong>Tipo:</strong> IconButton.</li><li><strong>Componente SIAGE-UI:</strong> SFileUploadComponent (s-file-upload: allowDownload true), com ação integrada.</li><li><strong>Formato:</strong> Ação ghost.</li><li><strong>Visibilidade:</strong> Quando existir documento.</li><li><strong>Comportamentos:</strong> Permite baixar o arquivo em seu formato original.</li></ul> |
+| <strong>Normativa de Extinção</strong> | <ul><li><strong>Tipo:</strong> Sub-bloco informativo de normativa de extinção.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Exibição:</strong> Somente quando existir documento de Normativa de Extinção cadastrado.</li><li><strong>Comportamentos:</strong><ul><li>Quando não existir documento de extinção, o bloco inteiro não deverá ser exibido na tela Visualizar.</li><li>Quando existir, exibe seus dados de forma somente leitura, sem ação de inclusão, remoção ou substituição.</li></ul></li></ul> |
+| **Informação de inativação** | <ul><li><strong>Tipo:</strong> Informação textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Apresenta “Necessária para inativação” junto ao título da Normativa de Extinção quando o bloco estiver visível.</li></ul> |
+| <strong>Nome da Normativa — Extinção</strong> | <ul><li><strong>Label:</strong> “Nome da Normativa”.</li><li><strong>Tipo:</strong> Campo informativo textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Exibe o nome cadastrado da Normativa de Extinção.</li></ul> |
+| <strong>Número da Normativa — Extinção</strong> | <ul><li><strong>Label:</strong> “Número da Normativa”.</li><li><strong>Tipo:</strong> Campo informativo textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Exibe o número cadastrado da Normativa de Extinção.</li></ul> |
+| <strong>Data da Publicação — Extinção</strong> | <ul><li><strong>Label:</strong> “Data da Publicação”.</li><li><strong>Tipo:</strong> Campo informativo de data.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Formato:</strong> DD/MM/AAAA.</li><li><strong>Comportamentos:</strong> Exibe a data da publicação da normativa.</li></ul> |
+| <strong>Documento da Normativa de Extinção</strong> | <ul><li><strong>Tipo:</strong> Informação de documento anexado.</li><li><strong>Componente SIAGE-UI:</strong> SFileUploadComponent (s-file-upload: fileName, fileId, allowDownload true e allowRemove false).</li><li><strong>Apresentação:</strong> Nome, tamanho e data/hora do envio quando disponíveis.</li><li><strong>Comportamentos:</strong> Exibe o documento já cadastrado, permitindo apenas consulta e download.</li></ul> |
+| <strong>Visualizar anexo — Extinção</strong> | <ul><li><strong>Label:</strong> “Visualizar anexo”.</li><li><strong>Tipo:</strong> IconButton.</li><li><strong>Componente SIAGE-UI:</strong> SIconButtonComponent (s-icon-button: icon visibility, variant info, text) e STooltipDirective (sTooltip).</li><li><strong>Formato:</strong> Ação ghost.</li><li><strong>Visibilidade:</strong> Somente quando o bloco de Normativa de Extinção existir e possuir documento.</li><li><strong>Comportamentos:</strong> Abre o modal “Visualizar anexo” para consultar o documento de extinção.</li></ul> |
+| <strong>Baixar anexo — Extinção</strong> | <ul><li><strong>Label:</strong> “Baixar arquivo”.</li><li><strong>Tipo:</strong> IconButton.</li><li><strong>Componente SIAGE-UI:</strong> SFileUploadComponent (s-file-upload: allowDownload true), com ação integrada.</li><li><strong>Formato:</strong> Ação ghost.</li><li><strong>Visibilidade:</strong> Somente quando existir documento.</li><li><strong>Comportamentos:</strong> Inicia download do documento no formato original.</li></ul> |
+
+
+### **5.6 Ações gerais da página**
+
+| Nome do campo | Detalhamento do campo |
+| --- | --- |
+| <strong>Editar</strong> | <ul><li><strong>Label:</strong> “Editar”.</li><li><strong>Tipo:</strong> Button.</li><li><strong>Componente SIAGE-UI:</strong> SButtonComponent (s-button: variant primary, icon edit), projetado em SPageHeaderComponent (s-page-header).</li><li><strong>Formato:</strong> Ação primária.</li><li><strong>Visibilidade:</strong> Usuário com permissão de edição; sujeita às regras de situação do registro.</li><li><strong>Comportamentos:</strong> Encaminha para a funcionalidade de Editar Secretaria Geral do registro selecionado, conforme permissão e regra de manutenção.</li></ul> |
+| **Voltar — rodapé** | <ul><li><strong>Label:</strong> “Voltar”.</li><li><strong>Tipo:</strong> Ação de retorno no rodapé.</li><li><strong>Componente SIAGE-UI:</strong> SButtonComponent (s-button).</li><li><strong>Comportamentos:</strong> Retorna à [RF001] Listar / Inativar – Configurar Secretaria Geral sem alterar os dados, conforme a regra da seção 4.2.6.</li></ul> |
+| **Informações de auditoria** | <ul><li><strong>Tipo:</strong> Informação textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Apresenta data e responsável pelo cadastro ou, quando houver atualização, data e responsável pela última atualização.</li></ul> |
+
+
+### **5.7 Estados da visualização**
+**Os estados abaixo descrevem condições da interface e não são campos editáveis ou colunas da listagem.**
+| Nome do campo | Detalhamento do campo |
+| --- | --- |
+| **Sem Chefe Imediato** | <ul><li><strong>Tipo:</strong> Estado/condição da interface.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong><ul><li>Exibe “Nenhum Chefe Imediato vinculado no momento.”.</li><li>Não apresenta os dados do Ato Governamental atual e mantém a ação “Consultar histórico” disponível.</li></ul></li></ul> |
+| **Sem Normativa de Extinção** | <ul><li><strong>Tipo:</strong> Estado/condição da interface.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> A seção completa da Normativa de Extinção permanece oculta quando não houver documento de extinção cadastrado.</li></ul> |
+| **Sem unidades vinculadas** | <ul><li><strong>Tipo:</strong> Estado/condição da interface.</li><li><strong>Componente SIAGE-UI:</strong> SEmptyStateComponent (s-empty-state), integrado ao STableComponent (s-table: empty, variant no-results).</li><li><strong>Comportamentos:</strong> Quando não houver Secretarias Executivas ou Gerências Regionais subordinadas, a listagem apresenta “Nenhum vínculo foi encontrado.”</li></ul> |
+| **Pesquisa de unidades sem resultado** | <ul><li><strong>Tipo:</strong> Estado/condição da interface.</li><li><strong>Componente SIAGE-UI:</strong> SEmptyStateComponent (s-empty-state), integrado ao STableComponent (s-table: empty, variant no-results).</li><li><strong>Comportamentos:</strong> Quando nenhum registro corresponder aos filtros Nome e/ou UTB, a listagem apresenta “Nenhum vínculo foi encontrado.”</li></ul> |
+| **Acesso restrito** | <ul><li><strong>Tipo:</strong> Estado/condição da interface.</li><li><strong>Componente SIAGE-UI:</strong> SEmptyStateComponent (s-empty-state, variante forbidden) está disponível.</li><li><strong>Comportamentos:</strong> Sem permissão, apresentar a tela global “Acesso restrito”, sem expor informações do registro.</li></ul> |
+| **Registro inexistente ou indisponível** | <ul><li><strong>Tipo:</strong> Estado/condição da interface.</li><li><strong>Componente SIAGE-UI:</strong> SToastService (warning).</li><li><strong>Comportamentos:</strong> Informa a indisponibilidade da Secretaria Geral e retorna à listagem, com comunicação definida no Toast “Registro não encontrado”, seção 7.</li></ul> |
+
+
+## 6) Modais
+
+| Modal | Quando exibir | Título/Mensagem | Ações/Regras | Imagens |
+| --- | --- | --- | --- | --- |
+| **6.1 Histórico de Atos Governamentais** | Ao acionar “Consultar histórico”, com ou sem Chefe Imediato atual. | Título: Histórico de Atos Governamentais. | Consulta os atos associados à Secretaria Geral e aos respectivos Chefes Imediatos. Exibe Data do Cadastro e Responsável pelo Cadastro. Permite Visualizar e Baixar; Fechar e X encerram a consulta sem alterar o registro. Paginação de no máximo 5 registros por página. Consultar [RF006 — Visualizar Histórico de Atos Governamentais](globais/RF006_Visualizar_Historico_Atos_Governamentais_Global_SIAGE_UI.md). |  |
+| **6.2 Visualizar anexo** | Ao acionar Visualizar no Ato Governamental atual, na Normativa de Criação ou na Normativa de Extinção. O histórico também disponibiliza a ação Visualizar/Baixar para seus atos, conforme a seção 4.2.3. | Título: “Visualizar anexo”. Identificação: nome do arquivo, tamanho e data/hora de envio, quando disponíveis. | <ul><li><strong>Componente SIAGE-UI:</strong> SModalComponent (s-modal), aberto por SModalService; SButtonComponent (s-button) para ações.</li><li><strong>Ações/Regras:</strong> Abre modal centralizado com visualização do PDF ou da imagem, controles de carregamento, falha e tentativa de recuperação. X e Fechar encerram. Baixar arquivo disponível. Não modifica documento nem registro.</li><li><strong>Pré-visualização do documento:</strong><ul><li><strong>Tipo:</strong> Área de visualização de PDF ou imagem.</li><li><strong>Componente SIAGE-UI:</strong> Lacuna da biblioteca — LAC-001.</li><li><strong>No protótipo:</strong> ngx-extended-pdf-viewer para PDF e elemento img para imagens.</li><li><strong>Comportamentos:</strong> Apresenta o conteúdo do arquivo sem permitir alteração; aplica-se a LAC-001 registrada na RF001 e na RF002.</li></ul></li><li><strong>Controles de visualização de PDF:</strong><ul><li><strong>Tipo:</strong> Controles do visualizador de documento.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; controles do ngx-extended-pdf-viewer.</li><li><strong>Comportamentos:</strong> Permitem consultar páginas e ajustar o zoom do PDF.</li></ul></li><li><strong>Controles de zoom de imagem:</strong><ul><li><strong>Tipo:</strong> Ações de ajuste da visualização.</li><li><strong>Componente SIAGE-UI:</strong> SIconButtonComponent (s-icon-button), SButtonComponent (s-button) e STooltipDirective (sTooltip).</li><li><strong>Comportamentos:</strong> Permitem diminuir, aumentar ou retornar o zoom a 100%.</li></ul></li><li><strong>Baixar arquivo:</strong><ul><li><strong>Tipo:</strong> Ação de download no modal.</li><li><strong>Componente SIAGE-UI:</strong> SButtonComponent (s-button: variant secondary, outlined, icon download).</li><li><strong>Comportamentos:</strong> Disponibiliza o download do documento no formato em que foi cadastrado, observadas as permissões.</li></ul></li><li><strong>Fechar / X:</strong><ul><li><strong>Tipo:</strong> Ações de encerramento do modal.</li><li><strong>Componente SIAGE-UI:</strong> SModalComponent (s-modal) e SButtonComponent (s-button).</li><li><strong>Comportamentos:</strong> Fecham a pré-visualização sem modificar o registro ou o documento.</li></ul></li><li><strong>Estados da pré-visualização</strong></li><li><strong>Carregamento</strong><ul><li>do documento: Tipo: Estado do modal.</li><li><strong>Componente SIAGE-UI:</strong> SSpinnerComponent (s-spinner: size md).</li><li><strong>Comportamentos:</strong> Exibe o controle de carregamento durante a abertura do arquivo.</li><li>Falha ao visualizar documento: Tipo: Estado do modal.</li><li><strong>Componente SIAGE-UI:</strong> SIconComponent (s-icon: variant destructive) e SButtonComponent (s-button) para Tentar novamente e Baixar arquivo.</li><li><strong>Comportamentos:</strong> Exibe o estado de falha da pré-visualização e oferece tentativa de recuperação, sem alterar o documento.</li></ul></li></ul> |  |
+
+## 7) Toast
+
+| Toast | Quando exibir | Título/Mensagem | Ações/Regras | Imagens |
+| --- | --- | --- | --- | --- |
+| <strong>Registro não encontrado</strong> | Ao acessar a visualização por identificação inexistente ou indisponível. | Título: “Secretaria Geral não encontrada.” Mensagem: Não se aplica. | <strong>Componente SIAGE-UI</strong>: SToastService (warning).<br><strong>Ações/Regras</strong>: Não expor dados de outro registro; comunicar o usuário e retornar à listagem. |  |
+| <strong>Erro genérico de requisição</strong> | Quando operação de consulta falhar sem mensagem funcional específica. | Título: “Não foi possível concluir a solicitação.” Mensagem: “Tente novamente.” | <strong>Componente SIAGE-UI</strong>: SToastService (error).<br><strong>Ações/Regras</strong>: Utilizar Toast global de erro; não expor URL, endpoint, código HTTP, SQL ou dados técnicos. Manter navegação segura. |  |
+
+O início do download não apresenta toast de confirmação.
+
+## 8) Protótipos
+
+| Visualizar Secretaria Geral - Sem Normativa de Extinção |
+| --- |
+|  |
+| Visualizar Secretaria Geral - Com Normativa de Extinção |
+|  |
+| Visualizar Secretaria Geral - Sem Chefe Imediato e Secretarias Executivas e GREs vinculadas |
+|  |
+| Visualizar Secretaria Geral - Sem acesso à funcionalidade |
+|  |
+
+## 9) Lacunas da biblioteca SIAGE-UI
+
+**Situação:** Aplica-se a LAC-001 já registrada nas RF001 e RF002.
+**Referência existente:** LAC-001 (RF001 e RF002) — pré-visualização de documentos. A mesma lacuna se aplica à pré-visualização desta RF.
+| Identificador | Elemento da RF | Necessidade não atendida | Referência na RF |
+| --- | --- | --- | --- |
+| **LAC-001 (RF001 e RF002)** | Pré-visualização de documentos. | A biblioteca instalada não disponibiliza componente dedicado à pré-visualização de PDF e imagens; o protótipo utiliza ngx-extended-pdf-viewer para PDF e img para imagens. | 6.2 Visualizar anexo. |
+

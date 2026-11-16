@@ -252,6 +252,50 @@ describe.each(cases)('$name - migração completa', config => {
     fixture.destroy();
   });
 
+  it('rejeita datas futuras nos três campos e revalida ao salvar', () => {
+    const fixture = formFixture();
+    const component = fixture.componentInstance;
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const future = tomorrow.toLocaleDateString('pt-BR');
+    for (const control of [component.atoDataControl, component.normCriacaoDataControl, component.normExtincaoDataControl]) {
+      control.setValue(future);
+      expect(control.getError('dataRange')).toBe('A data não pode ser futura.');
+    }
+    component.expandindoNormativaExtincao.set(true);
+    vi.spyOn(component, 'focusPrimeiroCampoInvalido').mockImplementation(() => undefined);
+    component.onSalvar();
+    fixture.detectChanges();
+    expect(component.normCriacaoDataControl.getError('dataRange')).toBe('A data não pode ser futura.');
+    expect(component.normExtincaoDataControl.getError('dataRange')).toBe('A data não pode ser futura.');
+    expect(fixture.nativeElement.textContent).toContain('A data não pode ser futura.');
+    expect(component.isSaving()).toBe(false);
+    expect(component.dataMaxima.toDateString()).toBe(new Date().toDateString());
+    component.normCriacaoDataControl.setValue(new Date().toLocaleDateString('pt-BR'));
+    expect(component.normCriacaoDataControl.hasError('dataRange')).toBe(false);
+    fixture.destroy();
+  });
+
+  it('impede atualização com data futura no ato governamental', () => {
+    const fixture = formFixture(true);
+    const component = fixture.componentInstance;
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    component.chefeImediato.set({
+      matricula: '123', cpf: '123', nome: 'Servidor', cargo: 'Cargo', situacaoFuncional: 'Em exercício',
+      atoGovernamental: {numero: '123', dataPublicacao: '01/01/2024', documento: document}
+    });
+    component.atoNumeroControl.setValue('123');
+    component.atoDataControl.setValue(tomorrow.toLocaleDateString('pt-BR'));
+    vi.spyOn(component, 'focusPrimeiroCampoInvalido').mockImplementation(() => undefined);
+    component.onSalvar();
+    fixture.detectChanges();
+    expect(component.atoDataControl.getError('dataRange')).toBe('A data não pode ser futura.');
+    expect(fixture.nativeElement.textContent).toContain('A data não pode ser futura.');
+    expect(component.isSaving()).toBe(false);
+    fixture.destroy();
+  });
+
   it('carrega e atualiza a edição sem alterar a normativa de criação', async () => {
     const fixture = formFixture(true);
     const component = fixture.componentInstance;

@@ -108,6 +108,13 @@ export function normalizarDataParaBr(data: string | undefined | null): string {
   return trimmed;
 }
 
+export function dataFutura(data: string): boolean {
+  if (!validarDataFormato(data)) return false;
+  const [dia, mes, ano] = normalizarDataParaBr(data).split('/').map(Number);
+  const hoje = new Date();
+  return new Date(ano, mes - 1, dia).getTime() > new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).getTime();
+}
+
 export function formatarDataParaExibicao(data: string | undefined | null): string {
   if (!data || typeof data !== 'string') return '-';
   const trimmed = data.trim();
@@ -1215,7 +1222,7 @@ class DataFormulario {
 
   private aplicarErros(valor: string) {
     const limpo = (valor || '').trim();
-    const erro = !limpo ? {required: true} : !validarDataFormato(limpo) ? {dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.'} : null;
+    const erro = !limpo ? {required: true} : !validarDataFormato(limpo) ? {dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.'} : dataFutura(limpo) ? {dataRange: 'A data não pode ser futura.'} : null;
     this.control.setErrors(erro);
     this.dateControl.setErrors(erro);
   }
@@ -1396,7 +1403,6 @@ class DataFormulario {
 export class VisualizarDocumentoModal {
   readonly dialogRef = injectModalRef<void, VisualizarDocumentoModal>();
   readonly data = injectModalData<{documento: DocumentoAnexo; titulo?: string; tipoDocumento?: string}>();
-  private readonly toast = inject(SToastService);
 
   readonly isLoading = signal(true);
   readonly hasError = signal(false);
@@ -1472,7 +1478,6 @@ export class VisualizarDocumentoModal {
   baixar() {
     const url = this.fileUrl();
     const filename = this.data?.documento?.nomeArquivo || (this.isPdf() ? 'documento-comprovacao.pdf' : 'anexo-documento.png');
-    this.toast.success(`Download de "${filename}" iniciado.`);
     try {
       const a = document.createElement('a');
       a.href = url;
@@ -1527,6 +1532,15 @@ function abrirDocumentoAninhado(dialog: MatDialog, documento: DocumentoAnexo) {
       width: 100%;
       box-sizing: border-box;
     }
+
+    :host ::ng-deep s-table .s-table__tabela .s-table__cabecalho th {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    :host ::ng-deep .s-table__tabela td {
+      overflow-wrap: anywhere;
+    }
   `],
   template: `
     <s-modal
@@ -1557,7 +1571,6 @@ function abrirDocumentoAninhado(dialog: MatDialog, documento: DocumentoAnexo) {
 export class HistoricoAtosModal {
   readonly dialogRef = injectModalRef<void, HistoricoAtosModal>();
   private readonly dialog = inject(MatDialog);
-  private readonly toast = inject(SToastService);
   readonly data = injectModalData<{atos: HistoricoAtoItem[]}>();
 
   readonly atos = signal<HistoricoAtoItem[]>(this.data?.atos || []);
@@ -1612,7 +1625,6 @@ export class HistoricoAtosModal {
   }
 
   baixar(item: HistoricoAtoItem) {
-    this.toast.success(`Download de "${item.documento.nomeArquivo}" iniciado.`);
     const blob = new Blob([`Simulação de documento oficial: ${item.documento.nomeArquivo}`], {type: 'application/pdf'});
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1686,7 +1698,7 @@ export class HistoricoAtosModal {
                   <s-input
                     formControlName="nome"
                     [maxlength]="200"
-                    placeholder="Digite o servidor"
+                    placeholder="Digite o Nome do Servidor"
                   />
                 </s-field>
               </div>
@@ -2033,7 +2045,7 @@ export class ImpedimentoInativacaoModal {
             <s-input
               formControlName="nome"
               [maxlength]="100"
-              placeholder="Ex: Lei Complementar nº 184/2023 - Extinção da Secretaria"
+              placeholder="Digite o Nome da Normativa de Extinção"
               (focusout)="form.controls.nome.markAsTouched()"
             />
           </s-field>
@@ -2051,7 +2063,7 @@ export class ImpedimentoInativacaoModal {
               <s-input
                 formControlName="numero"
                 [maxlength]="20"
-                placeholder="Ex: 184"
+                placeholder="Digite o Número da Normativa"
                 (focusout)="form.controls.numero.markAsTouched()"
               />
             </s-field>
@@ -2130,7 +2142,7 @@ export class AnexarNormativaExtincaoModal {
   readonly documento = signal<DocumentoAnexo | undefined>(undefined);
   readonly tentouSalvarSemDoc = signal(false);
   readonly dataMinima = new Date(1900, 0, 1);
-  readonly dataMaxima = new Date(2100, 11, 31);
+  readonly dataMaxima = new Date();
   readonly arquivoControl = new FormControl<File | null>({value: null, disabled: true});
 
   readonly form = new FormGroup({
@@ -2148,7 +2160,7 @@ export class AnexarNormativaExtincaoModal {
     const nome = (this.nomeVal() || this.form.controls.nome.value || '').trim();
     const num = (this.numeroVal() || this.form.controls.numero.value || '').trim();
     const data = (this.dataVal() || this.form.controls.dataPublicacao.value || '').trim();
-    return nome.length > 0 && nome.length <= 100 && num.length > 0 && num.length <= 20 && validarDataFormato(data);
+    return nome.length > 0 && nome.length <= 100 && num.length > 0 && num.length <= 20 && validarDataFormato(data) && !dataFutura(data);
   });
 
   private readonly estadoAnexo = effect(() => {
@@ -2225,7 +2237,6 @@ export class AnexarNormativaExtincaoModal {
   }
 
   baixarDoc(doc: DocumentoAnexo) {
-    this.toast.success(`Download de "${doc.nomeArquivo}" iniciado.`);
     const blob = new Blob([`Simulação de documento oficial: ${doc.nomeArquivo}`], {type: 'application/pdf'});
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -2300,8 +2311,8 @@ export class AnexarNormativaExtincaoModal {
       this.form.controls.dataPublicacao.setErrors({ required: true });
       this.dataPicker.dateControl.setErrors({ required: true });
       hasError = true;
-    } else if (!validarDataFormato(data)) {
-      const erro = { dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' };
+    } else if (!validarDataFormato(data) || dataFutura(data)) {
+      const erro = dataFutura(data) ? { dataRange: 'A data não pode ser futura.' } : { dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' };
       this.form.controls.dataPublicacao.setErrors(erro);
       this.dataPicker.dateControl.setErrors(erro);
       hasError = true;
@@ -2393,7 +2404,7 @@ export class AnexarNormativaExtincaoModal {
               <s-input
                 formControlName="nome"
                 [maxlength]="200"
-                placeholder="Buscar por nome"
+                placeholder="Digite o Nome"
               />
             </s-field>
 
@@ -3033,7 +3044,7 @@ export class SecretariaGeralList {
                   [error]="form.controls.nome.hasError('duplicado') ? 'Já existe uma Secretaria Geral cadastrada com este nome.' : form.controls.nome.hasError('required') && form.controls.nome.touched ? 'O Nome da Secretaria Geral é obrigatório.' : ''"
                   (focusout)="form.controls.nome.markAsTouched()"
                 >
-                  <s-input formControlName="nome" [maxlength]="200" placeholder="Ex: Secretaria Geral de Governo e Articulação Institucional" />
+                  <s-input formControlName="nome" [maxlength]="200" placeholder="Digite o Nome da Secretaria Geral" />
                 </s-field>
               </div>
 
@@ -3157,7 +3168,7 @@ export class SecretariaGeralList {
                     <div class="form-field-group">
                       <s-field label="Número do Ato Governamental" controlId="form-ato-numero" required
                         [error]="erroObrigatorio(atoNumeroControl, 'O Número do Ato Governamental é obrigatório.', 'O Número do Ato Governamental deve ter no máximo 20 caracteres.')">
-                        <s-input [formControl]="atoNumeroControl" [maxlength]="20" placeholder="Ex: Ato nº 1.420/2024" (focusout)="atoNumeroControl.markAsTouched()" />
+                        <s-input [formControl]="atoNumeroControl" [maxlength]="20" placeholder="Digite o Número do Ato Governamental" (focusout)="atoNumeroControl.markAsTouched()" />
                       </s-field>
                     </div>
 
@@ -3275,14 +3286,14 @@ export class SecretariaGeralList {
                     <s-field label="Nome da Normativa de Criação" controlId="form-norm-criacao-nome" required
                       [showCharCounter]="!normCriacaoNomeControl.invalid || !normCriacaoNomeControl.touched" [maxlength]="100"
                       [error]="erroObrigatorio(normCriacaoNomeControl, 'O Nome da Normativa de Criação é obrigatório.', 'O Nome da Normativa de Criação deve ter no máximo 100 caracteres.')">
-                      <s-input [formControl]="normCriacaoNomeControl" [maxlength]="100" placeholder="Ex: Decreto Estadual nº 42.150/2023 - Estrutura Organizacional" (focusout)="normCriacaoNomeControl.markAsTouched()" />
+                      <s-input [formControl]="normCriacaoNomeControl" [maxlength]="100" placeholder="Digite o Nome da Normativa de Criação" (focusout)="normCriacaoNomeControl.markAsTouched()" />
                     </s-field>
                   </div>
 
                   <div class="form-field-group">
                     <s-field label="Número da Normativa" controlId="form-norm-criacao-numero" required
                       [error]="erroObrigatorio(normCriacaoNumeroControl, 'O Número da Normativa de Criação é obrigatório.', 'O Número da Normativa de Criação deve ter no máximo 20 caracteres.')">
-                      <s-input [formControl]="normCriacaoNumeroControl" [maxlength]="20" placeholder="Ex: 42.150" (focusout)="normCriacaoNumeroControl.markAsTouched()" />
+                      <s-input [formControl]="normCriacaoNumeroControl" [maxlength]="20" placeholder="Digite o Número da Normativa" (focusout)="normCriacaoNumeroControl.markAsTouched()" />
                     </s-field>
                   </div>
 
@@ -3390,14 +3401,14 @@ export class SecretariaGeralList {
                     <s-field label="Nome da Normativa de Extinção" controlId="form-norm-ext-nome" required
                       [showCharCounter]="!normExtincaoNomeControl.invalid || !normExtincaoNomeControl.touched" [maxlength]="100"
                       [error]="erroObrigatorio(normExtincaoNomeControl, 'O Nome da Normativa de Extinção é obrigatório.', 'O Nome da Normativa de Extinção deve ter no máximo 100 caracteres.')">
-                      <s-input [formControl]="normExtincaoNomeControl" [maxlength]="100" placeholder="Ex: Lei Complementar nº 184/2023 - Extinção da Secretaria" (focusout)="normExtincaoNomeControl.markAsTouched()" />
+                      <s-input [formControl]="normExtincaoNomeControl" [maxlength]="100" placeholder="Digite o Nome da Normativa de Extinção" (focusout)="normExtincaoNomeControl.markAsTouched()" />
                     </s-field>
                   </div>
 
                   <div class="form-field-group">
                     <s-field label="Número da Normativa" controlId="form-norm-ext-numero" required
                       [error]="erroObrigatorio(normExtincaoNumeroControl, 'O Número da Normativa de Extinção é obrigatório.', 'O Número da Normativa de Extinção deve ter no máximo 20 caracteres.')">
-                      <s-input [formControl]="normExtincaoNumeroControl" [maxlength]="20" placeholder="Ex: 184" (focusout)="normExtincaoNumeroControl.markAsTouched()" />
+                      <s-input [formControl]="normExtincaoNumeroControl" [maxlength]="20" placeholder="Digite o Número da Normativa" (focusout)="normExtincaoNumeroControl.markAsTouched()" />
                     </s-field>
                   </div>
 
@@ -3479,7 +3490,7 @@ export class SecretariaGeralList {
                       <s-input
                         [formControl]="filtroSubordinadaNome"
                         [maxlength]="200"
-                        placeholder="Digite o nome"
+                        placeholder="Digite o Nome"
                         (keydown.enter)="$event.preventDefault(); canBuscarSubordinadas() && onBuscarSubordinadas()"
                       />
                     </s-field>
@@ -3610,7 +3621,7 @@ export class SecretariaGeralForm {
   readonly normCriacaoDataPicker = new DataFormulario(this.normCriacaoDataControl);
   readonly normCriacaoArquivoControl = new FormControl<File | null>({value: null, disabled: true});
   readonly dataMinima = new Date(1900, 0, 1);
-  readonly dataMaxima = new Date(2100, 11, 31);
+  readonly dataMaxima = new Date();
   readonly normCriacaoDoc = signal<DocumentoAnexo | undefined>(undefined);
   readonly normCriacaoNomeVal = toSignal(this.normCriacaoNomeControl.valueChanges, { initialValue: '' });
   readonly normCriacaoNumeroVal = toSignal(this.normCriacaoNumeroControl.valueChanges, { initialValue: '' });
@@ -3651,21 +3662,21 @@ export class SecretariaGeralForm {
     if (!this.chefeImediato()) return false;
     const num = (this.atoNumeroVal() || this.atoNumeroControl.value || '').trim();
     const data = (this.atoDataVal() || this.atoDataControl.value || '').trim();
-    return num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data);
+    return num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data) && !dataFutura(data);
   });
 
   readonly canAnexarNormCriacao = computed(() => {
     const nome = (this.normCriacaoNomeVal() || this.normCriacaoNomeControl.value || '').trim();
     const num = (this.normCriacaoNumeroVal() || this.normCriacaoNumeroControl.value || '').trim();
     const data = (this.normCriacaoDataVal() || this.normCriacaoDataControl.value || '').trim();
-    return nome.length > 0 && nome.length <= 100 && num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data);
+    return nome.length > 0 && nome.length <= 100 && num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data) && !dataFutura(data);
   });
 
   readonly canAnexarNormExtincao = computed(() => {
     const nome = (this.normExtincaoNomeVal() || this.normExtincaoNomeControl.value || '').trim();
     const num = (this.normExtincaoNumeroVal() || this.normExtincaoNumeroControl.value || '').trim();
     const data = (this.normExtincaoDataVal() || this.normExtincaoDataControl.value || '').trim();
-    return nome.length > 0 && nome.length <= 100 && num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data);
+    return nome.length > 0 && nome.length <= 100 && num.length > 0 && num.length <= 20 && data.length > 0 && validarDataFormato(data) && !dataFutura(data);
   });
 
   private readonly estadoAnexos = effect(() => {
@@ -4374,8 +4385,8 @@ export class SecretariaGeralForm {
       this.normExtincaoDataPicker.dateControl.markAsTouched();
       hasError = true;
       if (!firstInvalidId) firstInvalidId = 'form-norm-ext-data';
-    } else if (!validarDataFormato(data)) {
-      this.normExtincaoDataControl.setErrors({ dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
+    } else if (!validarDataFormato(data) || dataFutura(data)) {
+      this.normExtincaoDataControl.setErrors(dataFutura(data) ? { dataRange: 'A data não pode ser futura.' } : { dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
       this.normExtincaoDataControl.markAsTouched();
       this.normExtincaoDataPicker.dateControl.markAsTouched();
       hasError = true;
@@ -4416,9 +4427,7 @@ export class SecretariaGeralForm {
     });
   }
 
-  baixarDoc(doc: DocumentoAnexo) {
-    this.toastService.success(`Download de "${doc.nomeArquivo}" iniciado.`);
-  }
+  baixarDoc(_doc: DocumentoAnexo) {}
 
   onCliqueDownloadLocal(event: MouseEvent, arquivo: File | null, doc: DocumentoAnexo | undefined) {
     if (arquivo && doc && (event.target as Element).closest('button[aria-label="Baixar arquivo"]')) {
@@ -4500,8 +4509,8 @@ export class SecretariaGeralForm {
         this.normExtincaoDataPicker.dateControl.markAsTouched();
         hasError = true;
         if (!firstInvalidId) firstInvalidId = 'form-norm-ext-data';
-      } else if (!validarDataFormato(extData)) {
-        this.normExtincaoDataControl.setErrors({ dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
+      } else if (!validarDataFormato(extData) || dataFutura(extData)) {
+        this.normExtincaoDataControl.setErrors(dataFutura(extData) ? { dataRange: 'A data não pode ser futura.' } : { dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
         this.normExtincaoDataControl.markAsTouched();
         this.normExtincaoDataPicker.dateControl.markAsTouched();
         hasError = true;
@@ -4565,8 +4574,8 @@ export class SecretariaGeralForm {
         this.atoDataPicker.dateControl.markAsTouched();
         hasError = true;
         if (!firstInvalidId) firstInvalidId = 'form-ato-data';
-      } else if (!validarDataFormato(atoData)) {
-        this.atoDataControl.setErrors({ dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
+      } else if (!validarDataFormato(atoData) || dataFutura(atoData)) {
+        this.atoDataControl.setErrors(dataFutura(atoData) ? { dataRange: 'A data não pode ser futura.' } : { dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
         this.atoDataControl.markAsTouched();
         this.atoDataPicker.dateControl.markAsTouched();
         hasError = true;
@@ -4621,8 +4630,8 @@ export class SecretariaGeralForm {
         this.normCriacaoDataPicker.dateControl.markAsTouched();
         hasError = true;
         if (!firstInvalidId) firstInvalidId = 'form-norm-criacao-data';
-      } else if (!validarDataFormato(normCriaData)) {
-        this.normCriacaoDataControl.setErrors({ dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
+      } else if (!validarDataFormato(normCriaData) || dataFutura(normCriaData)) {
+        this.normCriacaoDataControl.setErrors(dataFutura(normCriaData) ? { dataRange: 'A data não pode ser futura.' } : { dataFormato: 'Informe uma data válida no formato DD/MM/AAAA.' });
         this.normCriacaoDataControl.markAsTouched();
         this.normCriacaoDataPicker.dateControl.markAsTouched();
         hasError = true;
@@ -4972,7 +4981,7 @@ export const secretariaGeralFormDeactivateGuard: CanDeactivateFn<SecretariaGeral
                       <s-input
                         [formControl]="filtroNome"
                         [maxlength]="200"
-                        placeholder="Digite o nome"
+                        placeholder="Digite o Nome"
                         (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
                       />
                     </s-field>
@@ -5305,9 +5314,7 @@ export class SecretariaGeralView {
     });
   }
 
-  baixarDoc(doc: DocumentoAnexo) {
-    this.toastService.success(`Download de "${doc.nomeArquivo}" iniciado.`);
-  }
+  baixarDoc(_doc: DocumentoAnexo) {}
 
   abrirHistoricoAtos() {
     const sec = this.item();
