@@ -1,4 +1,4 @@
-# Cópia de \[RF001\] Listar / Inativar - Configurar Secretaria Geral
+# \[RF001\] Listar / Inativar - Configurar Secretaria Geral
 
 ## 1) Histórico
 
@@ -54,7 +54,7 @@ Login \>\> Selecionar Matrícula, quando aplicável \>\> Página Inicial \>\> Co
 
 - O botão Adicionar deverá permanecer desabilitado quando existir qualquer Secretaria Geral ativa, independentemente dos filtros aplicados.
 
-- A interface deverá seguir os padrões de acessibilidade definidos nas Padronizações do SIAGE-RH e os comportamentos acessíveis disponibilizados pelos componentes da biblioteca SIAGE-UI. Particularidades deverão ser especificadas no detalhamento dos respectivos elementos.
+- A interface deverá seguir os padrões de acessibilidade definidos nas Padronizações do SIAGE-RH e os comportamentos acessíveis disponibilizados pelos componentes da biblioteca SIAGE-UI.
 
 #### 4.2.2 Pesquisa, ordenação e paginação
 
@@ -114,7 +114,7 @@ Login \>\> Selecionar Matrícula, quando aplicável \>\> Página Inicial \>\> Co
 
 
 
-Quando não houver registros cadastrados, exibir “Nenhum registro cadastrado” e “Ainda não existem secretarias gerais cadastradas.”. Quando os filtros não retornarem correspondências, exibir “Nenhum resultado encontrado” e “Nenhum registro corresponde aos filtros aplicados.”. Durante o carregamento, exibir skeleton no formato da tabela. Em falha de carregamento, exibir “Erro ao carregar dados”, a mensagem definida na seção  5.4 e a ação “Tentar novamente”.
+Quando não houver registros cadastrados, exibir “Nenhum registro cadastrado” e “Ainda não existem secretarias gerais cadastradas.”. Quando os filtros não retornarem correspondências, exibir “Nenhum resultado encontrado” e “Nenhum registro corresponde aos filtros aplicados.”. Durante o carregamento, exibir skeleton no formato da tabela. Em falha de carregamento, exibir “Erro ao carregar dados”, a mensagem definida na seção 5.4 e a ação “Tentar novamente”.
 
 ## 5) Detalhamento da funcionalidade
 
@@ -160,10 +160,10 @@ Ações incorporadas à tabela do bloco de listagem.
 
 | Nome do campo | Detalhamento do campo |
 | --- | --- |
-| **Nenhum registro cadastrado** | <ul><li><strong>Label:</strong> “Nenhum registro cadastrado”.</li><li><strong>Tipo:</strong> Estado vazio.</li><li><strong>Componente SIAGE-UI:</strong> SEmptyStateComponent (s-empty-state), integrado ao STableComponent (s-table).</li><li><strong>Comportamentos:</strong> Exibe “Ainda não existem secretarias gerais cadastradas.” quando não houver registros a apresentar.</li></ul> |
-| **Nenhum resultado encontrado** | <ul><li><strong>Label:</strong> “Nenhum resultado encontrado”.</li><li><strong>Tipo:</strong> Estado vazio.</li><li><strong>Componente SIAGE-UI:</strong> SEmptyStateComponent (s-empty-state), integrado ao STableComponent (s-table).</li><li><strong>Comportamentos:</strong> Exibe “Nenhum registro corresponde aos filtros aplicados.” quando a busca nos filtros não retornar resultados.</li></ul> |
-| **Carregamento** | <ul><li><strong>Tipo:</strong> Estado de carregamento.</li><li><strong>Componente SIAGE-UI:</strong> SSkeletonComponent (s-skeleton), integrado ao STableComponent (s-table).</li><li><strong>Comportamentos:</strong> Durante o carregamento, exibe skeleton no formato da tabela.</li></ul> |
-| **Erro ao carregar dados** | <ul><li><strong>Label:</strong> “Erro ao carregar dados”.</li><li><strong>Tipo:</strong> Estado de erro.</li><li><strong>Componente SIAGE-UI:</strong> SEmptyStateComponent (s-empty-state), integrado ao STableComponent (s-table); SButtonComponent (s-button) para a ação “Tentar novamente”.</li><li><strong>Comportamentos:</strong><ul><li>Exibe “Não foi possível carregar as informações desta funcionalidade. Verifique sua conexão e tente novamente.” e a ação “Tentar novamente” quando houver erro ao carregar dados.</li><li>A ação utiliza o botão secundário com contorno disponibilizado pelo componente oficial, sem variante personalizada.</li></ul></li></ul> |
+| Nenhum registro cadastrado | <ul><li><strong>Label:</strong> “Nenhum registro cadastrado”.</li><li><strong>Tipo:</strong> Estado vazio.</li><li><strong>Componente SIAGE-UI:</strong> SEmptyStateComponent (s-empty-state), integrado ao STableComponent (s-table).</li><li><strong>Comportamentos:</strong> Exibe “Ainda não existem secretarias gerais cadastradas.” quando não houver registros a apresentar.</li></ul> |
+| Nenhum resultado encontrado | <ul><li><strong>Label:</strong> “Nenhum resultado encontrado”.</li><li><strong>Tipo:</strong> Estado vazio.</li><li><strong>Componente SIAGE-UI:</strong> SEmptyStateComponent (s-empty-state), integrado ao STableComponent (s-table).</li><li><strong>Comportamentos:</strong> Exibe “Nenhum registro corresponde aos filtros aplicados.” quando a busca nos filtros não retornar resultados.</li></ul> |
+| Carregamento | <ul><li><strong>Tipo:</strong> Estado de carregamento.</li><li><strong>Componente SIAGE-UI:</strong> SSkeletonComponent (s-skeleton), integrado ao STableComponent (s-table).</li><li><strong>Comportamentos:</strong> Durante o carregamento, exibe skeleton no formato da tabela.</li></ul> |
+| Erro ao carregar dados | <ul><li><strong>Label:</strong> “Erro ao carregar dados”.</li><li><strong>Tipo:</strong> Estado de erro.</li><li><strong>Componente SIAGE-UI:</strong> SEmptyStateComponent (s-empty-state), integrado ao STableComponent (s-table); SButtonComponent (s-button) para a ação “Tentar novamente”.</li><li><strong>Comportamentos:</strong><ul><li>Exibe “Não foi possível carregar as informações desta funcionalidade. Verifique sua conexão e tente novamente.” e a ação “Tentar novamente” quando houver erro ao carregar dados.</li><li>A ação utiliza o botão secundário com contorno disponibilizado pelo componente oficial, sem variante personalizada.</li></ul></li></ul> |
 
 ## 6) Modais
 
@@ -191,15 +191,15 @@ Ações incorporadas à tabela do bloco de listagem.
 | Listar Secretaria Geral |
 | --- |
 |  |
-| Listar Secretaria Geral - Nenhum resultado encontrado |
+| **Listar Secretaria Geral - Nenhum resultado encontrado** |
 |  |
-| Listar Secretaria Geral - Nenhum Registro cadastrado |
+| **Listar Secretaria Geral - Nenhum Registro cadastrado** |
 |  |
-| Listar Secretaria Geral - Carregando em skeleton |
+| **Listar Secretaria Geral - Carregando em skeleton** |
 |  |
-| Listar Secretaria Geral - Erro de carregamento |
+| **Listar Secretaria Geral - Erro de carregamento** |
 |  |
-| Listar Secretaria Geral - Sem acesso a funcionalidade |
+| **Listar Secretaria Geral - Sem acesso a funcionalidade** |
 |  |
 
 ## 9) Lacunas da biblioteca SIAGE-UI

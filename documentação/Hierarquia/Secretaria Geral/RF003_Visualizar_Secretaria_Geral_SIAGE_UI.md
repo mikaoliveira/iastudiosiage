@@ -32,7 +32,7 @@ Login >> Selecionar Matrícula, quando aplicável >> Página Inicial >> Configur
 - Os cards deverão ser exibidos na sequência: 1. Identificação da Secretaria Geral; 2. Chefia Imediata e Ato Governamental; 3. Secretarias Executivas e Gerências Regionais Vinculadas; 4. Gestão de Normativas.
 - Os dados deverão ser apresentados em formato somente leitura, com rótulos e valores organizados e com quebra de linha para informações extensas, sem campos editáveis ou indicadores de obrigatoriedade.
 - A tela deverá exibir informações de autoria e auditoria e oferecer retorno à listagem pelo botão Voltar.
-- **A interface deverá seguir os padrões de acessibilidade definidos nas Padronizações do SIAGE-RH e os comportamentos acessíveis disponibilizados pelos componentes da biblioteca SIAGE-UI. Particularidades deverão ser especificadas no detalhamento dos respectivos elementos.**
+- A interface deverá seguir os padrões de acessibilidade definidos nas Padronizações do SIAGE-RH e os comportamentos acessíveis disponibilizados pelos componentes da biblioteca SIAGE-UI.
 
 #### 4.2.2 Identificação da Secretaria Geral
 - O sistema deverá apresentar Nome da Secretaria Geral e Unidade de Trabalho (UTB), lado a lado, seguidos por Situação, Criador / Editor e Data de Criação.
@@ -165,18 +165,6 @@ Login >> Selecionar Matrícula, quando aplicável >> Página Inicial >> Configur
 | **Informações de auditoria** | <ul><li><strong>Tipo:</strong> Informação textual.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> Apresenta data e responsável pelo cadastro ou, quando houver atualização, data e responsável pela última atualização.</li></ul> |
 
 
-### **5.7 Estados da visualização**
-**Os estados abaixo descrevem condições da interface e não são campos editáveis ou colunas da listagem.**
-| Nome do campo | Detalhamento do campo |
-| --- | --- |
-| **Sem Chefe Imediato** | <ul><li><strong>Tipo:</strong> Estado/condição da interface.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong><ul><li>Exibe “Nenhum Chefe Imediato vinculado no momento.”.</li><li>Não apresenta os dados do Ato Governamental atual e mantém a ação “Consultar histórico” disponível.</li></ul></li></ul> |
-| **Sem Normativa de Extinção** | <ul><li><strong>Tipo:</strong> Estado/condição da interface.</li><li><strong>Componente SIAGE-UI:</strong> Não se aplica; informação textual.</li><li><strong>Comportamentos:</strong> A seção completa da Normativa de Extinção permanece oculta quando não houver documento de extinção cadastrado.</li></ul> |
-| **Sem unidades vinculadas** | <ul><li><strong>Tipo:</strong> Estado/condição da interface.</li><li><strong>Componente SIAGE-UI:</strong> SEmptyStateComponent (s-empty-state), integrado ao STableComponent (s-table: empty, variant no-results).</li><li><strong>Comportamentos:</strong> Quando não houver Secretarias Executivas ou Gerências Regionais subordinadas, a listagem apresenta “Nenhum vínculo foi encontrado.”</li></ul> |
-| **Pesquisa de unidades sem resultado** | <ul><li><strong>Tipo:</strong> Estado/condição da interface.</li><li><strong>Componente SIAGE-UI:</strong> SEmptyStateComponent (s-empty-state), integrado ao STableComponent (s-table: empty, variant no-results).</li><li><strong>Comportamentos:</strong> Quando nenhum registro corresponder aos filtros Nome e/ou UTB, a listagem apresenta “Nenhum vínculo foi encontrado.”</li></ul> |
-| **Acesso restrito** | <ul><li><strong>Tipo:</strong> Estado/condição da interface.</li><li><strong>Componente SIAGE-UI:</strong> SEmptyStateComponent (s-empty-state, variante forbidden) está disponível.</li><li><strong>Comportamentos:</strong> Sem permissão, apresentar a tela global “Acesso restrito”, sem expor informações do registro.</li></ul> |
-| **Registro inexistente ou indisponível** | <ul><li><strong>Tipo:</strong> Estado/condição da interface.</li><li><strong>Componente SIAGE-UI:</strong> SToastService (warning).</li><li><strong>Comportamentos:</strong> Informa a indisponibilidade da Secretaria Geral e retorna à listagem, com comunicação definida no Toast “Registro não encontrado”, seção 7.</li></ul> |
-
-
 ## 6) Modais
 
 | Modal | Quando exibir | Título/Mensagem | Ações/Regras | Imagens |
@@ -190,8 +178,6 @@ Login >> Selecionar Matrícula, quando aplicável >> Página Inicial >> Configur
 | --- | --- | --- | --- | --- |
 | <strong>Registro não encontrado</strong> | Ao acessar a visualização por identificação inexistente ou indisponível. | Título: “Secretaria Geral não encontrada.” Mensagem: Não se aplica. | <strong>Componente SIAGE-UI</strong>: SToastService (warning).<br><strong>Ações/Regras</strong>: Não expor dados de outro registro; comunicar o usuário e retornar à listagem. |  |
 | <strong>Erro genérico de requisição</strong> | Quando operação de consulta falhar sem mensagem funcional específica. | Título: “Não foi possível concluir a solicitação.” Mensagem: “Tente novamente.” | <strong>Componente SIAGE-UI</strong>: SToastService (error).<br><strong>Ações/Regras</strong>: Utilizar Toast global de erro; não expor URL, endpoint, código HTTP, SQL ou dados técnicos. Manter navegação segura. |  |
-
-O início do download não apresenta toast de confirmação.
 
 ## 8) Protótipos
 
@@ -207,7 +193,6 @@ O início do download não apresenta toast de confirmação.
 
 ## 9) Lacunas da biblioteca SIAGE-UI
 
-**Situação:** Aplica-se a LAC-001 já registrada nas RF001 e RF002.
 **Referência existente:** LAC-001 (RF001 e RF002) — pré-visualização de documentos. A mesma lacuna se aplica à pré-visualização desta RF.
 | Identificador | Elemento da RF | Necessidade não atendida | Referência na RF |
 | --- | --- | --- | --- |
