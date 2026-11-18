@@ -8,7 +8,7 @@ import {
   OnInit
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {SEmptyStateComponent} from '@siage/siage-ui';
+import {SButtonComponent, SCardComponent, SEmptyStateComponent, SFieldComponent, SIconButtonComponent, SInputComponent, SModalComponent, SModalFooterDirective, SPageHeaderComponent, SSelectComponent, STableColumn, STableComponent} from '@siage/siage-ui';
 import {Router, ActivatedRoute} from '@angular/router';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -355,30 +355,9 @@ export class ImportacaoService {
 @Component({
   selector: 'app-nova-carga-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, MatIconModule, MatButtonModule, SButtonComponent, SIconButtonComponent, SModalComponent, SModalFooterDirective],
   template: `
-    <div 
-      class="relative w-[calc(100vw-2rem)] sm:w-[540px] max-w-full bg-siage-surface text-siage-text-primary rounded-lg border border-siage-border shadow-[var(--mat-sys-level3)] font-sans transition-colors duration-200 flex flex-col text-left box-border max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-full max-sm:max-w-full max-sm:rounded-b-none max-sm:rounded-t-2xl max-sm:m-0"
-      role="dialog"
-      aria-labelledby="nova-carga-dialog-title"
-    >
-      <!-- Cabeçalho com Título e Fechar -->
-      <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b border-siage-border/40 shrink-0">
-        <h2 id="nova-carga-dialog-title" class="text-base sm:text-lg font-poppins font-bold text-siage-text-primary tracking-tight leading-snug truncate pr-3 text-left">
-          Nova carga
-        </h2>
-
-        <button 
-          type="button" 
-          (click)="fechar()" 
-          class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-lg flex items-center justify-center text-siage-text-secondary hover:text-siage-text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-          title="Fechar"
-          aria-label="Fechar modal"
-        >
-          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">close</mat-icon>
-        </button>
-      </div>
-
+    <s-modal title="Nova carga" width="540px" (cancel)="fechar()">
       <!-- Corpo do Modal -->
       <div class="px-5 py-5 overflow-y-auto flex-1 font-sans text-left space-y-4">
         
@@ -412,14 +391,7 @@ export class ImportacaoService {
           <!-- Estado 1: Nenhum arquivo selecionado ainda -->
           @if (!selectedFile()) {
             <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-              <button 
-                type="button" 
-                (click)="fileInput.click()" 
-                class="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg border border-siage-border bg-siage-surface hover:bg-siage-primary/5 hover:border-siage-primary/40 text-siage-text-primary text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-              >
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;" class="text-siage-primary">upload_file</mat-icon>
-                <span>Escolher arquivo</span>
-              </button>
+              <s-button variant="secondary" outlined icon="upload_file" (click)="fileInput.click()">Escolher arquivo</s-button>
 
               <span class="text-xs text-siage-text-secondary">
                 Formato permitido: <span class="font-semibold text-siage-text-primary">.xlsx</span>
@@ -446,25 +418,8 @@ export class ImportacaoService {
 
               <!-- Ações do arquivo selecionado: Baixar e Remover -->
               <div class="flex items-center gap-1 shrink-0">
-                <button 
-                  type="button" 
-                  (click)="baixarArquivoSelecionado()" 
-                  matTooltip="Baixar arquivo selecionado"
-                  aria-label="Baixar arquivo selecionado"
-                  class="w-8 h-8 rounded-md flex items-center justify-center text-siage-text-secondary hover:text-siage-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
-                >
-                  <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-                </button>
-
-                <button 
-                  type="button" 
-                  (click)="removerArquivo(fileInput)" 
-                  matTooltip="Remover arquivo"
-                  aria-label="Remover arquivo"
-                  class="w-8 h-8 rounded-md flex items-center justify-center text-siage-text-secondary hover:text-red-600 hover:bg-red-500/10 transition-colors cursor-pointer"
-                >
-                  <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete_outline</mat-icon>
-                </button>
+                <s-icon-button icon="download" label="Baixar arquivo selecionado" size="sm" text (click)="baixarArquivoSelecionado()" />
+                <s-icon-button icon="delete_outline" label="Remover arquivo" size="sm" variant="destructive" text (click)="removerArquivo(fileInput)" />
               </div>
             </div>
           }
@@ -480,25 +435,11 @@ export class ImportacaoService {
       </div>
 
       <!-- Rodapé com Cancelar e Salvar -->
-      <div class="flex items-center justify-end gap-3 px-5 py-3.5 border-t border-siage-border/40 shrink-0 bg-siage-surface">
-        <button 
-          type="button" 
-          (click)="fechar()" 
-          class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-xs sm:text-sm text-siage-text-primary hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-        >
-          Cancelar
-        </button>
-
-        <button 
-          type="button" 
-          [disabled]="!selectedFile()" 
-          (click)="salvar()" 
-          class="h-10 px-5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-sans font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-        >
-          Salvar
-        </button>
+      <div sModalFooter>
+        <s-button variant="secondary" outlined (click)="fechar()">Cancelar</s-button>
+        <s-button variant="primary" [disabled]="!selectedFile()" (click)="salvar()">Salvar</s-button>
       </div>
-    </div>
+    </s-modal>
   `
 })
 export class NovaCargaDialog {
@@ -594,6 +535,14 @@ export class NovaCargaDialog {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     SEmptyStateComponent,
+    SButtonComponent,
+    SCardComponent,
+    SFieldComponent,
+    SIconButtonComponent,
+    SInputComponent,
+    SPageHeaderComponent,
+    SSelectComponent,
+    STableComponent,
     CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -608,165 +557,59 @@ export class NovaCargaDialog {
     AcessoRestritoComponent,
     SiagePaginatorComponent
   ],
+  styles: [`
+    @media (max-width: 640px) {
+      :host ::ng-deep .s-page-header__linha { flex-wrap: wrap; }
+      :host ::ng-deep s-page-header .s-page-header__texto { flex: 1 1 calc(100% - 56px); }
+      :host ::ng-deep .s-page-header__acao { margin-left: 56px; }
+    }
+  `],
   template: `
     @if (!hasAccess()) {
       <app-acesso-restrito backUrl="/inicio" />
     } @else {
       <div class="flex flex-col gap-6 font-sans">
         
-        <!-- Cabeçalho com Breadcrumbs, Título com Seta Voltar, Descrição e Botão Nova Carga -->
-        <div class="flex flex-col gap-2">
-          
-          <!-- Breadcrumb: Início / Profissionais / Importação de Profissionais -->
-          <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-sans font-medium tracking-wide text-siage-text-secondary/70">
-            <span 
-              (click)="goHome()" 
-              (keydown.enter)="goHome()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Início
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goBack()" 
-              (keydown.enter)="goBack()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Profissionais
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span class="text-siage-primary font-semibold" aria-current="page">
-              Importação de Profissionais
-            </span>
-          </nav>
-
-          <!-- Bloco de Título com Botão Voltar, Descrição e Botão Nova Carga -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <button 
-                  mat-icon-button 
-                  type="button"
-                  (click)="goBack()" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                  title="Voltar para Profissionais"
-                  aria-label="Voltar para Profissionais"
-                >
-                  <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-                </button>
-                <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                  Importação de Profissionais
-                </h1>
-              </div>
-              
-              <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-2xl">
-                Consulte e acompanhe as importações de profissionais.
-              </p>
-            </div>
-
-            <!-- Botão Nova carga (alinhado em dimensões ao padrão Adicionar dos CRUDs SEAD) -->
-            @if (permissionService.canCreate()) {
-              <button 
-                type="button"
-                (click)="abrirModalNovaCarga()"
-                class="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs dark:shadow-none active:scale-[0.99] shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-              >
-                <mat-icon style="font-size: 20px; width: 20px; height: 20px;">add</mat-icon>
-                <span>Nova carga</span>
-              </button>
-            }
-          </div>
-        </div>
+        <s-page-header
+          [breadcrumbs]="breadcrumbs"
+          title="Importação de Profissionais"
+          description="Consulte e acompanhe as importações de profissionais."
+          showBack
+          (back)="goBack()"
+        >
+          @if (permissionService.canCreate()) {
+            <s-button action variant="primary" icon="add" (click)="abrirModalNovaCarga()">Nova carga</s-button>
+          }
+        </s-page-header>
 
         <!-- CARD DE FILTROS (Padrão idêntico aos CRUDs SEAD) -->
-        <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs dark:shadow-none">
+        <s-card [padding]="24" [elevation]="0">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 items-start">
             
             <!-- Filtro Arquivo (limite 100 caracteres) -->
-            <div class="form-field-group">
-              <label for="filter-arquivo" class="siage-field-label">Arquivo</label>
-              <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                <input 
-                  matInput 
-                  id="filter-arquivo"
-                  type="text" 
-                  maxlength="100"
-                  [formControl]="arquivoControl"
-                  placeholder="Buscar por arquivo" 
-                  (keydown.enter)="onBuscar()"
-                  class="text-sm font-sans"
-                />
-                @if (arquivoControl.value) {
-                  <button mat-icon-button matSuffix (click)="arquivoControl.setValue(''); updateBuscarStatus()" aria-label="Limpar campo">
-                    <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                  </button>
-                }
-              </mat-form-field>
-            </div>
+            <s-field label="Arquivo" controlId="filter-arquivo">
+              <s-input [formControl]="arquivoControl" [maxlength]="100" placeholder="Buscar por arquivo" (keydown.enter)="onBuscar()" />
+              @if (arquivoControl.value) {
+                <s-icon-button icon="close" label="Limpar campo" size="sm" text (click)="arquivoControl.setValue(''); updateBuscarStatus()" />
+              }
+            </s-field>
 
-            <!-- Filtro Responsável com busca pesquisável -->
-            <div class="form-field-group">
-              <label for="filter-responsavel" class="siage-field-label">Responsável</label>
-              <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                <mat-select [formControl]="responsavelControl" id="filter-responsavel" class="text-sm font-sans">
-                  <!-- Campo de pesquisa interna de responsáveis -->
-                  <div class="p-2 border-b border-siage-border/40 sticky top-0 bg-siage-surface z-10">
-                    <input 
-                      matInput 
-                      [formControl]="responsavelSearchControl" 
-                      placeholder="Pesquisar responsável..." 
-                      class="text-xs px-2.5 py-1.5 border border-siage-border rounded-md w-full bg-siage-background text-siage-text-primary focus:outline-none focus:ring-1 focus:ring-siage-primary" 
-                      (click)="$event.stopPropagation()"
-                      (keydown)="$event.stopPropagation()" 
-                    />
-                  </div>
-                  <mat-option value="TODOS">Todos</mat-option>
-                  @for (resp of filteredResponsaveis(); track resp) {
-                    <mat-option [value]="resp">{{ resp }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-            </div>
+            <s-field label="Responsável" controlId="filter-responsavel">
+              <s-select [formControl]="responsavelControl" [options]="responsavelOptions()" [clearable]="false" filterable filterPlaceholder="Pesquisar responsável..." />
+            </s-field>
 
             <!-- Filtro Status -->
-            <div class="form-field-group">
-              <label for="filter-status" class="siage-field-label">Status</label>
-              <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                <mat-select [formControl]="statusControl" id="filter-status" class="text-sm font-sans">
-                  <mat-option value="TODOS">Todos</mat-option>
-                  <mat-option value="EM_PROCESSAMENTO">Em processamento</mat-option>
-                  <mat-option value="CONCLUIDO_COM_SUCESSO">Concluído com sucesso</mat-option>
-                  <mat-option value="CONCLUIDO_COM_PENDENCIAS">Concluído com pendências</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
+            <s-field label="Status" controlId="filter-status">
+              <s-select [formControl]="statusControl" [options]="statusOptions" [clearable]="false" />
+            </s-field>
           </div>
 
           <!-- Ações do Filtro: Limpar e Buscar -->
           <div class="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-siage-border/40">
-            <button 
-              type="button" 
-              (click)="onLimpar()"
-              class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-siage-primary/5 hover:border-siage-primary/30 active:scale-[0.99] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-            >
-              Limpar
-            </button>
-            
-            <button 
-              type="button" 
-              [disabled]="!isBuscarEnabled()"
-              (click)="onBuscar()"
-              class="inline-flex items-center justify-center gap-1.5 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-sans font-semibold text-sm transition-all shadow-xs dark:shadow-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-            >
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">search</mat-icon>
-              <span>Buscar</span>
-            </button>
+            <s-button variant="secondary" outlined (click)="onLimpar()">Limpar</s-button>
+            <s-button variant="primary" icon="search" [disabled]="!isBuscarEnabled()" (click)="onBuscar()">Buscar</s-button>
           </div>
-        </div>
+        </s-card>
 
         <!-- TABELA DE IMPORTAÇÕES COM ESTADOS EXPLÍCITOS -->
         <div class="bg-siage-surface border border-siage-border rounded-lg shadow-xs dark:shadow-none overflow-hidden">
@@ -830,122 +673,16 @@ export class NovaCargaDialog {
               </div>
             </div>
           } @else {
-            <div class="overflow-x-auto w-full">
-              <table 
-                mat-table 
-                [dataSource]="paginatedItems()" 
-                class="w-full font-sans border-collapse"
-              >
-                <!-- Coluna Arquivo (Apresentação limpa SEM ícone de documento) -->
-                <ng-container matColumnDef="arquivo">
-                  <th mat-header-cell *matHeaderCellDef class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-4 bg-siage-surface border-b border-siage-border">
-                    Arquivo
-                  </th>
-                  <td mat-cell *matCellDef="let row" class="text-left font-sans text-sm font-medium text-siage-text-primary py-3.5 px-4 border-b border-siage-border/50">
-                    <span class="truncate max-w-[320px] inline-block" [title]="row.arquivo">{{ row.arquivo }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- Coluna Data/Hora -->
-                <ng-container matColumnDef="dataHora">
-                  <th mat-header-cell *matHeaderCellDef class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-4 bg-siage-surface border-b border-siage-border w-40">
-                    Data/Hora
-                  </th>
-                  <td mat-cell *matCellDef="let row" class="text-left font-sans text-sm text-siage-text-primary py-3.5 px-4 border-b border-siage-border/50 whitespace-nowrap">
-                    {{ row.dataHora }}
-                  </td>
-                </ng-container>
-
-                <!-- Coluna Conclusão -->
-                <ng-container matColumnDef="conclusao">
-                  <th mat-header-cell *matHeaderCellDef class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-4 bg-siage-surface border-b border-siage-border w-40">
-                    Conclusão
-                  </th>
-                  <td mat-cell *matCellDef="let row" class="text-left font-sans text-sm text-siage-text-primary py-3.5 px-4 border-b border-siage-border/50 whitespace-nowrap">
-                    {{ row.conclusao }}
-                  </td>
-                </ng-container>
-
-                <!-- Coluna Responsável -->
-                <ng-container matColumnDef="responsavel">
-                  <th mat-header-cell *matHeaderCellDef class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-4 bg-siage-surface border-b border-siage-border">
-                    Responsável
-                  </th>
-                  <td mat-cell *matCellDef="let row" class="text-left font-sans text-sm text-siage-text-primary py-3.5 px-4 border-b border-siage-border/50">
-                    {{ row.responsavel }}
-                  </td>
-                </ng-container>
-
-                <!-- Coluna Status (Badges padrão RH V2 sem ícones decorativos internos) -->
-                <ng-container matColumnDef="status">
-                  <th mat-header-cell *matHeaderCellDef class="text-center font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-4 bg-siage-surface border-b border-siage-border w-44">
-                    Status
-                  </th>
-                  <td mat-cell *matCellDef="let row" class="text-center py-3.5 px-4 border-b border-siage-border/50 whitespace-nowrap">
-                    @switch (row.status) {
-                      @case ('EM_PROCESSAMENTO') {
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-sans font-medium bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300 border border-sky-500/20">
-                          Em processamento
-                        </span>
-                      }
-                      @case ('CONCLUIDO_COM_SUCESSO') {
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-sans font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20">
-                          Concluído com sucesso
-                        </span>
-                      }
-                      @case ('CONCLUIDO_COM_PENDENCIAS') {
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-sans font-medium bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-500/30">
-                          Concluído com pendências
-                        </span>
-                      }
-                    }
-                  </td>
-                </ng-container>
-
-                <!-- Coluna Ações (Dimensões, hover e estilo idênticos aos IconButtons SEAD) -->
-                <ng-container matColumnDef="acoes">
-                  <th mat-header-cell *matHeaderCellDef class="text-center font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-4 bg-siage-surface border-b border-siage-border w-36">
-                    Ações
-                  </th>
-                  <td mat-cell *matCellDef="let row" class="text-center py-3.5 px-4 border-b border-siage-border/50 whitespace-nowrap">
-                    @if (row.id === latestPendenciasId()) {
-                      <div class="flex items-center justify-center gap-1">
-                        <!-- Ação Visualizar -->
-                        <button 
-                          type="button" 
-                          (click)="visualizarImportacao(row.id)" 
-                          matTooltip="Visualizar"
-                          aria-label="Visualizar detalhes da importação"
-                          class="w-10 h-10 inline-flex items-center justify-center rounded-lg text-siage-text-secondary hover:text-siage-primary hover:bg-siage-primary/8 dark:hover:bg-siage-primary/12 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                        >
-                          <mat-icon style="font-size: 20px; width: 20px; height: 20px;">visibility</mat-icon>
-                        </button>
-
-                        <!-- Ação Baixar relatório -->
-                        <button 
-                          type="button" 
-                          (click)="baixarRelatorio(row)" 
-                          matTooltip="Baixar relatório de pendências (.xlsx)"
-                          aria-label="Baixar relatório de pendências (.xlsx)"
-                          class="w-10 h-10 inline-flex items-center justify-center rounded-lg text-siage-text-secondary hover:text-siage-primary hover:bg-siage-primary/8 dark:hover:bg-siage-primary/12 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                        >
-                          <mat-icon style="font-size: 20px; width: 20px; height: 20px;">download</mat-icon>
-                        </button>
-                      </div>
-                    } @else {
-                      <span class="text-siage-text-secondary/70 font-semibold select-none">-</span>
-                    }
-                  </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr 
-                  mat-row 
-                  *matRowDef="let row; columns: displayedColumns;"
-                  class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                ></tr>
-              </table>
-            </div>
+            <s-table label="Importações de profissionais" [columns]="tableColumns" [rows]="paginatedItems()" frameless>
+              <ng-template #customActions let-row>
+                @if (row.id === latestPendenciasId()) {
+                  <s-icon-button icon="visibility" label="Visualizar detalhes da importação" size="sm" text (click)="visualizarImportacao(row.id)" />
+                  <s-icon-button icon="download" label="Baixar relatório de pendências (.xlsx)" size="sm" text (click)="baixarRelatorio(row)" />
+                } @else {
+                  <span>-</span>
+                }
+              </ng-template>
+            </s-table>
 
             <!-- Paginação -->
             <app-siage-paginator 
@@ -969,14 +706,41 @@ export class ImportacaoProfissionaisList implements OnInit {
   readonly simulator = inject(SimulatorService);
 
   readonly hasAccess = computed(() => this.permissionService.hasAccess());
+  readonly breadcrumbs = [
+    {label: 'Início', routerLink: '/inicio'},
+    {label: 'Profissionais', routerLink: '/profissionais'},
+    {label: 'Importação de Profissionais'}
+  ];
+  readonly statusOptions = [
+    {label: 'Todos', value: 'TODOS'},
+    {label: 'Em processamento', value: 'EM_PROCESSAMENTO'},
+    {label: 'Concluído com sucesso', value: 'CONCLUIDO_COM_SUCESSO'},
+    {label: 'Concluído com pendências', value: 'CONCLUIDO_COM_PENDENCIAS'}
+  ];
+  readonly tableColumns: STableColumn<ImportacaoItem>[] = [
+    {key: 'arquivo', label: 'Arquivo', truncate: true},
+    {key: 'dataHora', label: 'Data/Hora'},
+    {key: 'conclusao', label: 'Conclusão'},
+    {key: 'responsavel', label: 'Responsável'},
+    {key: 'status', label: 'Status', align: 'center', badge: item => {
+      switch (item.status) {
+        case 'EM_PROCESSAMENTO': return {label: 'Em processamento', tone: 'info'};
+        case 'CONCLUIDO_COM_SUCESSO': return {label: 'Concluído com sucesso', tone: 'success'};
+        case 'CONCLUIDO_COM_PENDENCIAS': return {label: 'Concluído com pendências', tone: 'warning', icon: 'warning'};
+      }
+    }}
+  ];
   readonly responsaveis = this.importacaoService.uniqueResponsaveis;
+  readonly responsavelOptions = computed(() => [
+    {label: 'Todos', value: 'TODOS'},
+    ...this.responsaveis().map(responsavel => ({label: responsavel, value: responsavel}))
+  ]);
   readonly latestPendenciasId = this.importacaoService.latestConcluidoComPendenciasId;
 
   readonly displayedColumns = ['arquivo', 'dataHora', 'conclusao', 'responsavel', 'status', 'acoes'];
 
   readonly arquivoControl = new FormControl('');
   readonly responsavelControl = new FormControl('TODOS');
-  readonly responsavelSearchControl = new FormControl('');
   readonly statusControl = new FormControl('TODOS');
 
   readonly isBuscarEnabled = signal<boolean>(false);
@@ -1019,12 +783,6 @@ export class ImportacaoProfissionaisList implements OnInit {
   // Paginação
   readonly pageIndex = signal<number>(0);
   readonly pageSize = signal<number>(10);
-
-  readonly filteredResponsaveis = computed(() => {
-    const search = this.responsavelSearchControl.value?.toLowerCase().trim() || '';
-    if (!search) return this.responsaveis();
-    return this.responsaveis().filter(r => r.toLowerCase().includes(search));
-  });
 
   readonly filteredItems = computed(() => {
     const list = this.importacaoService.items();
@@ -1097,7 +855,6 @@ export class ImportacaoProfissionaisList implements OnInit {
   onLimpar() {
     this.arquivoControl.setValue('');
     this.responsavelControl.setValue('TODOS');
-    this.responsavelSearchControl.setValue('');
     this.statusControl.setValue('TODOS');
 
     this.appliedArquivo.set('');
@@ -1150,6 +907,9 @@ export class ImportacaoProfissionaisList implements OnInit {
   selector: 'app-importacao-profissionais-detalhes',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    SButtonComponent,
+    SPageHeaderComponent,
+    STableComponent,
     CommonModule,
     MatButtonModule,
     MatIconModule,
@@ -1159,76 +919,30 @@ export class ImportacaoProfissionaisList implements OnInit {
     AcessoRestritoComponent,
     SiagePaginatorComponent
   ],
+  styles: [`
+    :host ::ng-deep s-table .s-table__tabela { min-width: 760px; }
+    .titulo-card {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: var(--text-h6, 16px);
+      font-weight: var(--weight-semibold, 600);
+      line-height: var(--leading-tight, 1.2);
+      color: var(--text-primary);
+    }
+  `],
   template: `
     @if (!hasAccess()) {
       <app-acesso-restrito backUrl="/profissionais/importacao" />
     } @else {
       <div class="flex flex-col gap-6 font-sans">
         
-        <!-- Cabeçalho com Breadcrumbs, Título com Seta Voltar e Descrição -->
-        <div class="flex flex-col gap-2">
-          
-          <!-- Breadcrumb: Início / Profissionais / Importação de Profissionais / Detalhes da Importação -->
-          <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-sans font-medium tracking-wide text-siage-text-secondary/70">
-            <span 
-              (click)="goHome()" 
-              (keydown.enter)="goHome()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Início
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="goProfissionais()" 
-              (keydown.enter)="goProfissionais()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Profissionais
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span 
-              (click)="voltar()" 
-              (keydown.enter)="voltar()" 
-              tabindex="0" 
-              role="button" 
-              class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-            >
-              Importação de Profissionais
-            </span>
-            <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-            <span class="text-siage-primary font-semibold" aria-current="page">
-              Detalhes da Importação
-            </span>
-          </nav>
-
-          <!-- Título com Seta Voltar única e Descrição -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <button 
-                  mat-icon-button 
-                  type="button"
-                  (click)="voltar()" 
-                  class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                  title="Voltar para a listagem"
-                  aria-label="Voltar para a listagem"
-                >
-                  <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-                </button>
-                <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                  Detalhes da Importação
-                </h1>
-              </div>
-              <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-2xl">
-                Consulte os registros e as pendências identificadas na importação.
-              </p>
-            </div>
-          </div>
-        </div>
+        <s-page-header
+          [breadcrumbs]="breadcrumbs"
+          title="Detalhes da Importação"
+          description="Consulte os registros e as pendências identificadas na importação."
+          showBack
+          (back)="voltar()"
+        />
 
         @if (!importacao()) {
           <!-- Estado: Registro não localizado -->
@@ -1238,19 +952,12 @@ export class ImportacaoProfissionaisList implements OnInit {
             <p class="text-xs sm:text-sm text-siage-text-secondary max-w-md">
               O registro de importação solicitado não foi encontrado no sistema ou foi removido.
             </p>
-            <button 
-              type="button" 
-              (click)="voltar()" 
-              class="mt-2 h-10 px-6 rounded-lg bg-siage-primary text-white font-sans font-semibold text-sm hover:bg-siage-primary/90 transition-all cursor-pointer"
-            >
-              Voltar à listagem
-            </button>
+            <s-button variant="primary" (click)="voltar()">Voltar à listagem</s-button>
           </div>
         } @else {
           <!-- 1. BLOCO DE INFORMAÇÕES (Padrão de dados informativos de Visualizar Professor) -->
           <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs flex flex-col gap-4">
-            <h3 class="text-sm font-poppins font-bold uppercase tracking-wider text-siage-primary flex items-center gap-2 border-b border-siage-border/40 pb-2">
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">description</mat-icon>
+            <h3 class="titulo-card border-b border-siage-border/40 pb-2">
               <span>Informações da Importação</span>
             </h3>
 
@@ -1310,7 +1017,7 @@ export class ImportacaoProfissionaisList implements OnInit {
           <!-- 2. TABELA DE PENDÊNCIAS (Padrão visual das tabelas do RH V2) -->
           <div class="bg-siage-surface border border-siage-border rounded-lg shadow-xs dark:shadow-none overflow-hidden">
             <div class="px-5 sm:px-6 py-4 border-b border-siage-border/40">
-              <h2 class="text-base font-poppins font-bold text-siage-text-primary">
+              <h2 class="titulo-card">
                 Pendências identificadas
               </h2>
             </div>
@@ -1326,60 +1033,7 @@ export class ImportacaoProfissionaisList implements OnInit {
                 </p>
               </div>
             } @else {
-              <div class="overflow-x-auto w-full">
-                <table 
-                  mat-table 
-                  [dataSource]="paginatedPendencias()" 
-                  class="w-full font-sans border-collapse"
-                >
-                  <!-- Matrícula -->
-                  <ng-container matColumnDef="matricula">
-                    <th mat-header-cell *matHeaderCellDef class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-4 bg-siage-surface border-b border-siage-border w-36">
-                      Matrícula
-                    </th>
-                    <td mat-cell *matCellDef="let p" class="text-left font-mono font-medium text-sm text-siage-text-primary py-3.5 px-4 border-b border-siage-border/50 whitespace-nowrap">
-                      {{ p.matricula }}
-                    </td>
-                  </ng-container>
-
-                  <!-- Nome -->
-                  <ng-container matColumnDef="nome">
-                    <th mat-header-cell *matHeaderCellDef class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-4 bg-siage-surface border-b border-siage-border w-64">
-                      Nome
-                    </th>
-                    <td mat-cell *matCellDef="let p" class="text-left font-sans font-medium text-sm text-siage-text-primary py-3.5 px-4 border-b border-siage-border/50 whitespace-nowrap">
-                      {{ p.nome }}
-                    </td>
-                  </ng-container>
-
-                  <!-- CPF -->
-                  <ng-container matColumnDef="cpf">
-                    <th mat-header-cell *matHeaderCellDef class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-4 bg-siage-surface border-b border-siage-border w-40">
-                      CPF
-                    </th>
-                    <td mat-cell *matCellDef="let p" class="text-left font-mono text-sm text-siage-text-primary py-3.5 px-4 border-b border-siage-border/50 whitespace-nowrap">
-                      {{ p.cpf }}
-                    </td>
-                  </ng-container>
-
-                  <!-- Pendência (Quebra normal de linha permitida para mensagens extensas) -->
-                  <ng-container matColumnDef="motivo">
-                    <th mat-header-cell *matHeaderCellDef class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-4 bg-siage-surface border-b border-siage-border">
-                      Pendência
-                    </th>
-                    <td mat-cell *matCellDef="let p" class="text-left font-sans text-sm text-siage-text-primary leading-relaxed whitespace-normal break-words py-3.5 px-4 border-b border-siage-border/50">
-                      {{ p.motivo }}
-                    </td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="displayedPendenciaColumns"></tr>
-                  <tr 
-                    mat-row 
-                    *matRowDef="let row; columns: displayedPendenciaColumns;"
-                    class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                  ></tr>
-                </table>
-              </div>
+              <s-table label="Pendências identificadas" [columns]="pendenciaColumns" [rows]="paginatedPendencias()" frameless />
 
               <!-- Paginação de Pendências (10 registros por página) -->
               <app-siage-paginator 
@@ -1402,6 +1056,18 @@ export class ImportacaoProfissionaisDetalhes implements OnInit {
   private readonly permissionService = inject(PermissionService);
 
   readonly hasAccess = computed(() => this.permissionService.hasAccess());
+  readonly breadcrumbs = [
+    {label: 'Início', routerLink: '/inicio'},
+    {label: 'Profissionais', routerLink: '/profissionais'},
+    {label: 'Importação de Profissionais', routerLink: '/profissionais/importacao'},
+    {label: 'Detalhes da Importação'}
+  ];
+  readonly pendenciaColumns: STableColumn<PendenciaItem>[] = [
+    {key: 'matricula', label: 'Matrícula', width: '144px'},
+    {key: 'nome', label: 'Nome', width: '256px'},
+    {key: 'cpf', label: 'CPF', width: '160px'},
+    {key: 'motivo', label: 'Pendência'}
+  ];
   readonly importacaoId = signal<string>('');
   readonly importacao = computed(() => this.importacaoService.getById(this.importacaoId()));
 

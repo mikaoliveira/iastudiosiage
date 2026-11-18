@@ -17,6 +17,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {SBadgeComponent, SButtonComponent, SCardComponent, SCardTitleDirective, SIconComponent, SPageHeaderComponent} from '@siage/siage-ui';
 
 import {PermissionService} from './permission';
 import {AcessoRestritoComponent} from './acesso-restrito';
@@ -99,6 +100,12 @@ function isUnidadeExtinta(item: { normativaExtincao?: { numero?: string; nome?: 
     MatInputModule,
     MatAutocompleteModule,
     MatTooltipModule,
+    SBadgeComponent,
+    SButtonComponent,
+    SCardComponent,
+    SCardTitleDirective,
+    SIconComponent,
+    SPageHeaderComponent,
     AcessoRestritoComponent
   ],
   template: `
@@ -107,79 +114,25 @@ function isUnidadeExtinta(item: { normativaExtincao?: { numero?: string; nome?: 
     } @else {
       <div class="flex flex-col gap-6 max-w-7xl mx-auto w-full font-sans pb-16">
         
-        <!-- Breadcrumb: Início > Configurações > Hierarquia de Unidades e Cargos > Visualizar Hierarquia -->
-        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-sans font-medium tracking-wide text-siage-text-secondary/70">
-          <span 
-            (click)="goHome()" 
-            (keydown.enter)="goHome()" 
-            tabindex="0" 
-            role="button" 
-            class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <s-page-header
+            class="min-w-0 flex-1"
+            [breadcrumbs]="breadcrumbs"
+            title="Visualizar Hierarquia"
+            description="Consulte a estrutura organizacional, as relações de subordinação e as informações das unidades cadastradas."
+            showBack
+            (back)="goHierarquia()"
+          />
+          <s-button
+            class="shrink-0"
+            variant="secondary"
+            outlined
+            icon="account_tree"
+            (click)="abrirModalEstruturaGeral()"
+            title="Visualizar a estrutura conceitual de subordinação entre os tipos de unidades"
           >
-            Início
-          </span>
-          <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-          <span 
-            (click)="goConfiguracoes()" 
-            (keydown.enter)="goConfiguracoes()" 
-            tabindex="0" 
-            role="button" 
-            class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-          >
-            Configurações
-          </span>
-          <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-          <span 
-            (click)="goHierarquia()" 
-            (keydown.enter)="goHierarquia()" 
-            tabindex="0" 
-            role="button" 
-            class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline"
-          >
-            Hierarquia de Unidades e Cargos
-          </span>
-          <span class="text-[10px] text-siage-text-secondary/40 select-none" aria-hidden="true">/</span>
-          <span class="text-siage-primary font-semibold" aria-current="page">Visualizar Hierarquia</span>
-        </nav>
-
-        <!-- Cabeçalho Principal: Título com Voltar, Descrição e Ação "Ver estrutura geral" -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-2 sm:gap-3">
-              <button 
-                mat-icon-button 
-                type="button" 
-                (click)="goHierarquia()" 
-                class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                title="Voltar para Hierarquia de Unidades e Cargos"
-                aria-label="Voltar para Hierarquia de Unidades e Cargos"
-              >
-                <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-              </button>
-              
-              <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                Visualizar Hierarquia
-              </h1>
-            </div>
-
-            <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-2xl">
-              Consulte a estrutura organizacional, as relações de subordinação e as informações das unidades cadastradas.
-            </p>
-          </div>
-
-          <!-- Botão Secundário: Ver estrutura geral (abre EstruturaHierarquicaModal existente) -->
-          <div class="pl-8 sm:pl-0 shrink-0">
-            <button 
-              type="button" 
-              (click)="abrirModalEstruturaGeral()" 
-              class="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg border border-siage-border bg-siage-surface hover:bg-siage-primary/5 hover:border-siage-primary/40 text-siage-text-primary hover:text-siage-primary font-sans font-semibold text-xs sm:text-sm transition-all shadow-xs active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-              title="Visualizar a estrutura conceitual de subordinação entre os tipos de unidades"
-              aria-label="Ver estrutura geral"
-            >
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;" class="text-siage-primary">account_tree</mat-icon>
-              <span>Ver estrutura geral</span>
-            </button>
-          </div>
+            Ver estrutura geral
+          </s-button>
         </div>
 
         <!-- Grade Principal com Disposição Lado a Lado (~55% Esquerda, ~45% Direita) e Vertical em Mobile -->
@@ -188,36 +141,35 @@ function isUnidadeExtinta(item: { normativaExtincao?: { numero?: string; nome?: 
           <!-- ============================================== -->
           <!-- ÁREA ESQUERDA: ESTRUTURA ORGANIZACIONAL (55%)   -->
           <!-- ============================================== -->
-          <div class="lg:col-span-7 flex flex-col gap-4 bg-siage-surface border border-siage-border rounded-lg shadow-xs p-5 sm:p-6">
+          <s-card class="lg:col-span-7" [padding]="0" [elevation]="0">
+          <div class="flex flex-col gap-4 p-5 sm:p-6">
             
             <!-- Cabeçalho do Card da Árvore com Ações de Expansão/Recolhimento -->
             <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-siage-border/40">
               <div class="flex items-center gap-2">
-                <mat-icon style="font-size: 20px; width: 20px; height: 20px;" class="text-siage-primary">schema</mat-icon>
-                <h2 class="text-sm sm:text-base font-poppins font-bold text-siage-text-primary tracking-tight">
+                <s-icon name="schema" size="sm" class="text-siage-primary" />
+                <h2 sCardTitle>
                   Estrutura Organizacional
                 </h2>
               </div>
 
               <!-- Controles Rápidos -->
               <div class="flex items-center gap-2 text-xs">
-                <button 
-                  type="button" 
+                <s-button
+                  variant="link"
                   (click)="expandirTodos()" 
-                  class="text-xs text-siage-text-secondary hover:text-siage-primary font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:underline"
                   title="Expandir todos os ramos da hierarquia"
                 >
                   Expandir tudo
-                </button>
+                </s-button>
                 <span class="text-siage-text-secondary/40 select-none">•</span>
-                <button 
-                  type="button" 
+                <s-button
+                  variant="link"
                   (click)="recolherTodos()" 
-                  class="text-xs text-siage-text-secondary hover:text-siage-primary font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:underline"
                   title="Recolher todos os ramos para o nível inicial"
                 >
                   Recolher tudo
-                </button>
+                </s-button>
               </div>
             </div>
 
@@ -387,17 +339,19 @@ function isUnidadeExtinta(item: { normativaExtincao?: { numero?: string; nome?: 
             </div>
 
           </div>
+          </s-card>
 
           <!-- ============================================== -->
           <!-- ÁREA DIREITA: DETALHES DA UNIDADE (45%)        -->
           <!-- ============================================== -->
-          <div class="lg:col-span-5 flex flex-col gap-5 bg-siage-surface border border-siage-border rounded-lg shadow-xs p-5 sm:p-6 lg:sticky lg:top-4">
+          <s-card class="lg:col-span-5 lg:sticky lg:top-4" [padding]="0" [elevation]="0">
+          <div class="flex flex-col gap-5 p-5 sm:p-6">
             
             <!-- Cabeçalho do Card de Detalhes -->
-            <div class="flex items-center justify-between pb-3 border-b border-siage-border/40">
-              <div class="flex items-center gap-2">
-                <mat-icon style="font-size: 20px; width: 20px; height: 20px;" class="text-siage-primary">info</mat-icon>
-                <h2 class="text-sm sm:text-base font-poppins font-bold text-siage-text-primary tracking-tight">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-siage-border/40">
+              <div class="flex shrink-0 items-center gap-2">
+                <s-icon name="info" size="sm" class="text-siage-primary" />
+                <h2 sCardTitle>
                   Detalhes da Unidade
                 </h2>
               </div>
@@ -405,16 +359,15 @@ function isUnidadeExtinta(item: { normativaExtincao?: { numero?: string; nome?: 
               <!-- Ação Visualizar: NÃO EXIBIR PARA ESCOLA NEM PARA AGRUPAMENTOS -->
               @if (selectedNode(); as node) {
                 @if (node.tipo !== 'ESCOLA' && !node.isGroup && node.viewRoute) {
-                  <button 
-                    type="button" 
+                  <s-button
+                    variant="primary"
+                    icon="visibility"
+                    label="Visualizar unidade"
                     (click)="onVisualizar(node)" 
-                    class="inline-flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3.5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-xs transition-all shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
                     title="Visualizar registro completo no módulo correspondente"
-                    aria-label="Visualizar unidade"
                   >
-                    <mat-icon style="font-size: 16px; width: 16px; height: 16px;">visibility</mat-icon>
                     <span>Visualizar</span>
-                  </button>
+                  </s-button>
                 }
               }
             </div>
@@ -456,13 +409,13 @@ function isUnidadeExtinta(item: { normativaExtincao?: { numero?: string; nome?: 
                         <span class="text-[10px] uppercase font-semibold text-siage-text-secondary">Situação</span>
                         <div>
                           @if (node.status === 'ATIVO') {
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                            <s-badge tone="success">
                               Ativo
-                            </span>
+                            </s-badge>
                           } @else {
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-700 dark:text-slate-300 border border-slate-500/20">
+                            <s-badge tone="secondary">
                               Inativo
-                            </span>
+                            </s-badge>
                           }
                         </div>
                       </div>
@@ -570,9 +523,9 @@ function isUnidadeExtinta(item: { normativaExtincao?: { numero?: string; nome?: 
                     <div class="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-lg p-3.5 flex flex-col gap-2 text-xs">
                       <div class="flex items-center justify-between gap-2">
                         <span class="text-[10px] uppercase font-semibold text-amber-800 dark:text-amber-300">Aprovador de Exceção</span>
-                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20">
+                        <s-badge tone="info">
                           Exceção Vigente
-                        </span>
+                        </s-badge>
                       </div>
 
                       <div class="flex items-center gap-2.5 mt-0.5">
@@ -608,6 +561,7 @@ function isUnidadeExtinta(item: { normativaExtincao?: { numero?: string; nome?: 
             }
 
           </div>
+          </s-card>
 
         </div>
 
@@ -619,6 +573,12 @@ export class HierarquiaVisualizacao {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   readonly permissionService = inject(PermissionService);
+  readonly breadcrumbs = [
+    {label: 'Início', routerLink: '/inicio'},
+    {label: 'Configurações', routerLink: '/configuracoes'},
+    {label: 'Hierarquia de Unidades e Cargos', routerLink: '/configuracoes/hierarquia'},
+    {label: 'Visualizar Hierarquia'}
+  ];
 
   private readonly secGeralService = inject(SecretariaGeralService);
   private readonly secExecService = inject(SecretariaExecutivaService);

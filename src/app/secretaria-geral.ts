@@ -2354,7 +2354,6 @@ export class AnexarNormativaExtincaoModal {
     FormsModule,
     MatDialogModule,
     MatSnackBarModule,
-    SAutocompleteComponent,
     SButtonComponent,
     SFieldComponent,
     SFilterCardComponent,
@@ -2404,18 +2403,18 @@ export class AnexarNormativaExtincaoModal {
               <s-input
                 formControlName="nome"
                 [maxlength]="200"
-                placeholder="Digite o Nome"
+                placeholder="Buscar por Nome"
               />
             </s-field>
 
             <!-- Filtro: Unidade de Trabalho (UTB) (Autocomplete oficial) -->
             <s-field label="Unidade de Trabalho (UTB)" controlId="filter-utb">
-              <s-autocomplete
+              <s-select
                 formControlName="utb"
                 [options]="utbOptions()"
-                placeholder="Selecione ou busque uma unidade de trabalho"
-                (input)="onUtbInput($event)"
-                (selectionChange)="onUtbSelectionChange($event)"
+                [clearable]="false"
+                filterable
+                filterPlaceholder="Pesquisar unidade de trabalho..."
               />
             </s-field>
 
@@ -2504,7 +2503,7 @@ export class SecretariaGeralList {
   readonly canBuscar = computed(() => {
     const nome = (this.filtroNomeVal() ?? this.filtroForm.controls.nome.value ?? '').trim();
     const utb = (this.filtroUtbVal() ?? this.filtroForm.controls.utb.value ?? this.utbTextoDigitado() ?? '').trim();
-    return nome.length > 0 || utb.length > 0;
+    return nome.length > 0 || utb.length > 0 || !!this.appliedUtb();
   });
 
   readonly appliedNome = signal('');
@@ -2561,7 +2560,7 @@ export class SecretariaGeralList {
   private atualizarEstadoBusca() {
     const nome = (this.filtroForm.controls.nome.value ?? '').trim();
     const utb = (this.filtroForm.controls.utb.value ?? this.utbTextoDigitado() ?? '').trim();
-    const habilitado = nome.length > 0 || utb.length > 0 ? '1' : '';
+    const habilitado = nome.length > 0 || utb.length > 0 || !!this.appliedUtb() ? '1' : '';
     if (this.filtroBuscaForm.controls.ativo.value !== habilitado) {
       this.filtroBuscaForm.controls.ativo.setValue(habilitado);
     }
@@ -2711,12 +2710,13 @@ export class SecretariaGeralList {
     return list.sort((a, b) => a.codigo.localeCompare(b.codigo, undefined, { numeric: true, sensitivity: 'base' }));
   });
 
-  readonly utbOptions = computed(() =>
-    this.utbsVinculadas().map(u => ({
+  readonly utbOptions = computed(() => [
+    {label: 'Todos', value: ''},
+    ...this.utbsVinculadas().map(u => ({
       label: u.descricaoCompleta,
       value: u.descricaoCompleta
     }))
-  );
+  ]);
 
   readonly filteredUtbsList = computed(() => {
     const query = (this.filtroUtbVal() || this.filtroForm.get('utb')?.value || this.utbTextoDigitado() || '').trim().toLowerCase();
@@ -2821,6 +2821,7 @@ export class SecretariaGeralList {
     this.appliedUtb.set(this.filtroForm.get('utb')?.value || this.utbTextoDigitado() || '');
     this.appliedStatus.set(this.filtroForm.get('status')?.value || 'TODOS');
     this.pageIndex.set(0);
+    this.atualizarEstadoBusca();
   }
 
   onLimpar() {
@@ -2831,6 +2832,7 @@ export class SecretariaGeralList {
     this.appliedUtb.set('');
     this.appliedStatus.set('TODOS');
     this.pageIndex.set(0);
+    this.atualizarEstadoBusca();
   }
 
   onPageChange(newIndex: number) {

@@ -982,7 +982,7 @@ export class DetalhesExcecaoModal {
               <s-field label="Unidade de Trabalho / Setor" controlId="filter-setor">
                 <s-input
                   formControlName="setor"
-                  placeholder="Digite a Unidade de Trabalho / Setor"
+                  placeholder="Buscar por Unidade de Trabalho / Setor"
                   (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
                 />
               </s-field>
@@ -1009,7 +1009,7 @@ export class DetalhesExcecaoModal {
               <s-field label="Chefia Imediata (Nome)" controlId="filter-chefe-nome">
                 <s-input
                   formControlName="chefeNome"
-                  placeholder="Digite o Nome da Chefia Imediata"
+                  placeholder="Buscar por Chefia Imediata (Nome)"
                   (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
                 />
               </s-field>
@@ -1027,7 +1027,7 @@ export class DetalhesExcecaoModal {
               <s-field label="Aprovador de Exceção (Nome)" controlId="filter-aprov-nome">
                 <s-input
                   formControlName="aprovadorNome"
-                  placeholder="Digite o Nome do Aprovador de Exceção"
+                  placeholder="Buscar por Aprovador de Exceção (Nome)"
                   (keydown.enter)="$event.preventDefault(); canBuscar() && onBuscar()"
                 />
               </s-field>

@@ -1,9 +1,9 @@
-import {signal} from '@angular/core';
+import {provideZonelessChangeDetection, signal} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
 import {NgModel, Validators} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute, provideRouter, Router} from '@angular/router';
-import {SAutocompleteComponent, SFileUploadComponent, SModalService, STableComponent, SToastService} from '@siage/siage-ui';
+import {SAutocompleteComponent, SFileUploadComponent, SModalService, SSelectComponent, STableComponent, SToastService} from '@siage/siage-ui';
 import {of} from 'rxjs';
 import {vi} from 'vitest';
 import {SecretariaExecutivaForm, SecretariaExecutivaList, SecretariaExecutivaView} from './secretaria-executiva';
@@ -50,6 +50,7 @@ describe.each(cases)('$name - migração completa', config => {
     await TestBed.configureTestingModule({
       imports: [config.list, config.form, config.view],
       providers: [
+        provideZonelessChangeDetection(),
         provideRouter([]),
         {provide: SimulatorService, useValue: {currentScenario: scenario, allowCreation: signal(true), setScenario: vi.fn()}},
         {provide: SModalService, useValue: modal},
@@ -89,9 +90,10 @@ describe.each(cases)('$name - migração completa', config => {
 
   it('renderiza cabeçalho, filtros, tabela e paginação oficiais', () => {
     const fixture = listFixture();
-    for (const selector of ['s-page-header', 's-filter-card', 's-field', 's-input', 's-autocomplete', 's-select', 's-table', 's-pagination', 's-badge', 's-switch']) {
+    for (const selector of ['s-page-header', 's-filter-card', 's-field', 's-input', 's-select', 's-table', 's-pagination', 's-badge', 's-switch']) {
       expect(fixture.nativeElement.querySelector(selector), selector).not.toBeNull();
     }
+    expect(fixture.nativeElement.querySelector('s-field[controlId="filter-utb"] s-select')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('app-siage-paginator, mat-slide-toggle, mat-form-field')).toBeNull();
     fixture.destroy();
   });
@@ -411,22 +413,36 @@ describe.each(cases)('$name - migração completa', config => {
     fixture.destroy();
   });
 
-  it('mantém o valor visível no campo nativo do s-autocomplete ao selecionar opções e ao carregar edição', async () => {
+  it('mantém os valores visíveis nos controles oficiais ao selecionar opções e ao carregar edição', async () => {
     type Opt = {label: string; value: unknown};
     // 1. Filtro UTB na listagem
     const listFix = listFixture();
-    const listAuto = listFix.debugElement.query(By.directive(SAutocompleteComponent)).componentInstance as SAutocompleteComponent;
-    const listInput = listFix.nativeElement.querySelector('s-autocomplete input.s-autocomplete__nativo') as HTMLInputElement;
-    const firstFilterOpt = (listAuto.options() as readonly Opt[])[0];
+    const listSelect = listFix.debugElement.queryAll(By.directive(SSelectComponent))[0].componentInstance as SSelectComponent;
+    const firstFilterOpt = (listSelect.options() as readonly Opt[])[1];
     expect(firstFilterOpt).toBeDefined();
-    listInput.value = firstFilterOpt.label.slice(0, 3);
-    listInput.dispatchEvent(new Event('input'));
+    expect(listSelect.options()[0]).toEqual({label: 'Todos', value: ''});
+    await listFix.whenStable();
     listFix.detectChanges();
-    (listAuto as unknown as {onOptionSelected: (ev: {option: {value: Opt}}) => void}).onOptionSelected({option: {value: firstFilterOpt}});
+    expect(listFix.nativeElement.querySelector('s-field[controlId="filter-utb"] mat-select').textContent).toContain('Todos');
+    (listSelect as unknown as {onSelectionChange: (event: {value: unknown}) => void}).onSelectionChange({value: firstFilterOpt.value});
     listFix.detectChanges();
     await Promise.resolve();
     listFix.detectChanges();
-    expect(listInput.value).toBe(firstFilterOpt.label);
+    expect(listFix.componentInstance.filtroForm.controls.utb.value).toBe(firstFilterOpt.value);
+    expect(listFix.nativeElement.querySelector('s-field[controlId="filter-utb"] mat-select').textContent).toContain(firstFilterOpt.label);
+    listFix.componentInstance.onBuscar();
+    expect(listFix.componentInstance.filteredItems().length).toBeGreaterThan(0);
+    (listSelect as unknown as {onSelectionChange: (event: {value: unknown}) => void}).onSelectionChange({value: ''});
+    listFix.detectChanges();
+    await listFix.whenStable();
+    listFix.detectChanges();
+    expect(listFix.componentInstance.filtroForm.controls.utb.value).toBe('');
+    expect(listFix.nativeElement.querySelector('s-field[controlId="filter-utb"] mat-select').textContent).toContain('Todos');
+    expect(listFix.componentInstance.canBuscar()).toBe(true);
+    listFix.componentInstance.onBuscar();
+    listFix.detectChanges();
+    expect(listFix.componentInstance.filteredItems().length).toBe(listFix.componentInstance.service.items().length);
+    expect(listFix.componentInstance.canBuscar()).toBe(false);
     listFix.destroy();
 
     // 2. Seleção no cadastro (Unidade Superior e UTB)

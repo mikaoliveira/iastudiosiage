@@ -637,7 +637,6 @@ export class SecretariaExecutivaService {
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    SAutocompleteComponent,
     SButtonComponent,
     SFieldComponent,
     SFilterCardComponent,
@@ -687,18 +686,18 @@ export class SecretariaExecutivaService {
               <s-input
                 formControlName="nome"
                 [maxlength]="200"
-                placeholder="Digite o Nome"
+                placeholder="Buscar por Nome"
               />
             </s-field>
 
             <!-- Filtro: Unidade de Trabalho (UTB) (Autocomplete oficial) -->
             <s-field label="Unidade de Trabalho (UTB)" controlId="filter-utb">
-              <s-autocomplete
+              <s-select
                 formControlName="utb"
                 [options]="utbOptions()"
-                placeholder="Selecione ou busque uma unidade de trabalho"
-                (input)="onUtbInput($event)"
-                (selectionChange)="onUtbSelectionChange($event)"
+                [clearable]="false"
+                filterable
+                filterPlaceholder="Pesquisar unidade de trabalho..."
               />
             </s-field>
 
@@ -841,7 +840,7 @@ export class SecretariaExecutivaList {
     const nome = (this.filtroForm.controls.nome.value ?? '').trim();
     const utb = (this.filtroForm.controls.utb.value ?? this.utbTextoDigitado() ?? '').trim();
     const status = this.filtroForm.controls.status.value ?? 'TODOS';
-    const habilitado = nome.length > 0 || utb.length > 0 || status !== 'TODOS' ? '1' : '';
+    const habilitado = nome.length > 0 || utb.length > 0 || status !== 'TODOS' || !!this.appliedUtb() ? '1' : '';
     if (this.filtroBuscaForm.controls.ativo.value !== habilitado) {
       this.filtroBuscaForm.controls.ativo.setValue(habilitado);
     }
@@ -871,12 +870,13 @@ export class SecretariaExecutivaList {
     return list.sort((a, b) => a.codigo.localeCompare(b.codigo));
   });
 
-  readonly utbOptions = computed(() =>
-    this.utbsVinculadas().map(u => ({
+  readonly utbOptions = computed(() => [
+    {label: 'Todos', value: ''},
+    ...this.utbsVinculadas().map(u => ({
       label: u.descricaoCompleta,
       value: u.descricaoCompleta
     }))
-  );
+  ]);
 
   readonly isSemRegistros = computed(() => {
     if (this.simulatorService.currentScenario() === 'empty') return true;
@@ -1000,7 +1000,7 @@ export class SecretariaExecutivaList {
     const nome = (this.filtroNomeVal() ?? this.filtroForm.controls.nome.value ?? '').trim();
     const utb = (this.filtroUtbVal() ?? this.filtroForm.controls.utb.value ?? this.utbTextoDigitado() ?? '').trim();
     const status = this.filtroStatusVal() ?? this.filtroForm.controls.status.value;
-    return nome.length > 0 || utb.length > 0 || (!!status && status !== 'TODOS');
+    return nome.length > 0 || utb.length > 0 || (!!status && status !== 'TODOS') || !!this.appliedUtb();
   }
 
   onBuscar() {
@@ -1011,6 +1011,7 @@ export class SecretariaExecutivaList {
     this.appliedUtb.set((this.filtroForm.get('utb')?.value || this.utbTextoDigitado() || '').trim());
     this.appliedStatus.set(this.filtroForm.get('status')?.value || 'TODOS');
     this.pageIndex.set(0);
+    this.atualizarEstadoBusca();
   }
 
   onLimpar() {
@@ -1021,6 +1022,7 @@ export class SecretariaExecutivaList {
     this.appliedUtb.set('');
     this.appliedStatus.set('TODOS');
     this.pageIndex.set(0);
+    this.atualizarEstadoBusca();
   }
 
   toggleSort(column: 'dataCriacao' | 'nome' | 'utb') {

@@ -5,18 +5,15 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
-import {MatTableModule} from '@angular/material/table';
-import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
-import {MatSortModule, Sort} from '@angular/material/sort';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {MatChipsModule} from '@angular/material/chips';
+import {PageEvent} from '@angular/material/paginator';
+import {Sort} from '@angular/material/sort';
+import {MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS, MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatDialogModule, MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatSelectModule} from '@angular/material/select';
 import {MatCardModule} from '@angular/material/card';
-import {MatRadioModule} from '@angular/material/radio';
 import {CommonModule} from '@angular/common';
-import {SEmptyStateComponent} from '@siage/siage-ui';
+import {SBadgeComponent, SButtonComponent, SEmptyStateComponent, SFieldComponent, SIconButtonComponent, SInputComponent, SModalComponent, SModalFooterDirective, SPageHeaderComponent, SRadioGroupComponent, SSelectComponent, STableCellDirective, STableComponent, STextareaComponent, type STableColumn, type STableSort} from '@siage/siage-ui';
 
 import {ConfirmacaoDialog, ResultadoDialog, RevalidarSenhaDialog, RevalidarSenhaDialogData, VinculoUsoItem, VINCULOS_USO_MUITOS, ModalService} from './dialog';
 import {ToastService} from './toast';
@@ -796,53 +793,30 @@ export {RevalidarSenhaDialog, type RevalidarSenhaDialogData};
 @Component({
   selector: 'app-justificativa-inativacao-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatDialogModule, MatButtonModule, MatIconModule, ReactiveFormsModule, CommonModule],
+  imports: [MatDialogModule, SButtonComponent, SFieldComponent, SModalComponent, STextareaComponent, ReactiveFormsModule, CommonModule],
   template: `
-    <div class="w-[calc(100vw-2rem)] sm:w-[500px] max-w-full bg-siage-surface text-siage-text-primary rounded-lg border border-siage-border shadow-[var(--mat-sys-level3)] font-sans flex flex-col text-left box-border">
-      <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b border-siage-border/40">
-        <h2 class="text-base font-poppins font-bold text-siage-text-primary">Inativar registro?</h2>
-        <button type="button" (click)="cancelar()" class="w-8 h-8 rounded-lg flex items-center justify-center text-siage-text-secondary hover:text-siage-text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">close</mat-icon>
-        </button>
-      </div>
-
-      <form [formGroup]="form" (ngSubmit)="confirmar()" class="px-5 py-4 flex flex-col gap-4">
+    <s-modal title="Inativar registro?" width="500px" [showActions]="false" (cancel)="cancelar()">
+      <form [formGroup]="form" (ngSubmit)="confirmar()" class="flex flex-col gap-4">
         <p class="text-xs sm:text-sm text-siage-text-secondary leading-relaxed">
           Tem certeza que deseja inativar o registro de <strong>{{ data.nome }}</strong>? Esta ação exigirá o preenchimento obrigatório da justificativa legal ou operacional.
         </p>
 
         <div class="flex flex-col gap-1.5">
-          <label for="justificativa-input" class="text-xs font-semibold uppercase tracking-wider text-siage-text-secondary">
-            Justificativa da inativação <span class="text-red-500">*</span>
-          </label>
-          <textarea 
-            id="justificativa-input"
-            rows="4" 
-            maxlength="500"
-            formControlName="justificativa" 
-            placeholder="Descreva o motivo da inativação (ex.: término de contrato, remoção, aposentadoria ou retorno ao batalhão)..." 
-            class="w-full p-3 rounded-lg border border-siage-border bg-siage-background text-sm font-sans text-siage-text-primary focus:outline-none focus:ring-2 focus:ring-siage-primary/40 focus:border-siage-primary transition-all resize-none"
-          ></textarea>
+          <s-field label="Justificativa da inativação" controlId="justificativa-input" required [error]="form.controls.justificativa.invalid && form.controls.justificativa.touched ? 'A justificativa é obrigatória (mínimo 10 caracteres).' : null">
+            <s-textarea [maxlength]="500" formControlName="justificativa" placeholder="Descreva o motivo da inativação (ex.: término de contrato, remoção, aposentadoria ou retorno ao batalhão)..." />
+          </s-field>
           <div class="flex justify-between items-center text-[11px] text-siage-text-secondary/70">
-            @if (form.controls.justificativa.invalid && form.controls.justificativa.touched) {
-              <span class="text-red-500 font-medium">A justificativa é obrigatória (mínimo 10 caracteres).</span>
-            } @else {
-              <span></span>
-            }
+            <span></span>
             <span>{{ form.controls.justificativa.value.length }} de 500</span>
           </div>
         </div>
 
         <div class="flex justify-end gap-3 pt-3 border-t border-siage-border/40">
-          <button type="button" (click)="cancelar()" class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-xs sm:text-sm text-siage-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-all">
-            Cancelar
-          </button>
-          <button type="submit" [disabled]="form.invalid" class="h-10 px-5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-xs sm:text-sm transition-all disabled:opacity-50">
-            Sim, inativar
-          </button>
+          <s-button variant="secondary" (click)="cancelar()">Cancelar</s-button>
+          <s-button type="submit" variant="primary" [disabled]="form.invalid">Sim, inativar</s-button>
         </div>
       </form>
-    </div>
+    </s-modal>
   `
 })
 export class JustificativaInativacaoDialog {
@@ -875,28 +849,10 @@ export interface VisualizarJustificativaData {
 @Component({
   selector: 'app-visualizar-justificativa-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatDialogModule, MatButtonModule, MatIconModule, CommonModule],
+  imports: [MatDialogModule, SButtonComponent, SModalComponent, SModalFooterDirective, CommonModule],
   template: `
-    <div class="w-[calc(100vw-2rem)] sm:w-[500px] max-w-full bg-siage-surface text-siage-text-primary rounded-lg border border-siage-border shadow-[var(--mat-sys-level3)] font-sans flex flex-col text-left box-border">
-      <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b border-siage-border/40">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">comment</mat-icon>
-          </div>
-          <h2 class="text-base font-poppins font-bold text-siage-text-primary">Justificativa da Inativação</h2>
-        </div>
-        <button 
-          type="button" 
-          (click)="fechar()" 
-          class="w-8 h-8 rounded-lg flex items-center justify-center text-siage-text-secondary hover:text-siage-text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
-          title="Fechar"
-          aria-label="Fechar modal"
-        >
-          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">close</mat-icon>
-        </button>
-      </div>
-
-      <div class="px-5 py-4 flex flex-col gap-4">
+    <s-modal title="Justificativa da Inativação" icon="comment" width="500px" (cancel)="fechar()">
+      <div class="flex flex-col gap-4">
         <!-- PROFESSOR(A) -->
         <div class="flex flex-col gap-1">
           <span class="text-xs font-semibold uppercase tracking-wider text-siage-text-secondary">Professor(a)</span>
@@ -920,16 +876,10 @@ export interface VisualizarJustificativaData {
         </div>
       </div>
 
-      <div class="flex justify-end px-5 py-3.5 border-t border-siage-border/40 bg-siage-surface">
-        <button 
-          type="button" 
-          (click)="fechar()" 
-          class="h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-        >
-          Fechar
-        </button>
+      <div sModalFooter>
+        <s-button variant="primary" (click)="fechar()">Fechar</s-button>
       </div>
-    </div>
+    </s-modal>
   `
 })
 export class VisualizarJustificativaDialog {
@@ -949,6 +899,8 @@ export class VisualizarJustificativaDialog {
     MatButtonModule, 
     MatIconModule, 
     MatTooltipModule,
+    SButtonComponent,
+    SIconButtonComponent,
     CommonModule, 
     NgxExtendedPdfViewerModule
   ],
@@ -977,15 +929,7 @@ export class VisualizarJustificativaDialog {
         </div>
 
         <!-- BOTÃO FECHAR (X) NO CABEÇALHO -->
-        <button 
-          type="button" 
-          (click)="fechar()" 
-          matTooltip="Fechar"
-          class="w-8 h-8 rounded-lg flex items-center justify-center text-siage-text-secondary hover:text-siage-text-primary hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-          aria-label="Fechar modal"
-        >
-          <mat-icon style="font-size: 20px; width: 20px; height: 20px;">close</mat-icon>
-        </button>
+        <s-icon-button icon="close" label="Fechar modal" variant="ghost" (click)="fechar()" />
       </div>
 
       <!-- CORPO PRINCIPAL DO VISUALIZADOR -->
@@ -1012,20 +956,8 @@ export class VisualizarJustificativaDialog {
               O arquivo pode conter restrições de formato ou estar temporariamente indisponível para renderização no navegador. Você pode tentar novamente ou realizar o download do arquivo.
             </p>
             <div class="flex items-center gap-3">
-              <button 
-                type="button" 
-                (click)="tentarNovamente()" 
-                class="h-9 px-4 rounded-lg border border-siage-border bg-siage-surface hover:bg-black/5 dark:hover:bg-white/5 text-xs font-semibold text-siage-text-primary transition-all cursor-pointer"
-              >
-                Tentar novamente
-              </button>
-              <button 
-                type="button" 
-                (click)="download()" 
-                class="h-9 px-4 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white text-xs font-semibold transition-all cursor-pointer"
-              >
-                Baixar arquivo
-              </button>
+              <s-button variant="secondary" (click)="tentarNovamente()">Tentar novamente</s-button>
+              <s-button variant="primary" (click)="download()">Baixar arquivo</s-button>
             </div>
           </div>
         }
@@ -1071,16 +1003,10 @@ export class VisualizarJustificativaDialog {
             <div class="flex items-center justify-between px-4 py-2 bg-siage-surface border-b border-siage-border/40 text-xs">
               <span class="text-siage-text-secondary font-medium">Visualização de imagem</span>
               <div class="flex items-center gap-1.5">
-                <button type="button" (click)="diminuirZoomImagem()" class="w-7 h-7 rounded border border-siage-border flex items-center justify-center hover:bg-black/5" title="Diminuir zoom">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">remove</mat-icon>
-                </button>
+                <s-icon-button icon="remove" label="Diminuir zoom" size="sm" variant="secondary" (click)="diminuirZoomImagem()" />
                 <span class="w-12 text-center font-mono font-medium">{{ imageZoom() }}%</span>
-                <button type="button" (click)="aumentarZoomImagem()" class="w-7 h-7 rounded border border-siage-border flex items-center justify-center hover:bg-black/5" title="Aumentar zoom">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">add</mat-icon>
-                </button>
-                <button type="button" (click)="resetarZoomImagem()" class="h-7 px-2 rounded border border-siage-border hover:bg-black/5 text-[11px] font-medium" title="Ajustar">
-                  100%
-                </button>
+                <s-icon-button icon="add" label="Aumentar zoom" size="sm" variant="secondary" (click)="aumentarZoomImagem()" />
+                <s-button variant="secondary" (click)="resetarZoomImagem()">100%</s-button>
               </div>
             </div>
 
@@ -1101,23 +1027,8 @@ export class VisualizarJustificativaDialog {
 
       <!-- RODAPÉ DE AÇÕES DO MODAL (PADRÃO SIAGE-RH V2) -->
       <div class="flex items-center justify-end gap-3 px-6 py-3.5 border-t border-siage-border/40 shrink-0 bg-siage-surface">
-        <button 
-          type="button" 
-          (click)="download()" 
-          matTooltip="Baixar arquivo para o computador"
-          class="inline-flex items-center gap-2 h-10 px-4 rounded-lg border border-siage-border bg-siage-surface hover:bg-black/5 dark:hover:bg-white/5 font-sans font-medium text-xs sm:text-sm text-siage-text-primary transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-        >
-          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-          <span>Baixar arquivo</span>
-        </button>
-
-        <button 
-          type="button" 
-          (click)="fechar()" 
-          class="inline-flex items-center justify-center h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-        >
-          Fechar
-        </button>
+        <s-button variant="secondary" icon="download" (click)="download()">Baixar arquivo</s-button>
+        <s-button variant="primary" (click)="fechar()">Fechar</s-button>
       </div>
     </div>
   `
@@ -1213,18 +1124,24 @@ export class VisualizarAnexoDialog {
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-professores-emergencial-militares-base-tecnica-list',
+  providers: [{provide: MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS, useValue: {disableToggleValue: true}}],
   imports: [
+    SBadgeComponent,
+    SButtonComponent,
     SEmptyStateComponent,
+    SFieldComponent,
+    SIconButtonComponent,
+    SInputComponent,
+    SPageHeaderComponent,
+    SSelectComponent,
+    STableCellDirective,
+    STableComponent,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
     MatButtonModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
     MatSlideToggleModule,
-    MatChipsModule,
     MatDialogModule,
     MatTooltipModule,
     MatSelectModule,
@@ -1239,53 +1156,17 @@ export class VisualizarAnexoDialog {
       <div class="flex flex-col gap-6 font-sans">
       
       <!-- Cabeçalho com Breadcrumbs, Título com Voltar, Descrição e Ação Principal -->
-      <div class="flex flex-col gap-2">
-        
-        <!-- Breadcrumb: Início / Configurações / SEAD / Professores em contratação emergencial, Militares e Base Técnica -->
-        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-sans font-medium tracking-wide text-siage-text-secondary/70 flex-wrap">
-          <span (click)="goHome()" tabindex="0" role="button" class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline">Início</span>
-          <span class="text-[10px] text-siage-text-secondary/40 select-none">/</span>
-          <span (click)="navConfig()" tabindex="0" role="button" class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline">Configurações</span>
-          <span class="text-[10px] text-siage-text-secondary/40 select-none">/</span>
-          <span (click)="navSead()" tabindex="0" role="button" class="hover:text-siage-primary cursor-pointer focus:outline-none focus:underline">SEAD</span>
-          <span class="text-[10px] text-siage-text-secondary/40 select-none">/</span>
-          <span class="text-siage-primary font-semibold" aria-current="page">Professores em contratação emergencial, Militares e Base Técnica</span>
-        </nav>
-
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-2 sm:gap-3">
-              <button 
-                mat-icon-button 
-                (click)="goBack()" 
-                class="text-siage-text-secondary hover:text-siage-primary transition-colors cursor-pointer -ml-2 shrink-0"
-                title="Voltar para SEAD"
-                aria-label="Voltar para SEAD"
-              >
-                <mat-icon style="font-size: 22px; width: 22px; height: 22px;">arrow_back</mat-icon>
-              </button>
-              <h1 class="text-2xl sm:text-3xl font-poppins font-bold tracking-tight text-siage-text-primary leading-tight">
-                Professores em contratação emergencial, Militares e Base Técnica
-              </h1>
-            </div>
-            
-            <p class="text-xs sm:text-sm text-siage-text-secondary font-sans leading-normal pl-8 sm:pl-9 max-w-3xl">
-              Cadastre e mantenha os professores vinculados a estas modalidades.
-            </p>
-          </div>
-          
-          @if (permissionService.canCreate()) {
-            <button 
-              type="button"
-              (click)="onAdicionar()"
-              class="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs dark:shadow-none active:scale-[0.99] shrink-0 cursor-pointer"
-            >
-              <mat-icon style="font-size: 20px; width: 20px; height: 20px;">add</mat-icon>
-              <span>Adicionar</span>
-            </button>
-          }
-        </div>
-      </div>
+      <s-page-header
+        [breadcrumbs]="breadcrumbs"
+        title="Professores em contratação emergencial, Militares e Base Técnica"
+        description="Cadastre e mantenha os professores vinculados a estas modalidades."
+        showBack
+        (back)="goBack()"
+      >
+        @if (permissionService.canCreate()) {
+          <s-button action variant="primary" icon="add" (click)="onAdicionar()">Adicionar</s-button>
+        }
+      </s-page-header>
 
       <!-- CARD DE FILTROS (Organizado em duas linhas) -->
       <div class="bg-siage-surface border border-siage-border rounded-lg p-5 sm:p-6 shadow-xs dark:shadow-none flex flex-col gap-4">
@@ -1294,153 +1175,69 @@ export class VisualizarAnexoDialog {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
           
           <!-- Filtro CPF -->
-          <div class="form-field-group">
-            <label for="filter-cpf" class="siage-field-label">CPF</label>
-            <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-              <input 
-                matInput 
-                id="filter-cpf"
-                type="text" 
-                maxlength="14"
-                [formControl]="cpfControl"
-                placeholder="000.000.000-00" 
-                (input)="onCpfFilterInput($event)"
-                (keydown.enter)="onBuscar()"
-                class="font-mono text-sm"
-              />
+          <s-field label="CPF" controlId="filter-cpf">
+            <div class="flex items-center gap-1">
+              <s-input class="flex-1 min-w-0" [maxlength]="14" [formControl]="cpfControl" placeholder="000.000.000-00" (input)="onCpfFilterInput($event)" (keydown.enter)="onBuscar()" />
               @if (cpfControl.value) {
-                <button mat-icon-button matSuffix (click)="cpfControl.setValue(''); updateBuscarStatus()" aria-label="Limpar campo">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                </button>
+                <s-icon-button icon="close" label="Limpar CPF" variant="ghost" (click)="cpfControl.setValue(''); updateBuscarStatus()" />
               }
-            </mat-form-field>
-          </div>
+            </div>
+          </s-field>
 
           <!-- Filtro Matrícula -->
-          <div class="form-field-group">
-            <label for="filter-matricula" class="siage-field-label">Matrícula</label>
-            <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-              <input 
-                matInput 
-                id="filter-matricula"
-                type="text" 
-                maxlength="10"
-                [formControl]="matriculaControl"
-                placeholder="Buscar por matrícula" 
-                (keydown.enter)="onBuscar()"
-                class="font-mono text-sm"
-              />
+          <s-field label="Matrícula" controlId="filter-matricula">
+            <div class="flex items-center gap-1">
+              <s-input class="flex-1 min-w-0" [maxlength]="10" [formControl]="matriculaControl" placeholder="Buscar por matrícula" (keydown.enter)="onBuscar()" />
               @if (matriculaControl.value) {
-                <button mat-icon-button matSuffix (click)="matriculaControl.setValue(''); updateBuscarStatus()" aria-label="Limpar campo">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                </button>
+                <s-icon-button icon="close" label="Limpar matrícula" variant="ghost" (click)="matriculaControl.setValue(''); updateBuscarStatus()" />
               }
-            </mat-form-field>
-          </div>
+            </div>
+          </s-field>
 
           <!-- Filtro Nome -->
-          <div class="form-field-group">
-            <label for="filter-nome" class="siage-field-label">Nome do(a) Servidor(a)</label>
-            <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-              <input 
-                matInput 
-                id="filter-nome"
-                type="text" 
-                [formControl]="nomeControl"
-                placeholder="Buscar por nome" 
-                (keydown.enter)="onBuscar()"
-                class="text-sm"
-              />
+          <s-field label="Nome do(a) Servidor(a)" controlId="filter-nome">
+            <div class="flex items-center gap-1">
+              <s-input class="flex-1 min-w-0" [formControl]="nomeControl" placeholder="Buscar por nome" (keydown.enter)="onBuscar()" />
               @if (nomeControl.value) {
-                <button mat-icon-button matSuffix (click)="nomeControl.setValue(''); updateBuscarStatus()" aria-label="Limpar campo">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                </button>
+                <s-icon-button icon="close" label="Limpar nome" variant="ghost" (click)="nomeControl.setValue(''); updateBuscarStatus()" />
               }
-            </mat-form-field>
-          </div>
+            </div>
+          </s-field>
 
           <!-- Filtro Secretaria -->
-          <div class="form-field-group">
-            <label for="filter-secretaria" class="siage-field-label">Secretaria</label>
-            <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-              <mat-select [formControl]="secretariaControl" id="filter-secretaria" class="text-sm">
-                <mat-option value="TODAS">Todas</mat-option>
-                <mat-option value="21 - Secretaria de Estado da Educação">21 - Secretaria de Estado da Educação</mat-option>
-                <mat-option value="25 - Secretaria de Segurança e Defesa Social">25 - Secretaria de Segurança e Defesa Social</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
+          <s-field label="Secretaria" controlId="filter-secretaria">
+            <s-select [formControl]="secretariaControl" [options]="secretariaOptions" [clearable]="false" />
+          </s-field>
         </div>
 
         <!-- Linha 2: Tipo de Professor, Unidade de Trabalho (UTB), Status -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
           
           <!-- Filtro Tipo de Professor -->
-          <div class="form-field-group">
-            <label for="filter-tipo" class="siage-field-label">Tipo de Professor</label>
-            <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-              <mat-select [formControl]="tipoControl" id="filter-tipo" class="text-sm">
-                <mat-option value="TODOS">Todos</mat-option>
-                <mat-option value="MILITAR">Professor Militar</mat-option>
-                <mat-option value="EMERGENCIAL">Professor em contratação emergencial</mat-option>
-                <mat-option value="BASE_TECNICA">Professor da Base Técnica</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
+          <s-field label="Tipo de Professor" controlId="filter-tipo">
+            <s-select [formControl]="tipoControl" [options]="tipoOptions" [clearable]="false" />
+          </s-field>
 
           <!-- Filtro Unidade de Trabalho (UTB) -->
-          <div class="form-field-group">
-            <label for="filter-utb" class="siage-field-label">Unidade de Trabalho (UTB)</label>
-            <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-              <input 
-                matInput 
-                id="filter-utb"
-                type="text" 
-                [formControl]="utbControl"
-                placeholder="Buscar por código ou nome da UTB" 
-                (keydown.enter)="onBuscar()"
-                class="text-sm"
-              />
+          <s-field label="Unidade de Trabalho (UTB)" controlId="filter-utb">
+            <div class="flex items-center gap-1">
+              <s-input class="flex-1 min-w-0" [formControl]="utbControl" placeholder="Buscar por código ou nome da UTB" (keydown.enter)="onBuscar()" />
               @if (utbControl.value) {
-                <button mat-icon-button matSuffix (click)="utbControl.setValue(''); updateBuscarStatus()" aria-label="Limpar campo">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                </button>
+                <s-icon-button icon="close" label="Limpar unidade de trabalho" variant="ghost" (click)="utbControl.setValue(''); updateBuscarStatus()" />
               }
-            </mat-form-field>
-          </div>
+            </div>
+          </s-field>
 
           <!-- Filtro Status -->
-          <div class="form-field-group">
-            <label for="filter-status" class="siage-field-label">Status</label>
-            <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-              <mat-select [formControl]="statusControl" id="filter-status" class="text-sm">
-                <mat-option value="TODOS">Todos</mat-option>
-                <mat-option value="ATIVO">Ativo</mat-option>
-                <mat-option value="INATIVO">Inativo</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
+          <s-field label="Status" controlId="filter-status">
+            <s-select [formControl]="statusControl" [options]="statusOptions" [clearable]="false" />
+          </s-field>
         </div>
 
         <!-- Ações do Filtro: Limpar e Buscar -->
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-siage-border/40">
-          <button 
-            type="button" 
-            (click)="onLimpar()"
-            class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-siage-primary/5 hover:border-siage-primary/30 active:scale-[0.99] transition-all cursor-pointer"
-          >
-            Limpar
-          </button>
-          
-          <button 
-            type="button" 
-            [disabled]="!isBuscarEnabled()"
-            (click)="onBuscar()"
-            class="inline-flex items-center justify-center gap-1.5 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-sans font-semibold text-sm transition-all shadow-xs cursor-pointer"
-          >
-            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">search</mat-icon>
-            <span>Buscar</span>
-          </button>
+          <s-button variant="secondary" (click)="onLimpar()">Limpar</s-button>
+          <s-button variant="primary" icon="search" [disabled]="!isBuscarEnabled()" (click)="onBuscar()">Buscar</s-button>
         </div>
       </div>
 
@@ -1465,202 +1262,33 @@ export class VisualizarAnexoDialog {
             (action)="carregarDados()"
           />
         } @else if (isSemRegistros()) {
-          <div class="py-16 px-6 flex flex-col items-center justify-center text-center gap-3">
-            <div class="w-12 h-12 rounded-lg bg-siage-text-secondary/10 text-siage-text-secondary flex items-center justify-center">
-              <mat-icon style="font-size: 24px; width: 24px; height: 24px;">inbox</mat-icon>
-            </div>
-            <div class="flex flex-col gap-1 max-w-md">
-              <h3 class="text-base font-poppins font-semibold text-siage-text-primary">Nenhum registro cadastrado</h3>
-              <p class="text-xs sm:text-sm text-siage-text-secondary">Ainda não existem professores cadastrados nestas modalidades.</p>
-            </div>
-          </div>
+          <s-empty-state variant="no-data" title="Nenhum registro cadastrado" description="Ainda não existem professores cadastrados nestas modalidades." />
         } @else if (isSemResultadoFiltro()) {
-          <div class="py-16 px-6 flex flex-col items-center justify-center text-center gap-3">
-            <div class="w-12 h-12 rounded-lg bg-siage-text-secondary/10 text-siage-text-secondary flex items-center justify-center">
-              <mat-icon style="font-size: 24px; width: 24px; height: 24px;">search_off</mat-icon>
-            </div>
-            <div class="flex flex-col gap-1 max-w-md">
-              <h3 class="text-base font-poppins font-semibold text-siage-text-primary">Nenhum resultado encontrado</h3>
-              <p class="text-xs sm:text-sm text-siage-text-secondary">Nenhum registro corresponde aos filtros aplicados.</p>
-            </div>
-          </div>
+          <s-empty-state variant="no-results" title="Nenhum resultado encontrado" description="Nenhum registro corresponde aos filtros aplicados." />
         } @else {
-          <div class="overflow-x-auto w-full">
-            <table 
-              mat-table 
-              [dataSource]="paginatedItems()" 
-              matSort 
-              [matSortActive]="sortState().active" 
-              [matSortDirection]="sortState().direction"
-              (matSortChange)="onSortChange($event)"
-              class="w-full font-sans"
-            >
-              
-              <!-- Coluna Servidor (Nome + CPF unificados) -->
-              <ng-container matColumnDef="servidor">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 pl-4 pr-3 min-w-[260px]">
-                  Servidor
-                </th>
-                <td mat-cell *matCellDef="let row" class="text-left py-3.5 pl-4 pr-3 break-words">
-                  <div class="flex flex-col gap-0.5">
-                    <span class="font-sans text-sm font-medium text-siage-text-primary leading-tight">{{ row.nome }}</span>
-                    <span class="font-mono text-xs text-siage-text-secondary leading-normal">CPF: {{ row.cpf }}</span>
-                  </div>
-                </td>
-              </ng-container>
-
-              <!-- Coluna Matrícula -->
-              <ng-container matColumnDef="matricula">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-3 w-[110px] min-w-[100px]">
-                  Matrícula
-                </th>
-                <td mat-cell *matCellDef="let row" class="text-left font-mono text-siage-text-primary py-3.5 px-3 text-sm whitespace-nowrap">
-                  {{ row.matricula }}
-                </td>
-              </ng-container>
-
-              <!-- Coluna Tipo de Professor (Texto simples, sem badges ou cores) -->
-              <ng-container matColumnDef="tipo">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-2.5 w-[14%] min-w-[130px]">
-                  Tipo de Professor
-                </th>
-                <td mat-cell *matCellDef="let row" class="text-left font-sans text-siage-text-primary py-3.5 px-2.5 text-sm leading-normal break-words">
-                  {{ getTipoDesc(row.tipo) }}
-                </td>
-              </ng-container>
-
-              <!-- Coluna Secretaria -->
-              <ng-container matColumnDef="secretaria">
-                <th mat-header-cell *matHeaderCellDef class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-2.5 w-[16%] min-w-[150px]">
-                  Secretaria
-                </th>
-                <td mat-cell *matCellDef="let row" class="text-left font-sans text-siage-text-primary py-3.5 px-2.5 text-sm leading-normal break-words">
-                  {{ row.secretaria }}
-                </td>
-              </ng-container>
-
-              <!-- Coluna Unidade de Trabalho -->
-              <ng-container matColumnDef="utb">
-                <th mat-header-cell *matHeaderCellDef class="text-left font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-2.5 min-w-[170px]">
-                  Unidade de Trabalho
-                </th>
-                <td mat-cell *matCellDef="let row" class="text-left font-sans text-siage-text-primary py-3.5 px-2.5 text-sm leading-normal break-words">
-                  {{ row.utb }}
-                </td>
-              </ng-container>
-
-              <!-- Coluna Situação -->
-              <ng-container matColumnDef="situacao">
-                <th mat-header-cell *matHeaderCellDef class="text-center font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-3 w-28">
-                  Situação
-                </th>
-                <td mat-cell *matCellDef="let row" class="text-center py-3.5 px-3 w-28">
-                  <span 
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-sans font-medium transition-colors"
-                    [class]="row.ativo 
-                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' 
-                      : 'bg-slate-100 text-slate-600 dark:bg-slate-800/60 dark:text-slate-400 border border-slate-300/40 dark:border-slate-700/50'"
-                  >
-                    {{ row.ativo ? 'Ativo' : 'Inativo' }}
-                  </span>
-                </td>
-              </ng-container>
-
-              <!-- Coluna Em Uso -->
-              <ng-container matColumnDef="emUso">
-                <th mat-header-cell *matHeaderCellDef class="text-center font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-2 w-24">
-                  Em uso
-                </th>
-                <td mat-cell *matCellDef="let row" class="text-center py-3.5 px-2 w-24">
-                  @if (row.exibindoEmUsoIndicator) {
-                    <button 
-                      type="button"
-                      (click)="onVerDetalhesEmUso(row)"
-                      matTooltip="Ver vínculos de uso" 
-                      aria-label="Ver vínculos de uso"
-                      class="w-10 h-10 inline-flex items-center justify-center rounded-lg text-siage-primary hover:bg-siage-primary/10 transition-colors cursor-pointer mx-auto focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-siage-primary/40"
-                    >
-                      <mat-icon style="font-size: 20px; width: 20px; height: 20px;">link</mat-icon>
-                    </button>
-                  } @else {
-                    <span class="text-sm text-siage-text-secondary/50 select-none inline-block">—</span>
-                  }
-                </td>
-              </ng-container>
-
-              <!-- Coluna Ações -->
-              <ng-container matColumnDef="acoes">
-                <th mat-header-cell *matHeaderCellDef class="text-center font-sans font-semibold text-xs text-siage-text-secondary py-3.5 px-3 w-48">
-                  Ações
-                </th>
-                <td mat-cell *matCellDef="let row" class="text-center py-3.5 px-3 w-48">
-                  <div class="flex items-center justify-center gap-1 mx-auto">
-                    
-                    <!-- Visualizar -->
-                    <button 
-                      type="button"
-                      (click)="onVisualizar(row)" 
-                      matTooltip="Visualizar" 
-                      aria-label="Visualizar professor"
-                      class="w-10 h-10 inline-flex items-center justify-center rounded-lg text-siage-text-secondary hover:text-siage-primary hover:bg-siage-primary/8 dark:hover:bg-siage-primary/12 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                    >
-                      <mat-icon style="font-size: 20px; width: 20px; height: 20px;">visibility</mat-icon>
-                    </button>
-                    
-                    <!-- Editar -->
-                    <button 
-                      type="button"
-                      (click)="onEditar(row)" 
-                      matTooltip="Editar" 
-                      aria-label="Editar professor"
-                      class="w-10 h-10 inline-flex items-center justify-center rounded-lg text-siage-text-secondary hover:text-siage-primary hover:bg-siage-primary/8 dark:hover:bg-siage-primary/12 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-primary/40"
-                    >
-                      <mat-icon style="font-size: 20px; width: 20px; height: 20px;">edit</mat-icon>
-                    </button>
-
-                    <!-- Ativar / Inativar Slide Toggle -->
-                    <div class="w-10 h-10 inline-flex items-center justify-center">
-                      <mat-slide-toggle 
-                        [checked]="row.ativo" 
-                        (click)="$event.preventDefault(); onToggleStatus(row)"
-                        [matTooltip]="row.ativo ? 'Inativar' : 'Ativar'"
-                        aria-label="Ativar ou inativar professor"
-                        class="scale-90"
-                      >
-                      </mat-slide-toggle>
-                    </div>
-
-                    <!-- Ver Justificativa (Apenas quando Inativo) -->
-                    @if (!row.ativo) {
-                      <button 
-                        type="button"
-                        (click)="onVerJustificativa(row)" 
-                        matTooltip="Ver justificativa" 
-                        aria-label="Ver justificativa da inativação"
-                        class="w-10 h-10 inline-flex items-center justify-center rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40"
-                      >
-                        <mat-icon style="font-size: 20px; width: 20px; height: 20px;">comment</mat-icon>
-                      </button>
-                    }
-
-                    <!-- Excluir -->
-                    <button 
-                      type="button"
-                      (click)="onExcluir(row)" 
-                      matTooltip="Excluir" 
-                      aria-label="Excluir professor"
-                      class="w-10 h-10 inline-flex items-center justify-center rounded-lg text-siage-text-secondary hover:text-siage-destructive hover:bg-siage-destructive/10 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-siage-destructive/40"
-                    >
-                      <mat-icon style="font-size: 20px; width: 20px; height: 20px;">delete</mat-icon>
-                    </button>
-                  </div>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-black/[0.02] dark:bg-white/[0.02] border-b border-siage-border"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns" class="border-b border-siage-border/40 hover:bg-siage-primary/[0.04] dark:hover:bg-siage-primary/[0.06] transition-colors"></tr>
-            </table>
-          </div>
+          <s-table label="Professores em contratação emergencial, Militares e Base Técnica" [columns]="tableColumns" [rows]="paginatedItems()" [sort]="tableSort()" (sortChange)="onTableSortChange($event)" frameless>
+            <ng-template sTableCell="ativo" let-row>
+              <s-badge [tone]="row['ativo'] ? 'success' : 'secondary'">{{ row['ativo'] ? 'Ativo' : 'Inativo' }}</s-badge>
+            </ng-template>
+            <ng-template sTableCell="exibindoEmUsoIndicator" let-row>
+              @if (row['exibindoEmUsoIndicator']) {
+                <s-icon-button icon="link" label="Ver vínculos de uso" variant="ghost" (click)="onVerDetalhesEmUso($any(row))" />
+              } @else {
+                <span>—</span>
+              }
+            </ng-template>
+            <ng-template #customActions let-row>
+              <s-icon-button icon="visibility" label="Visualizar professor" variant="ghost" (click)="onVisualizar(row)" />
+              <s-icon-button icon="edit" label="Editar professor" variant="ghost" (click)="onEditar(row)" />
+              <div class="w-10 h-10 inline-flex items-center justify-center">
+                <mat-slide-toggle [checked]="row.ativo" (click)="$event.preventDefault(); onToggleStatus(row)" [matTooltip]="row.ativo ? 'Inativar' : 'Ativar'" aria-label="Ativar ou inativar professor" class="scale-90" />
+              </div>
+              @if (!row.ativo) {
+                <s-icon-button icon="comment" label="Ver justificativa da inativação" variant="ghost" (click)="onVerJustificativa(row)" />
+              }
+              <s-icon-button icon="delete" label="Excluir professor" variant="destructive" text (click)="onExcluir(row)" />
+            </ng-template>
+          </s-table>
 
           <app-siage-paginator 
             [length]="sortedItems().length"
@@ -1676,6 +1304,37 @@ export class VisualizarAnexoDialog {
   `
 })
 export class ProfessoresList {
+  readonly breadcrumbs = [
+    {label: 'Início', routerLink: '/inicio'},
+    {label: 'Configurações', routerLink: '/configuracoes'},
+    {label: 'SEAD', routerLink: '/configuracoes/sead'},
+    {label: 'Professores em contratação emergencial, Militares e Base Técnica'}
+  ];
+  readonly secretariaOptions = [
+    {label: 'Todas', value: 'TODAS'},
+    {label: '21 - Secretaria de Estado da Educação', value: '21 - Secretaria de Estado da Educação'},
+    {label: '25 - Secretaria de Segurança e Defesa Social', value: '25 - Secretaria de Segurança e Defesa Social'}
+  ];
+  readonly tipoOptions = [
+    {label: 'Todos', value: 'TODOS'},
+    {label: 'Professor Militar', value: 'MILITAR'},
+    {label: 'Professor em contratação emergencial', value: 'EMERGENCIAL'},
+    {label: 'Professor da Base Técnica', value: 'BASE_TECNICA'}
+  ];
+  readonly statusOptions = [
+    {label: 'Todos', value: 'TODOS'},
+    {label: 'Ativo', value: 'ATIVO'},
+    {label: 'Inativo', value: 'INATIVO'}
+  ];
+  readonly tableColumns: readonly STableColumn<ProfessorItem>[] = [
+    {key: 'nome', label: 'Servidor', sortable: true, secondary: item => `CPF: ${item.cpf}`},
+    {key: 'matricula', label: 'Matrícula', sortable: true},
+    {key: 'tipo', label: 'Tipo de Professor', sortable: true, value: item => getTipoProfessorDescricao(item.tipo)},
+    {key: 'secretaria', label: 'Secretaria'},
+    {key: 'utb', label: 'Unidade de Trabalho'},
+    {key: 'ativo', label: 'Situação', align: 'center'},
+    {key: 'exibindoEmUsoIndicator', label: 'Em uso', align: 'center'}
+  ];
   readonly service = inject(ProfessoresService);
   readonly router = inject(Router);
   readonly dialog = inject(MatDialog);
@@ -1708,8 +1367,11 @@ export class ProfessoresList {
   readonly paginatorPageIndex = signal(0);
   readonly paginatorPageSize = signal(10);
   readonly sortState = signal<Sort>({ active: 'servidor', direction: 'asc' });
+  readonly tableSort = computed<STableSort | null>(() => {
+    const sort = this.sortState();
+    return sort.direction ? {key: sort.active === 'servidor' ? 'nome' : sort.active, direction: sort.direction} : null;
+  });
 
-  readonly displayedColumns = ['servidor', 'matricula', 'tipo', 'secretaria', 'utb', 'situacao', 'emUso', 'acoes'];
 
   readonly isLoading = signal(false);
   readonly hasError = signal(false);
@@ -1867,6 +1529,10 @@ export class ProfessoresList {
     this.sortState.set(sort);
   }
 
+  onTableSortChange(sort: STableSort | null) {
+    this.onSortChange(sort ? {active: sort.key, direction: sort.direction} : {active: this.sortState().active, direction: ''});
+  }
+
   onPageChange(event: PageEvent) {
     this.paginatorPageIndex.set(event.pageIndex);
     this.paginatorPageSize.set(event.pageSize);
@@ -2018,6 +1684,13 @@ export class ProfessoresList {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-professores-emergencial-militares-base-tecnica-form',
   imports: [
+    SBadgeComponent,
+    SButtonComponent,
+    SFieldComponent,
+    SIconButtonComponent,
+    SInputComponent,
+    SRadioGroupComponent,
+    SSelectComponent,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -2026,7 +1699,6 @@ export class ProfessoresList {
     MatSlideToggleModule,
     MatTooltipModule,
     MatCardModule,
-    MatRadioModule,
     MatSelectModule,
     AcessoRestritoComponent,
     CommonModule,
@@ -2079,14 +1751,7 @@ export class ProfessoresList {
           </div>
 
           @if (isViewMode()) {
-            <button 
-              type="button"
-              (click)="onToggleEdit()" 
-              class="inline-flex items-center justify-center gap-2 h-10 px-5 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs shrink-0 cursor-pointer"
-            >
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">edit</mat-icon>
-              <span>Editar</span>
-            </button>
+            <s-button variant="primary" icon="edit" (click)="onToggleEdit()">Editar</s-button>
           }
         </div>
       </div>
@@ -2102,14 +1767,7 @@ export class ProfessoresList {
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-siage-primary/10 text-siage-primary border border-siage-primary/20">
                   {{ getTipoDesc(currentItem()?.tipo || 'MILITAR') }}
                 </span>
-                <span 
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  [class]="currentItem()?.ativo 
-                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-500/20' 
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800/60 dark:text-slate-400 border border-slate-300/40'"
-                >
-                  {{ currentItem()?.ativo ? 'Ativo' : 'Inativo' }}
-                </span>
+                <s-badge [tone]="currentItem()?.ativo ? 'success' : 'secondary'">{{ currentItem()?.ativo ? 'Ativo' : 'Inativo' }}</s-badge>
               </div>
               <h2 class="text-xl sm:text-2xl font-poppins font-bold text-siage-text-primary mt-1 break-words">
                 {{ currentItem()?.nome }}
@@ -2364,12 +2022,8 @@ export class ProfessoresList {
                       </div>
                     </div>
                     <div class="flex items-center gap-1">
-                      <button type="button" (click)="onVisualizarAnexo(anexo)" matTooltip="Visualizar anexo" class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center">
-                        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                      </button>
-                      <button type="button" (click)="onDownloadAnexo(anexo)" matTooltip="Baixar arquivo" class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center">
-                        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-                      </button>
+                      <s-icon-button icon="visibility" label="Visualizar anexo" variant="ghost" (click)="onVisualizarAnexo(anexo)" />
+                      <s-icon-button icon="download" label="Baixar arquivo" variant="ghost" (click)="onDownloadAnexo(anexo)" />
                     </div>
                   </div>
                 }
@@ -2406,17 +2060,7 @@ export class ProfessoresList {
                   <span class="font-normal text-siage-text-secondary">{{ getTipoDesc(tipoSelecionado()) }}</span>
                 </div>
               } @else {
-                <mat-radio-group formControlName="tipo" (change)="onRadioTipoChange($event.value)" class="flex flex-col sm:flex-row gap-4 sm:gap-8">
-                  <mat-radio-button value="MILITAR">
-                    <span class="text-sm font-medium">Professor Militar</span>
-                  </mat-radio-button>
-                  <mat-radio-button value="EMERGENCIAL">
-                    <span class="text-sm font-medium">Professor em contratação emergencial</span>
-                  </mat-radio-button>
-                  <mat-radio-button value="BASE_TECNICA">
-                    <span class="text-sm font-medium">Professor da Base Técnica</span>
-                  </mat-radio-button>
-                </mat-radio-group>
+                <s-radio-group label="Tipo de Professor" formControlName="tipo" [options]="tipoProfessorOptions" (selectionChange)="$event && onRadioTipoChange($event)" />
               }
             </div>
           </div>
@@ -2431,70 +2075,36 @@ export class ProfessoresList {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-x-4 gap-y-3 items-start">
               <!-- CPF -->
               <div class="col-span-1 sm:col-span-1 lg:col-span-4 form-field-group">
-                <label for="form-cpf" class="siage-field-label">
-                  <span>CPF</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
                 @if (isEditMode()) {
+                  <label for="form-cpf" class="siage-field-label">
+                    <span>CPF</span>
+                    <span class="text-red-500 font-bold">*</span>
+                  </label>
                   <div class="h-[56px] px-4 flex items-center bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/70 rounded-lg text-sm text-siage-text-secondary font-mono cursor-not-allowed select-none">
                     <span class="font-normal text-siage-text-secondary">{{ form.controls.cpf.value }}</span>
                   </div>
                   <div class="min-h-[1.35rem] mt-[0.15rem]" aria-hidden="true"></div>
                 } @else {
-                  <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                    <input 
-                      matInput 
-                      id="form-cpf"
-                      type="text" 
-                      maxlength="14"
-                      formControlName="cpf"
-                      placeholder="000.000.000-00" 
-                      (input)="onCpfInput($event)"
-                      class="font-mono text-sm"
-                    />
-                    @if (form.get('cpf')?.hasError('required') && form.get('cpf')?.touched) {
-                      <mat-error>CPF é obrigatório.</mat-error>
-                    } @else if (form.get('cpf')?.hasError('cpfInvalido') && form.get('cpf')?.touched) {
-                      <mat-error>Informe um CPF válido (11 dígitos).</mat-error>
-                    } @else if (form.get('cpf')?.hasError('duplicado') && form.get('cpf')?.touched) {
-                      <mat-error>Já existe um professor cadastrado com este CPF.</mat-error>
-                    }
-                  </mat-form-field>
+                  <s-field label="CPF" controlId="form-cpf" required [error]="form.controls.cpf.touched ? (form.controls.cpf.hasError('required') ? 'CPF é obrigatório.' : form.controls.cpf.hasError('cpfInvalido') ? 'Informe um CPF válido (11 dígitos).' : form.controls.cpf.hasError('duplicado') ? 'Já existe um professor cadastrado com este CPF.' : null) : null">
+                    <s-input [maxlength]="14" formControlName="cpf" placeholder="000.000.000-00" (input)="onCpfInput($event)" />
+                  </s-field>
                 }
               </div>
 
               <!-- Matrícula -->
               <div class="col-span-1 sm:col-span-1 lg:col-span-4 form-field-group">
-                <label for="form-matricula" class="siage-field-label">
-                  <span>Matrícula</span>
-                  @if (isTipoMilitar() && !isEditMode()) {
-                    <span class="text-red-500 font-bold">*</span>
-                  }
-                </label>
                 @if (isEditMode()) {
+                  <label for="form-matricula" class="siage-field-label">Matrícula</label>
                   <div class="h-[56px] px-4 flex items-center bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/70 rounded-lg text-sm text-siage-text-secondary font-mono cursor-not-allowed select-none">
                     <span class="font-normal text-siage-text-secondary">{{ form.controls.matricula.value || 'Não informada' }}</span>
                   </div>
                   <div class="min-h-[1.35rem] mt-[0.15rem]" aria-hidden="true"></div>
                 } @else if (isTipoMilitar()) {
-                  <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                    <input 
-                      matInput 
-                      id="form-matricula"
-                      type="text" 
-                      maxlength="7"
-                      formControlName="matricula"
-                      placeholder="Digite a matrícula" 
-                      (input)="onMatriculaInput($event)"
-                      class="font-mono text-sm"
-                    />
-                    @if (form.get('matricula')?.hasError('required') && form.get('matricula')?.touched) {
-                      <mat-error>Matrícula é obrigatória para Professor Militar.</mat-error>
-                    } @else if (form.get('matricula')?.hasError('duplicado') && form.get('matricula')?.touched) {
-                      <mat-error>Já existe um registro cadastrado para a matrícula informada.</mat-error>
-                    }
-                  </mat-form-field>
+                  <s-field label="Matrícula" controlId="form-matricula" required [error]="form.controls.matricula.touched ? (form.controls.matricula.hasError('required') ? 'Matrícula é obrigatória para Professor Militar.' : form.controls.matricula.hasError('duplicado') ? 'Já existe um registro cadastrado para a matrícula informada.' : null) : null">
+                    <s-input [maxlength]="7" formControlName="matricula" placeholder="Digite a matrícula" (input)="onMatriculaInput($event)" />
+                  </s-field>
                 } @else {
+                  <label class="siage-field-label">Matrícula</label>
                   <div class="h-[56px] px-4 flex items-center bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/70 rounded-lg text-sm text-siage-text-secondary cursor-not-allowed select-none">
                     <span class="text-sm text-siage-text-secondary font-normal">Gerada automaticamente após a inclusão</span>
                   </div>
@@ -2516,28 +2126,10 @@ export class ProfessoresList {
 
               <!-- Nome do(a) Servidor(a) -->
               <div class="col-span-1 sm:col-span-2 lg:col-span-12 form-field-group">
-                <label for="form-nome" class="siage-field-label">
-                  <span>Nome do(a) Servidor(a)</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="form-nome"
-                    type="text" 
-                    maxlength="200"
-                    formControlName="nome"
-                    placeholder="Digite o nome completo do servidor" 
-                    (blur)="onNomeBlur()"
-                    class="text-sm font-medium"
-                  />
-                  <mat-hint align="end" class="text-xs text-siage-text-secondary/70">
-                    {{ (form.get('nome')?.value || '').length }} de 200
-                  </mat-hint>
-                  @if (form.get('nome')?.hasError('required') && form.get('nome')?.touched) {
-                    <mat-error>Nome do(a) servidor(a) é obrigatório.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Nome do(a) Servidor(a)" controlId="form-nome" required [error]="form.controls.nome.touched && form.controls.nome.hasError('required') ? 'Nome do(a) servidor(a) é obrigatório.' : null">
+                  <s-input [maxlength]="200" formControlName="nome" placeholder="Digite o nome completo do servidor" (focusout)="onNomeBlur()" />
+                </s-field>
+                <div class="text-right text-xs text-siage-text-secondary/70">{{ (form.get('nome')?.value || '').length }} de 200</div>
               </div>
             </div>
           </div>
@@ -2552,70 +2144,23 @@ export class ProfessoresList {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-x-4 gap-y-3 items-start">
               <!-- RG -->
               <div class="col-span-1 sm:col-span-1 lg:col-span-3 form-field-group">
-                <label for="form-rg" class="siage-field-label">
-                  <span>RG</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="form-rg" 
-                    type="text" 
-                    maxlength="15" 
-                    formControlName="rg" 
-                    placeholder="Digite o RG" 
-                    (input)="onRgInput($event)"
-                    class="text-sm font-mono" 
-                  />
-                  @if (form.get('rg')?.hasError('required') && form.get('rg')?.touched) {
-                    <mat-error>RG é obrigatório.</mat-error>
-                  } @else if ((form.get('rg')?.hasError('minlength') || form.get('rg')?.hasError('maxlength')) && form.get('rg')?.touched) {
-                    <mat-error>RG deve conter entre 7 e 15 dígitos.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="RG" controlId="form-rg" required [error]="form.controls.rg.touched ? (form.controls.rg.hasError('required') ? 'RG é obrigatório.' : (form.controls.rg.hasError('minlength') || form.controls.rg.hasError('maxlength')) ? 'RG deve conter entre 7 e 15 dígitos.' : null) : null">
+                  <s-input [maxlength]="15" formControlName="rg" placeholder="Digite o RG" (input)="onRgInput($event)" />
+                </s-field>
               </div>
 
               <!-- Órgão Emissor -->
               <div class="col-span-1 sm:col-span-1 lg:col-span-2 form-field-group">
-                <label for="form-emissor" class="siage-field-label">
-                  <span>Órgão Emissor</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="form-emissor" 
-                    type="text" 
-                    maxlength="5" 
-                    formControlName="orgaoEmissor" 
-                    placeholder="Ex.: SSP" 
-                    (input)="onOrgaoEmissorInput($event)"
-                    class="text-sm uppercase" 
-                  />
-                  @if (form.get('orgaoEmissor')?.hasError('required') && form.get('orgaoEmissor')?.touched) {
-                    <mat-error>Órgão emissor é obrigatório.</mat-error>
-                  } @else if (form.get('orgaoEmissor')?.hasError('minlength') && form.get('orgaoEmissor')?.touched) {
-                    <mat-error>O campo deve ter no mínimo 2 caracteres.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Órgão Emissor" controlId="form-emissor" required [error]="form.controls.orgaoEmissor.touched ? (form.controls.orgaoEmissor.hasError('required') ? 'Órgão emissor é obrigatório.' : form.controls.orgaoEmissor.hasError('minlength') ? 'O campo deve ter no mínimo 2 caracteres.' : null) : null">
+                  <s-input [maxlength]="5" formControlName="orgaoEmissor" placeholder="Ex.: SSP" (input)="onOrgaoEmissorInput($event)" />
+                </s-field>
               </div>
 
               <!-- UF do RG -->
               <div class="col-span-1 sm:col-span-1 lg:col-span-2 form-field-group">
-                <label for="form-ufrg" class="siage-field-label">
-                  <span>UF</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="ufRg" id="form-ufrg" class="text-sm" placeholder="Selecione">
-                    @for (uf of listaUfs; track uf.sigla) {
-                      <mat-option [value]="uf.sigla">{{ uf.nome }}</mat-option>
-                    }
-                  </mat-select>
-                  @if (form.get('ufRg')?.hasError('required') && form.get('ufRg')?.touched) {
-                    <mat-error>UF é obrigatória.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="UF" controlId="form-ufrg" required [error]="form.controls.ufRg.touched && form.controls.ufRg.hasError('required') ? 'UF é obrigatória.' : null">
+                  <s-select formControlName="ufRg" [options]="ufOptions" [clearable]="false" placeholder="Selecione" />
+                </s-field>
               </div>
 
               <!-- Data de Expedição -->
@@ -2632,27 +2177,9 @@ export class ProfessoresList {
 
               <!-- PIS/PASEP -->
               <div class="col-span-1 sm:col-span-2 lg:col-span-3 form-field-group">
-                <label for="form-pispasep" class="siage-field-label">
-                  <span>PIS/PASEP</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="form-pispasep" 
-                    type="text" 
-                    maxlength="14" 
-                    formControlName="pisPasep" 
-                    placeholder="000.00000.00-0" 
-                    (input)="onPisInput($event)"
-                    class="font-mono text-sm" 
-                  />
-                  @if (form.get('pisPasep')?.hasError('required') && form.get('pisPasep')?.touched) {
-                    <mat-error>PIS/PASEP é obrigatório.</mat-error>
-                  } @else if (form.get('pisPasep')?.hasError('pisInvalido') && form.get('pisPasep')?.touched) {
-                    <mat-error>PIS/PASEP deve conter 11 dígitos.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="PIS/PASEP" controlId="form-pispasep" required [error]="form.controls.pisPasep.touched ? (form.controls.pisPasep.hasError('required') ? 'PIS/PASEP é obrigatório.' : form.controls.pisPasep.hasError('pisInvalido') ? 'PIS/PASEP deve conter 11 dígitos.' : null) : null">
+                  <s-input [maxlength]="14" formControlName="pisPasep" placeholder="000.00000.00-0" (input)="onPisInput($event)" />
+                </s-field>
               </div>
             </div>
           </div>
@@ -2668,74 +2195,30 @@ export class ProfessoresList {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-3 items-start">
               <!-- Situação Funcional -->
               <div class="form-field-group">
-                <label for="form-situacao-funcional" class="siage-field-label">
-                  <span>Situação Funcional</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="situacaoFuncional" id="form-situacao-funcional" class="text-sm" placeholder="Selecione">
-                    @for (opt of situacaoFuncionalOpcoes(); track opt) {
-                      <mat-option [value]="opt">{{ opt }}</mat-option>
-                    }
-                  </mat-select>
-                  @if (form.get('situacaoFuncional')?.hasError('required') && form.get('situacaoFuncional')?.touched) {
-                    <mat-error>Situação funcional é obrigatória.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Situação Funcional" controlId="form-situacao-funcional" required [error]="form.controls.situacaoFuncional.touched && form.controls.situacaoFuncional.hasError('required') ? 'Situação funcional é obrigatória.' : null">
+                  <s-select formControlName="situacaoFuncional" [options]="situacaoFuncionalOptions()" [clearable]="false" placeholder="Selecione" />
+                </s-field>
               </div>
 
               <!-- Regime -->
               <div class="form-field-group">
-                <label for="form-regime" class="siage-field-label">
-                  <span>Regime</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="regime" id="form-regime" class="text-sm" placeholder="Selecione">
-                    @for (opt of regimeOpcoes(); track opt) {
-                      <mat-option [value]="opt">{{ opt }}</mat-option>
-                    }
-                  </mat-select>
-                  @if (form.get('regime')?.hasError('required') && form.get('regime')?.touched) {
-                    <mat-error>Regime é obrigatório.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Regime" controlId="form-regime" required [error]="form.controls.regime.touched && form.controls.regime.hasError('required') ? 'Regime é obrigatório.' : null">
+                  <s-select formControlName="regime" [options]="regimeOptions()" [clearable]="false" placeholder="Selecione" />
+                </s-field>
               </div>
 
               <!-- Cargo -->
               <div class="form-field-group">
-                <label for="form-cargo" class="siage-field-label">
-                  <span>Cargo</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="cargo" id="form-cargo" class="text-sm" placeholder="Selecione">
-                    @for (opt of cargoOpcoes(); track opt) {
-                      <mat-option [value]="opt">{{ opt }}</mat-option>
-                    }
-                  </mat-select>
-                  @if (form.get('cargo')?.hasError('required') && form.get('cargo')?.touched) {
-                    <mat-error>Cargo é obrigatório.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Cargo" controlId="form-cargo" required [error]="form.controls.cargo.touched && form.controls.cargo.hasError('required') ? 'Cargo é obrigatório.' : null">
+                  <s-select formControlName="cargo" [options]="cargoOptions()" [clearable]="false" placeholder="Selecione" />
+                </s-field>
               </div>
 
               <!-- Cargo Comissionado -->
               <div class="form-field-group">
-                <label for="form-cargocomiss" class="siage-field-label">
-                  <span>Cargo Comissionado</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="cargoComissionado" id="form-cargocomiss" class="text-sm" placeholder="Selecione">
-                    @for (opt of cargoComissionadoOpcoes(); track opt) {
-                      <mat-option [value]="opt">{{ opt }}</mat-option>
-                    }
-                  </mat-select>
-                  @if (form.get('cargoComissionado')?.hasError('required') && form.get('cargoComissionado')?.touched) {
-                    <mat-error>Cargo comissionado é obrigatório.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Cargo Comissionado" controlId="form-cargocomiss" required [error]="form.controls.cargoComissionado.touched && form.controls.cargoComissionado.hasError('required') ? 'Cargo comissionado é obrigatório.' : null">
+                  <s-select formControlName="cargoComissionado" [options]="cargoComissionadoOptions()" [clearable]="false" placeholder="Selecione" />
+                </s-field>
               </div>
             </div>
 
@@ -2743,74 +2226,30 @@ export class ProfessoresList {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-3 items-start">
               <!-- Forma de Admissão -->
               <div class="form-field-group">
-                <label for="form-admissao" class="siage-field-label">
-                  <span>Forma de Admissão</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="formaAdmissao" id="form-admissao" class="text-sm" placeholder="Selecione">
-                    @for (opt of formaAdmissaoOpcoes(); track opt) {
-                      <mat-option [value]="opt">{{ opt }}</mat-option>
-                    }
-                  </mat-select>
-                  @if (form.get('formaAdmissao')?.hasError('required') && form.get('formaAdmissao')?.touched) {
-                    <mat-error>Forma de admissão é obrigatória.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Forma de Admissão" controlId="form-admissao" required [error]="form.controls.formaAdmissao.touched && form.controls.formaAdmissao.hasError('required') ? 'Forma de admissão é obrigatória.' : null">
+                  <s-select formControlName="formaAdmissao" [options]="formaAdmissaoOptions()" [clearable]="false" placeholder="Selecione" />
+                </s-field>
               </div>
 
               <!-- Grau de Instrução -->
               <div class="form-field-group">
-                <label for="form-instrucao" class="siage-field-label">
-                  <span>Grau de Instrução</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="instrucao" id="form-instrucao" class="text-sm" placeholder="Selecione">
-                    @for (opt of grauInstrucaoOpcoes(); track opt) {
-                      <mat-option [value]="opt">{{ opt }}</mat-option>
-                    }
-                  </mat-select>
-                  @if (form.get('instrucao')?.hasError('required') && form.get('instrucao')?.touched) {
-                    <mat-error>Instrução é obrigatória.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Grau de Instrução" controlId="form-instrucao" required [error]="form.controls.instrucao.touched && form.controls.instrucao.hasError('required') ? 'Instrução é obrigatória.' : null">
+                  <s-select formControlName="instrucao" [options]="grauInstrucaoOptions()" [clearable]="false" placeholder="Selecione" />
+                </s-field>
               </div>
 
               <!-- Área de Formação -->
               <div class="form-field-group">
-                <label for="form-formacao" class="siage-field-label">
-                  <span>Área de Formação</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="formacao" id="form-formacao" class="text-sm" placeholder="Selecione">
-                    @for (opt of areaFormacaoOpcoes; track opt) {
-                      <mat-option [value]="opt">{{ opt }}</mat-option>
-                    }
-                  </mat-select>
-                  @if (form.get('formacao')?.hasError('required') && form.get('formacao')?.touched) {
-                    <mat-error>Formação acadêmica é obrigatória.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Área de Formação" controlId="form-formacao" required [error]="form.controls.formacao.touched && form.controls.formacao.hasError('required') ? 'Formação acadêmica é obrigatória.' : null">
+                  <s-select formControlName="formacao" [options]="areaFormacaoOptions" [clearable]="false" placeholder="Selecione" />
+                </s-field>
               </div>
 
               <!-- Unidade de Trabalho (UTB) -->
               <div class="form-field-group">
-                <label for="form-utb" class="siage-field-label">
-                  <span>Unidade de Trabalho (UTB)</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="utb" id="form-utb" class="text-sm" placeholder="Selecione">
-                    @for (opt of utbOpcoes; track opt) {
-                      <mat-option [value]="opt">{{ opt }}</mat-option>
-                    }
-                  </mat-select>
-                  @if (form.get('utb')?.hasError('required') && form.get('utb')?.touched) {
-                    <mat-error>Unidade de trabalho é obrigatória.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Unidade de Trabalho (UTB)" controlId="form-utb" required [error]="form.controls.utb.touched && form.controls.utb.hasError('required') ? 'Unidade de trabalho é obrigatória.' : null">
+                  <s-select formControlName="utb" [options]="utbOptions" [clearable]="false" filterable filterPlaceholder="Pesquisar unidade de trabalho..." placeholder="Selecione" />
+                </s-field>
               </div>
             </div>
 
@@ -2853,15 +2292,9 @@ export class ProfessoresList {
 
                 <!-- E-mail Institucional -->
                 <div class="col-span-1 sm:col-span-1 lg:col-span-3 form-field-group">
-                  <label for="form-email-inst" class="siage-field-label">
-                    <span>E-mail Institucional</span>
-                  </label>
-                  <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                    <input matInput id="form-email-inst" type="email" maxlength="200" formControlName="emailInstitucional" placeholder="servidor@see.pb.gov.br" (blur)="onEmailBlur('emailInstitucional')" class="text-sm" />
-                    @if (form.get('emailInstitucional')?.hasError('emailInvalido') && form.get('emailInstitucional')?.touched) {
-                      <mat-error>E-mail não atende aos critérios mínimos exigidos.</mat-error>
-                    }
-                  </mat-form-field>
+                  <s-field label="E-mail Institucional" controlId="form-email-inst" [error]="form.controls.emailInstitucional.touched && form.controls.emailInstitucional.hasError('emailInvalido') ? 'E-mail não atende aos critérios mínimos exigidos.' : null">
+                    <s-input type="email" [maxlength]="200" formControlName="emailInstitucional" placeholder="servidor@see.pb.gov.br" (focusout)="onEmailBlur('emailInstitucional')" />
+                  </s-field>
                 </div>
               } @else {
                 <!-- Professor Emergencial e Base Técnica (com Data Final de Contrato): 5 colunas distribuídas -->
@@ -2910,15 +2343,9 @@ export class ProfessoresList {
 
                 <!-- E-mail Institucional -->
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 form-field-group">
-                  <label for="form-email-inst" class="siage-field-label">
-                    <span>E-mail Institucional</span>
-                  </label>
-                  <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                    <input matInput id="form-email-inst" type="email" maxlength="200" formControlName="emailInstitucional" placeholder="servidor@see.pb.gov.br" (blur)="onEmailBlur('emailInstitucional')" class="text-sm" />
-                    @if (form.get('emailInstitucional')?.hasError('emailInvalido') && form.get('emailInstitucional')?.touched) {
-                      <mat-error>E-mail não atende aos critérios mínimos exigidos.</mat-error>
-                    }
-                  </mat-form-field>
+                  <s-field label="E-mail Institucional" controlId="form-email-inst" [error]="form.controls.emailInstitucional.touched && form.controls.emailInstitucional.hasError('emailInvalido') ? 'E-mail não atende aos critérios mínimos exigidos.' : null">
+                    <s-input type="email" [maxlength]="200" formControlName="emailInstitucional" placeholder="servidor@see.pb.gov.br" (focusout)="onEmailBlur('emailInstitucional')" />
+                  </s-field>
                 </div>
               }
             </div>
@@ -2935,60 +2362,23 @@ export class ProfessoresList {
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-3 items-start">
               <!-- Sexo -->
               <div class="form-field-group">
-                <label for="form-sexo" class="siage-field-label">
-                  <span>Sexo</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="sexo" id="form-sexo" class="text-sm" placeholder="Selecione">
-                    <mat-option value="Feminino">Feminino</mat-option>
-                    <mat-option value="Masculino">Masculino</mat-option>
-                  </mat-select>
-                  @if (form.get('sexo')?.hasError('required') && form.get('sexo')?.touched) {
-                    <mat-error>Sexo é obrigatório.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Sexo" controlId="form-sexo" required [error]="form.controls.sexo.touched && form.controls.sexo.hasError('required') ? 'Sexo é obrigatório.' : null">
+                  <s-select formControlName="sexo" [options]="sexoOptions" [clearable]="false" placeholder="Selecione" />
+                </s-field>
               </div>
 
               <!-- Telefone -->
               <div class="form-field-group">
-                <label for="form-telefone" class="siage-field-label">
-                  <span>Telefone</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="form-telefone"
-                    type="text" 
-                    maxlength="15" 
-                    formControlName="telefone"
-                    placeholder="(83) 90000-0000" 
-                    (input)="onTelefoneInput($event)"
-                    class="font-mono text-sm"
-                  />
-                  @if (form.get('telefone')?.hasError('required') && form.get('telefone')?.touched) {
-                    <mat-error>Telefone é obrigatório.</mat-error>
-                  } @else if (form.get('telefone')?.hasError('telefoneInvalido') && form.get('telefone')?.touched) {
-                    <mat-error>Telefone deve conter 10 ou 11 dígitos.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Telefone" controlId="form-telefone" required [error]="form.controls.telefone.touched ? (form.controls.telefone.hasError('required') ? 'Telefone é obrigatório.' : form.controls.telefone.hasError('telefoneInvalido') ? 'Telefone deve conter 10 ou 11 dígitos.' : null) : null">
+                  <s-input [maxlength]="15" formControlName="telefone" placeholder="(83) 90000-0000" (input)="onTelefoneInput($event)" />
+                </s-field>
               </div>
 
               <!-- E-mail Pessoal -->
               <div class="form-field-group">
-                <label for="form-email-pessoal" class="siage-field-label">
-                  <span>E-mail Pessoal</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input matInput id="form-email-pessoal" type="email" maxlength="200" formControlName="emailPessoal" placeholder="exemplo@gmail.com" (blur)="onEmailBlur('emailPessoal')" class="text-sm" />
-                  @if (form.get('emailPessoal')?.hasError('required') && form.get('emailPessoal')?.touched) {
-                    <mat-error>E-mail pessoal é obrigatório.</mat-error>
-                  } @else if (form.get('emailPessoal')?.hasError('emailInvalido') && form.get('emailPessoal')?.touched) {
-                    <mat-error>E-mail não atende aos critérios mínimos exigidos.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="E-mail Pessoal" controlId="form-email-pessoal" required [error]="form.controls.emailPessoal.touched ? (form.controls.emailPessoal.hasError('required') ? 'E-mail pessoal é obrigatório.' : form.controls.emailPessoal.hasError('emailInvalido') ? 'E-mail não atende aos critérios mínimos exigidos.' : null) : null">
+                  <s-input type="email" [maxlength]="200" formControlName="emailPessoal" placeholder="exemplo@gmail.com" (focusout)="onEmailBlur('emailPessoal')" />
+                </s-field>
               </div>
             </div>
 
@@ -2997,18 +2387,16 @@ export class ProfessoresList {
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 items-start">
                 <!-- Nome da Mãe -->
                 <div class="form-field-group">
-                  <label for="form-nome-mae" class="siage-field-label">Nome da Mãe</label>
-                  <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                    <input matInput id="form-nome-mae" type="text" maxlength="200" formControlName="nomeMae" placeholder="Nome completo da mãe" class="text-sm" />
-                  </mat-form-field>
+                  <s-field label="Nome da Mãe" controlId="form-nome-mae">
+                    <s-input [maxlength]="200" formControlName="nomeMae" placeholder="Nome completo da mãe" />
+                  </s-field>
                 </div>
 
                 <!-- Nome do Pai -->
                 <div class="form-field-group">
-                  <label for="form-nome-pai" class="siage-field-label">Nome do Pai</label>
-                  <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                    <input matInput id="form-nome-pai" type="text" maxlength="200" formControlName="nomePai" placeholder="Nome completo do pai" class="text-sm" />
-                  </mat-form-field>
+                  <s-field label="Nome do Pai" controlId="form-nome-pai">
+                    <s-input [maxlength]="200" formControlName="nomePai" placeholder="Nome completo do pai" />
+                  </s-field>
                 </div>
               </div>
             }
@@ -3024,28 +2412,9 @@ export class ProfessoresList {
             <!-- Linha 1: CEP, Estado, Município, Bairro (4 colunas) -->
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-x-4 gap-y-3 items-start">
               <div class="col-span-1 sm:col-span-3 form-field-group">
-                <label for="form-cep" class="siage-field-label">
-                  <span>CEP</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="form-cep"
-                    type="text" 
-                    maxlength="9"
-                    formControlName="cep"
-                    placeholder="00000-000" 
-                    (input)="onCepInput($event)"
-                    (blur)="onCepBlur()"
-                    class="font-mono text-sm"
-                  />
-                  @if (form.get('cep')?.hasError('required') && form.get('cep')?.touched) {
-                    <mat-error>CEP é obrigatório.</mat-error>
-                  } @else if (form.get('cep')?.hasError('cepIncompleto') && form.get('cep')?.touched) {
-                    <mat-error>CEP deve conter 8 dígitos.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="CEP" controlId="form-cep" required [error]="form.controls.cep.touched ? (form.controls.cep.hasError('required') ? 'CEP é obrigatório.' : form.controls.cep.hasError('cepIncompleto') ? 'CEP deve conter 8 dígitos.' : null) : null">
+                  <s-input [maxlength]="9" formControlName="cep" placeholder="00000-000" (input)="onCepInput($event)" (focusout)="onCepBlur()" />
+                </s-field>
                 @if (cepNaoLocalizado() && !form.get('cep')?.hasError('required') && !form.get('cep')?.hasError('cepIncompleto')) {
                   <span class="text-xs text-red-500 font-medium leading-tight mt-1 block">
                     CEP não localizado. Preencha os dados do endereço manualmente.
@@ -3071,84 +2440,36 @@ export class ProfessoresList {
               </div>
 
               <div class="col-span-1 sm:col-span-3 form-field-group">
-                <label for="form-municipio" class="siage-field-label">
-                  <span>Município</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <mat-select formControlName="municipio" id="form-municipio" class="text-sm" placeholder="Selecione">
-                    @for (cid of municipiosDisponiveis(); track cid) {
-                      <mat-option [value]="cid">{{ cid }}</mat-option>
-                    }
-                  </mat-select>
-                  @if (form.get('municipio')?.hasError('required') && form.get('municipio')?.touched) {
-                    <mat-error>Município é obrigatório.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Município" controlId="form-municipio" required [error]="form.controls.municipio.touched && form.controls.municipio.hasError('required') ? 'Município é obrigatório.' : null">
+                  <s-select formControlName="municipio" [options]="municipioOptions()" [clearable]="false" placeholder="Selecione" />
+                </s-field>
               </div>
 
               <div class="col-span-1 sm:col-span-4 form-field-group">
-                <label for="form-bairro" class="siage-field-label">
-                  <span>Bairro</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input matInput id="form-bairro" type="text" formControlName="bairro" placeholder="Nome do bairro" class="text-sm" />
-                  @if (form.get('bairro')?.hasError('required') && form.get('bairro')?.touched) {
-                    <mat-error>Bairro é obrigatório.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Bairro" controlId="form-bairro" required [error]="form.controls.bairro.touched && form.controls.bairro.hasError('required') ? 'Bairro é obrigatório.' : null">
+                  <s-input formControlName="bairro" placeholder="Nome do bairro" />
+                </s-field>
               </div>
             </div>
 
             <!-- Linha 2: Rua / Logradouro (6 cols / 50%), Número (2 cols), Complemento (4 cols) -->
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-x-4 gap-y-3 items-start">
               <div class="col-span-1 sm:col-span-6 form-field-group">
-                <label for="form-rua" class="siage-field-label">
-                  <span>Rua / Logradouro</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input matInput id="form-rua" type="text" formControlName="rua" placeholder="Avenida, Rua, Travessa..." class="text-sm" />
-                  @if (form.get('rua')?.hasError('required') && form.get('rua')?.touched) {
-                    <mat-error>Rua é obrigatória.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Rua / Logradouro" controlId="form-rua" required [error]="form.controls.rua.touched && form.controls.rua.hasError('required') ? 'Rua é obrigatória.' : null">
+                  <s-input formControlName="rua" placeholder="Avenida, Rua, Travessa..." />
+                </s-field>
               </div>
 
               <div class="col-span-1 sm:col-span-2 form-field-group">
-                <label for="form-numero" class="siage-field-label">
-                  <span>Número</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input 
-                    matInput 
-                    id="form-numero" 
-                    type="text" 
-                    maxlength="5" 
-                    formControlName="numero" 
-                    placeholder="Digite o número" 
-                    (input)="onNumeroInput($event)"
-                    class="text-sm font-mono" 
-                  />
-                  @if (form.get('numero')?.hasError('required') && form.get('numero')?.touched) {
-                    <mat-error>Número é obrigatório.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Número" controlId="form-numero" required [error]="form.controls.numero.touched && form.controls.numero.hasError('required') ? 'Número é obrigatório.' : null">
+                  <s-input [maxlength]="5" formControlName="numero" placeholder="Digite o número" (input)="onNumeroInput($event)" />
+                </s-field>
               </div>
 
               <div class="col-span-1 sm:col-span-4 form-field-group">
-                <label for="form-complemento" class="siage-field-label">
-                  <span>Complemento</span>
-                  <span class="text-red-500 font-bold">*</span>
-                </label>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="fixed">
-                  <input matInput id="form-complemento" type="text" maxlength="200" formControlName="complemento" placeholder="Apartamento, bloco, ponto de referência..." class="text-sm" />
-                  @if (form.get('complemento')?.hasError('required') && form.get('complemento')?.touched) {
-                    <mat-error>Complemento é obrigatório.</mat-error>
-                  }
-                </mat-form-field>
+                <s-field label="Complemento" controlId="form-complemento" required [error]="form.controls.complemento.touched && form.controls.complemento.hasError('required') ? 'Complemento é obrigatório.' : null">
+                  <s-input [maxlength]="200" formControlName="complemento" placeholder="Apartamento, bloco, ponto de referência..." />
+                </s-field>
               </div>
             </div>
           </div>
@@ -3166,15 +2487,7 @@ export class ProfessoresList {
                   {{ anexosList().length }} de 5 anexos adicionados
                 </span>
                 <input #fileInput type="file" multiple (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png" class="hidden" />
-                <button 
-                  type="button" 
-                  (click)="fileInput.click()" 
-                  [disabled]="anexosList().length >= 5"
-                  class="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-siage-primary/10 hover:bg-siage-primary/20 text-siage-primary font-sans font-semibold text-xs transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  <mat-icon style="font-size: 18px; width: 18px; height: 18px;">add</mat-icon>
-                  <span>Adicionar anexo</span>
-                </button>
+                <s-button variant="secondary" icon="add" [disabled]="anexosList().length >= 5" (click)="fileInput.click()">Adicionar anexo</s-button>
               </div>
             </div>
 
@@ -3202,18 +2515,12 @@ export class ProfessoresList {
                     </div>
                     
                     <div class="flex items-center gap-1">
-                      <button type="button" (click)="onVisualizarAnexo(anexo)" matTooltip="Visualizar anexo" class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center">
-                        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon>
-                      </button>
-                      <button type="button" (click)="onDownloadAnexo(anexo)" matTooltip="Baixar arquivo" class="w-8 h-8 rounded text-siage-text-secondary hover:text-siage-primary flex items-center justify-center">
-                        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-                      </button>
+                      <s-icon-button icon="visibility" label="Visualizar anexo" variant="ghost" (click)="onVisualizarAnexo(anexo)" />
+                      <s-icon-button icon="download" label="Baixar arquivo" variant="ghost" (click)="onDownloadAnexo(anexo)" />
                       
                       <!-- Exclusão: Permitida no cadastro para todos; na edição somente para anexos novos adicionados agora -->
                       @if (!isEditMode() || anexo.isNovo) {
-                        <button type="button" (click)="removerAnexo(anexo.id)" matTooltip="Remover anexo" class="w-8 h-8 rounded text-siage-text-secondary hover:text-red-500 flex items-center justify-center">
-                          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
-                        </button>
+                        <s-icon-button icon="delete" label="Remover anexo" variant="destructive" text (click)="removerAnexo(anexo.id)" />
                       }
                     </div>
                   </div>
@@ -3235,28 +2542,10 @@ export class ProfessoresList {
             </span>
 
             <div class="flex items-center justify-end gap-3 w-full sm:w-auto">
-              <button 
-                type="button" 
-                (click)="onCancelar()" 
-                [disabled]="isSaving()"
-                class="h-10 px-5 rounded-lg border border-siage-border font-sans font-medium text-sm text-siage-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-all"
-              >
-                Cancelar
-              </button>
-
-              <button 
-                type="submit" 
-                [disabled]="isSaving()"
-                class="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-lg bg-siage-primary hover:bg-siage-primary/90 text-white font-sans font-semibold text-sm transition-all shadow-xs disabled:opacity-50"
-              >
-                @if (isSaving()) {
-                  <mat-icon class="animate-spin" style="font-size: 18px; width: 18px; height: 18px;">refresh</mat-icon>
-                  <span>{{ isEditMode() ? 'Atualizando...' : 'Salvando...' }}</span>
-                } @else {
-                  <mat-icon style="font-size: 18px; width: 18px; height: 18px;">save</mat-icon>
-                  <span>{{ isEditMode() ? 'Atualizar' : 'Salvar' }}</span>
-                }
-              </button>
+              <s-button variant="secondary" [disabled]="isSaving()" (click)="onCancelar()">Cancelar</s-button>
+              <s-button type="submit" variant="primary" icon="save" [disabled]="isSaving()">
+                {{ isSaving() ? (isEditMode() ? 'Atualizando...' : 'Salvando...') : (isEditMode() ? 'Atualizar' : 'Salvar') }}
+              </s-button>
             </div>
           </div>
         </form>
@@ -3304,6 +2593,13 @@ export class ProfessoresForm {
 
   // Lista de 27 UFs em ordem alfabética
   readonly listaUfs = LISTA_27_UFS;
+  readonly ufOptions = this.listaUfs.map(uf => ({label: uf.nome, value: uf.sigla}));
+  readonly sexoOptions = [{label: 'Feminino', value: 'Feminino'}, {label: 'Masculino', value: 'Masculino'}];
+  readonly tipoProfessorOptions: {label: string; value: TipoProfessor}[] = [
+    {label: 'Professor Militar', value: 'MILITAR'},
+    {label: 'Professor em contratação emergencial', value: 'EMERGENCIAL'},
+    {label: 'Professor da Base Técnica', value: 'BASE_TECNICA'}
+  ];
 
   // Opções dinâmicas a partir dos serviços (registros ativos, Código SEAD + Descrição)
   readonly situacaoFuncionalOpcoes = computed(() => {
@@ -3311,6 +2607,7 @@ export class ProfessoresForm {
       .filter(item => item.ativo)
       .map(item => `${item.codigo} - ${item.descricao}`);
   });
+  readonly situacaoFuncionalOptions = computed(() => this.situacaoFuncionalOpcoes().map(opcao => ({label: opcao, value: opcao})));
 
   readonly regimeOpcoes = computed(() => {
     return this.regimeService.items()
@@ -3372,6 +2669,14 @@ export class ProfessoresForm {
     '3002 - Unidade de Ensino Emergencial do Agreste',
     '3003 - Unidade de Ensino Emergencial do Sertão'
   ];
+
+  readonly regimeOptions = computed(() => this.regimeOpcoes().map(opcao => ({label: opcao, value: opcao})));
+  readonly cargoOptions = computed(() => this.cargoOpcoes().map(opcao => ({label: opcao, value: opcao})));
+  readonly cargoComissionadoOptions = computed(() => this.cargoComissionadoOpcoes().map(opcao => ({label: opcao, value: opcao})));
+  readonly formaAdmissaoOptions = computed(() => this.formaAdmissaoOpcoes().map(opcao => ({label: opcao, value: opcao})));
+  readonly grauInstrucaoOptions = computed(() => this.grauInstrucaoOpcoes().map(opcao => ({label: opcao, value: opcao})));
+  readonly areaFormacaoOptions = this.areaFormacaoOpcoes.map(opcao => ({label: opcao, value: opcao}));
+  readonly utbOptions = this.utbOpcoes.map(opcao => ({label: opcao, value: opcao}));
 
   readonly form = new FormGroup({
     tipo: new FormControl<TipoProfessor>('MILITAR', { nonNullable: true, validators: [Validators.required] }),
@@ -3437,6 +2742,7 @@ export class ProfessoresForm {
     }
     return list;
   });
+  readonly municipioOptions = computed(() => this.municipiosDisponiveis().map(municipio => ({label: municipio, value: municipio})));
 
   readonly editOrigin = signal<'list' | 'view'>('list');
 

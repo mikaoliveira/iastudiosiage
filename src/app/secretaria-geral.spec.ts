@@ -1,4 +1,4 @@
-import {signal} from '@angular/core';
+import {provideZonelessChangeDetection, signal} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {provideRouter, Router} from '@angular/router';
@@ -16,6 +16,7 @@ describe('Secretaria Geral', () => {
     await TestBed.configureTestingModule({
       imports: [SecretariaGeralList, SecretariaGeralForm, SecretariaGeralView],
       providers: [
+        provideZonelessChangeDetection(),
         provideRouter([]),
         provideSiageDateAdapter(),
         {provide: SimulatorService, useValue: {currentScenario: scenario, allowCreation: signal(true), setScenario: vi.fn()}}
@@ -54,6 +55,31 @@ describe('Secretaria Geral', () => {
     expect(component.filtroForm.controls.nome.value).toBe('');
     fixture.nativeElement.querySelector('s-icon-button button[aria-label="Visualizar Secretaria Geral"]').click();
     expect(navigate).toHaveBeenCalledWith(['/configuracoes/hierarquia/secretaria-geral/1']);
+    fixture.destroy();
+  });
+
+  it('seleciona uma UTB e retorna ao filtro Todos', async () => {
+    const fixture = TestBed.createComponent(SecretariaGeralList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const select = fixture.nativeElement.querySelector('s-field[controlId="filter-utb"] mat-select') as HTMLElement;
+    const option = component.utbOptions()[1];
+    expect(component.utbOptions()[0]).toEqual({label: 'Todos', value: ''});
+    expect(select.textContent).toContain('Todos');
+    expect(option).toBeDefined();
+    component.filtroForm.controls.utb.setValue(option.value);
+    fixture.detectChanges();
+    component.onBuscar();
+    expect(component.filteredItems().length).toBeGreaterThan(0);
+    component.filtroForm.controls.utb.setValue('');
+    fixture.detectChanges();
+    expect(component.canBuscar()).toBe(true);
+    component.onBuscar();
+    fixture.detectChanges();
+    expect(component.filteredItems().length).toBe(component.service.items().length);
+    expect(component.canBuscar()).toBe(false);
     fixture.destroy();
   });
 

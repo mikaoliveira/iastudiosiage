@@ -521,7 +521,6 @@ export class NucleoService {
     SFieldComponent,
     SInputComponent,
     SIconButtonComponent,
-    SAutocompleteComponent,
     SSelectComponent,
     SSwitchComponent,
     STooltipDirective,
@@ -547,14 +546,14 @@ export class NucleoService {
               <!-- Filtro: Nome -->
               <div class="form-field-group">
 
-                <s-field label="Nome" controlId="filter-nome"><s-input type="text" formControlName="nome" [maxlength]="200" placeholder="Digite o Nome" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" (focusout)="filtroForm.controls.nome.markAsTouched(); " />
+                <s-field label="Nome" controlId="filter-nome"><s-input type="text" formControlName="nome" [maxlength]="200" placeholder="Buscar por Nome" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" (focusout)="filtroForm.controls.nome.markAsTouched(); " />
 @if (filtroForm.controls.nome.value) { <s-icon-button icon="close" label="Limpar campo" text size="sm" (click)="limparFiltroNome()" /> }</s-field>
               </div>
 
               <!-- Filtro: Unidade de Trabalho (UTB) (Select com autocomplete contendo somente UTBs de Núcleos cadastrados) -->
               <div class="form-field-group">
 
-                <s-field label="Unidade de Trabalho (UTB)" controlId="filter-utb"><s-autocomplete formControlName="utb" placeholder="Selecione ou busque uma unidade de trabalho" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" [options]="opcoesfilter_utb()" (input)="onUtbInput($event)" (selectionChange)="onUtbSelectionChange($event)" (focusout)="filtroForm.controls.utb.markAsTouched()" /></s-field>
+                <s-field label="Unidade de Trabalho (UTB)" controlId="filter-utb"><s-select formControlName="utb" [options]="opcoesfilter_utb()" [clearable]="false" filterable filterPlaceholder="Pesquisar unidade de trabalho..." /></s-field>
               </div>
 
               <!-- Filtro: Status (Todos, Ativo, Inativo) -->
@@ -650,7 +649,7 @@ export class NucleoList {
     const nome = (this.filtroNomeVal() || this.filtroForm.controls.nome.value || '').trim();
     const utb = (this.filtroUtbVal() || this.utbTextoDigitado() || this.filtroForm.controls.utb.value || '').trim();
     const status = this.filtroStatusVal() || this.filtroForm.controls.status.value || 'TODOS';
-    return nome.length > 0 || utb.length > 0 || status !== 'TODOS';
+    return nome.length > 0 || utb.length > 0 || status !== 'TODOS' || !!this.appliedUtb();
   });
 
   readonly isCarregando = computed(() => this.simulatorService.currentScenario() === 'loading');
@@ -707,12 +706,12 @@ export class NucleoList {
     return !this.isSemRegistros() && this.filteredItems().length === 0;
   });
 
-    readonly opcoesfilter_utb = computed(() => this.utbsVinculadas().map(utb => ({label: `${ utb.codigo } - ${ utb.nome }`, value: utb.codigo + ' - ' + utb.nome})));
+    readonly opcoesfilter_utb = computed(() => [{label: 'Todos', value: ''}, ...this.utbsVinculadas().map(utb => ({label: `${ utb.codigo } - ${ utb.nome }`, value: utb.codigo + ' - ' + utb.nome}))]);
     readonly filtroCardForm = new FormGroup({ativo: new FormControl('')});
   readonly valoresFiltroOficial = toSignal(this.filtroForm.valueChanges, {initialValue: this.filtroForm.value});
   private readonly estadoFiltroOficial = effect(() => {
     const value = this.valoresFiltroOficial();
-    const ativo = (value.nome || '').trim() || (value.utb || this.utbTextoDigitado() || '').trim() || value.status !== 'TODOS' ? '1' : '';
+    const ativo = (value.nome || '').trim() || (value.utb || this.utbTextoDigitado() || '').trim() || value.status !== 'TODOS' || this.appliedUtb() ? '1' : '';
     if (this.filtroCardForm.controls.ativo.value !== ativo) this.filtroCardForm.controls.ativo.setValue(ativo);
   });
   readonly pageIndexSize = signal(10);

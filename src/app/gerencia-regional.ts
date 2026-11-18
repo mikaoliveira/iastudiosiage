@@ -454,7 +454,6 @@ export class GerenciaRegionalService {
     SFieldComponent,
     SInputComponent,
     SIconButtonComponent,
-    SAutocompleteComponent,
     SSelectComponent,
     SSwitchComponent,
     STooltipDirective,
@@ -481,14 +480,14 @@ export class GerenciaRegionalService {
               <!-- Filtro: Nome (máximo de 200 caracteres) -->
               <div class="form-field-group">
 
-                <s-field label="Nome" controlId="filter-nome"><s-input type="text" formControlName="nome" [maxlength]="200" placeholder="Digite o Nome" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" (focusout)="filtroForm.controls.nome.markAsTouched(); " />
+                <s-field label="Nome" controlId="filter-nome"><s-input type="text" formControlName="nome" [maxlength]="200" placeholder="Buscar por Nome" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" (focusout)="filtroForm.controls.nome.markAsTouched(); " />
 @if (filtroForm.controls.nome.value) { <s-icon-button icon="close" label="Limpar campo" text size="sm" (click)="limparFiltroNome()" /> }</s-field>
               </div>
 
               <!-- Filtro: Unidade de Trabalho (UTB) (Select com autocomplete contendo somente UTBs de Gerências Regionais cadastradas) -->
               <div class="form-field-group">
 
-                <s-field label="Unidade de Trabalho (UTB)" controlId="filter-utb"><s-autocomplete formControlName="utb" placeholder="Selecione ou busque uma unidade de trabalho" (keydown.enter)="$event.preventDefault(); canBuscar() &amp;&amp; onBuscar()" [options]="opcoesfilter_utb()" (input)="onUtbInput($event)" (selectionChange)="onUtbSelectionChange($event)" (focusout)="filtroForm.controls.utb.markAsTouched()" /></s-field>
+                <s-field label="Unidade de Trabalho (UTB)" controlId="filter-utb"><s-select formControlName="utb" [options]="opcoesfilter_utb()" [clearable]="false" filterable filterPlaceholder="Pesquisar unidade de trabalho..." /></s-field>
               </div>
 
               <!-- Filtro: Status (Todos, Ativo, Inativo) -->
@@ -594,7 +593,7 @@ export class GerenciaRegionalList {
     const formNome = (this.filtroNomeVal() || '').trim();
     const formUtb = (this.filtroUtbVal() || this.utbTextoDigitado() || '').trim();
     const formStatus = this.filtroStatusVal() || 'TODOS';
-    return formNome.length > 0 || formUtb.length > 0 || formStatus !== 'TODOS';
+    return formNome.length > 0 || formUtb.length > 0 || formStatus !== 'TODOS' || !!this.appliedUtb();
   });
 
   readonly isCarregando = computed(() => this.simulatorService.currentScenario() === 'loading');
@@ -652,12 +651,12 @@ export class GerenciaRegionalList {
     return !this.isSemRegistros() && this.filteredItems().length === 0;
   });
 
-    readonly opcoesfilter_utb = computed(() => this.utbsVinculadas().map(utb => ({label: `${ utb.codigo } - ${ utb.nome }`, value: utb.codigo + ' - ' + utb.nome})));
+    readonly opcoesfilter_utb = computed(() => [{label: 'Todos', value: ''}, ...this.utbsVinculadas().map(utb => ({label: `${ utb.codigo } - ${ utb.nome }`, value: utb.codigo + ' - ' + utb.nome}))]);
     readonly filtroCardForm = new FormGroup({ativo: new FormControl('')});
   readonly valoresFiltroOficial = toSignal(this.filtroForm.valueChanges, {initialValue: this.filtroForm.value});
   private readonly estadoFiltroOficial = effect(() => {
     const value = this.valoresFiltroOficial();
-    const ativo = (value.nome || '').trim() || (value.utb || this.utbTextoDigitado() || '').trim() || value.status !== 'TODOS' ? '1' : '';
+    const ativo = (value.nome || '').trim() || (value.utb || this.utbTextoDigitado() || '').trim() || value.status !== 'TODOS' || this.appliedUtb() ? '1' : '';
     if (this.filtroCardForm.controls.ativo.value !== ativo) this.filtroCardForm.controls.ativo.setValue(ativo);
   });
   readonly pageIndexSize = signal(10);
