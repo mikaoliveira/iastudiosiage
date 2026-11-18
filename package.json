@@ -22,7 +22,7 @@
     "@angular/platform-browser-dynamic": "^20.3.34",
     "@angular/router": "^20.3.34",
     "@angular/ssr": "^20.3.17",
-    "@siage/siage-ui": "^20.0.5",
+    "@siage/siage-ui": "file:./vendor/siage-siage-ui-20.0.5.tgz",
     "@tailwindcss/postcss": "^4.0.0",
     "ngx-extended-pdf-viewer": "^31.0.1",
     "pdf-lib": "^1.17.1",

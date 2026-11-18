@@ -1,3 +1,4 @@
+import {provideZonelessChangeDetection} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideRouter, Router} from '@angular/router';
 import {SToastService} from '@siage/siage-ui';
@@ -19,6 +20,7 @@ describe('Login with SIAGE-UI', () => {
     await TestBed.configureTestingModule({
       imports: [Login],
       providers: [
+        provideZonelessChangeDetection(),
         provideRouter([]),
         {provide: App, useValue: {}},
         {provide: SToastService, useValue: toast}
@@ -105,16 +107,35 @@ describe('Login with SIAGE-UI', () => {
     expect(Array.from(simulator.querySelectorAll('*')).some(element => element.tagName.startsWith('S-'))).toBe(false);
     const close = simulator.querySelector<HTMLButtonElement>('button[title="Fechar simulador"]')!;
     const actions = Array.from(simulator.querySelectorAll<HTMLButtonElement>('button')).filter(button => button !== close);
-    expect(actions.length).toBe(8);
+    expect(actions.length).toBe(10);
     actions.forEach(button => button.click());
     expect(simulate.mock.calls.map(([scenario]) => scenario)).toEqual([
       'cpf-invalido', 'credenciais-invalidas', 'sem-acesso', 'usuario-inativo',
+      'situacao-inativa-unica', 'situacao-inativa-multipla',
       'servico-indisponivel', 'sucesso-individual', 'sucesso-multiplo', 'primeiro-acesso'
     ]);
     close.click();
     fixture.detectChanges();
     expect(login.showSimulator()).toBe(false);
     expect(root.querySelector('#login-prototype-toggle-btn')).not.toBeNull();
+  });
+
+  it.each([
+    ['simulator-situacao-inativa-unica', 'Sua matrícula possui a situação funcional ‘Licença tratamento de saúde’, que não permite acesso ao SIAGE-RH.'],
+    ['simulator-situacao-inativa-multipla', 'Nenhuma das suas matrículas possui situação funcional que permita acesso ao SIAGE-RH.']
+  ])('exibe o aviso de %s sem autenticar ou alterar o formulário', (buttonId, message) => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate');
+    const authenticate = vi.spyOn(auth, 'login');
+    login.loginForm.patchValue({cpf: '529.982.247-25', password: 'Educacao@2026'});
+    const initialValues = login.loginForm.getRawValue();
+    root.querySelector<HTMLButtonElement>('#login-prototype-toggle-btn')!.click();
+    fixture.detectChanges();
+    root.querySelector<HTMLButtonElement>(`#${buttonId}`)!.click();
+    expect(toast.warning).toHaveBeenCalledExactlyOnceWith(message);
+    expect(authenticate).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+    expect(login.loginForm.getRawValue()).toEqual(initialValues);
+    expect(login.isLoading()).toBe(false);
   });
 
   it('submits through the official button, shows loading and prevents duplicate authentication', () => {
@@ -138,7 +159,7 @@ describe('Login with SIAGE-UI', () => {
   it.each([
     ['cpf-invalido', 'error', 'CPF é inválido.', false],
     ['credenciais-invalidas', 'warning', 'CPF ou senha incorretos. Verifique os dados informados.', true],
-    ['sem-acesso', 'error', 'Seu usuário não possui permissão para acessar o SIAGE-RH.', true],
+    ['sem-acesso', 'warning', 'Seu usuário não possui permissão para acessar o SIAGE-RH.', true],
     ['usuario-inativo', 'warning', 'Seu usuário está inativo. Procure o responsável pela Gestão de Acesso da sua unidade.', true],
     ['servico-indisponivel', 'error', 'Não foi possível concluir o acesso. Tente novamente.', false]
   ] as const)('preserves the %s scenario and its toast', (scenario, kind, message, clearsPassword) => {
@@ -155,6 +176,19 @@ describe('Login with SIAGE-UI', () => {
       expect(login.loginForm.controls.password.touched).toBe(false);
       expect(root.textContent).not.toContain('Senha é obrigatória.');
     }
+  });
+
+  it('representa CPF sem cadastro pelo cenário de credenciais incorretas', () => {
+    vi.useFakeTimers();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const authenticate = vi.spyOn(auth, 'login');
+    login.simularCenario('credenciais-invalidas');
+    vi.advanceTimersByTime(450);
+    expect(login.loginForm.controls.cpf.value).toBe('123.456.789-09');
+    expect(toast.warning).toHaveBeenCalledExactlyOnceWith('CPF ou senha incorretos. Verifique os dados informados.');
+    expect(toast.error).not.toHaveBeenCalled();
+    expect(authenticate).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it.each([

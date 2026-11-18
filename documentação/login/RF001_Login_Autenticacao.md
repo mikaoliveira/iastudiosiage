@@ -1,4 +1,4 @@
-# [RF001] Login (Autenticação)
+# RF001 - Login (Autenticação) - Gestão de RH V2
 
 ## 1) Histórico
 
@@ -44,18 +44,18 @@ Acesso à URL raiz do SIAGE-RH >> /login >> Primeiro Acesso (quando obrigatório
 
 #### 4.2.2 Campos, obrigatoriedade e validações
 
-- CPF é obrigatório, exclusivamente numérico, até 11 dígitos, exibido na máscara 000.000.000-00. Descartar pontuação antes de enviar ao AUTH. Validar os dois dígitos verificadores pelo algoritmo oficial e rejeitar sequências com 11 dígitos idênticos.
-
+- CPF é obrigatório, exclusivamente numérico, até 11 dígitos, exibido na máscara 000.000.000-00. Descartar pontuação antes de enviar ao AUTH.
+- Validar os dois dígitos verificadores pelo algoritmo oficial e rejeitar sequências com 11 dígitos idênticos.
 - A verificação matemática do CPF deverá considerar os nove primeiros dígitos, multiplicá-los por pesos de 10 a 2 e obter o primeiro DV (resto da soma por 11; resto menor que 2 resulta em 0, caso contrário 11 menos o resto). Repetir com os dez primeiros dígitos e pesos de 11 a 2 para obter o segundo DV. Ambos devem coincidir com os dois dígitos informados.
 - CPF vazio: “CPF é obrigatório.”; incompleto, com sequência repetida ou dígitos verificadores inválidos: “CPF é inválido.”. Exibir a mensagem abaixo do campo após sair dele; ao tentar enviar CPF inválido, apresentar também o toast “CPF é inválido.” sem consultar o AUTH.
-- Senha é obrigatória, de 8 a 16 caracteres. Deve ser oculta inicialmente, com mecanismo individual de exibir/ocultar quando disponível no componente, sem expor o valor fora do campo. Vazio: “Senha é obrigatória.”; fora de 8 a 16: “A senha deve conter de 8 a 16 caracteres.”.
+- Senha é obrigatória e deverá aceitar até 80 caracteres, sem aplicar à autenticação a política de tamanho e composição exigida na definição de uma nova senha. Deve ser oculta inicialmente, com mecanismo individual de exibir/ocultar quando disponível no componente, sem expor o valor fora do campo. Vazio: “Senha é obrigatória.”. O campo deverá impedir a inserção de caracteres que ultrapassem o limite de 80.
 - As validações de campo deverão ocorrer após perda de foco ou tentativa de envio; as labels permanecerão visíveis e a área de erro abaixo de cada campo deverá evitar deslocamento do formulário.
 - Lembrar de mim é checkbox opcional, desmarcado inicialmente. Não altera exigência de senha nem autorização; qualquer persistência de sessão deve respeitar a política do AUTH. A opção não deverá armazenar senha em texto aberto.
 
 #### 4.2.3 Autenticação e roteamento
 
 - “Entrar no sistema” estará acionável quando CPF e senha tiverem conteúdo e não houver processamento; ao acioná-lo, revalidar CPF e senha e só enviar ao AUTH se ambos atenderem às regras. Com CPF inválido, exibir toast sem solicitar autenticação. Durante a requisição, desabilitar reenvio e exibir carregamento “Entrando...”.
-- Resultado: (1) autenticação inválida → permanecer no Login; (2) conta sem permissão/inativa → impedir acesso; (3) primeiro acesso obrigatório → /primeiro-acesso, sem matrícula ativa; (4) uma matrícula elegível → definir contexto e ir para /inicio; (5) duas ou mais matrículas elegíveis → /selecionar-matricula, sem matrícula previamente ativa.
+- Resultado: (1) autenticação inválida permanecer no Login; (2) conta sem permissão/inativa impedir acesso; (3) primeiro acesso obrigatório /primeiro-acesso, sem matrícula ativa; (4) uma matrícula elegível definir contexto e ir para /inicio; (5) duas ou mais matrículas elegíveis /selecionar-matricula, sem matrícula previamente ativa.
 - Quando houver zero matrícula elegível, não liberar Página Inicial; apresentar tratamento de indisponibilidade/ausência de vínculos conforme contrato de autorização, sem escolher vínculo arbitrário.
 - Perfis Administrador e Servidor pertencem à conta do AUTH; permissões, responsabilidades e abrangências operacionais deverão ser resolvidas a partir da matrícula ativa, não a partir de cards da página pública.
 - O protótipo utiliza credenciais e usuários simulados; CPFs de teste, acesso genérico por CPF válido e latências artificiais não constituem regras para produção.
@@ -92,7 +92,7 @@ Acesso à URL raiz do SIAGE-RH >> /login >> Primeiro Acesso (quando obrigatório
 | Nome do campo | Detalhamento do campo |
 | --- | --- |
 | <strong>CPF</strong> | <ul><li><strong>Label:</strong> “CPF”.</li><li><strong>Tipo:</strong> Campo de texto com entrada numérica e máscara.</li><li><strong>Componente SIAGE-UI:</strong> SFieldComponent (s-field: error), SInputComponent (s-input: maxlength=14) e SMaskDirective (sMask=cpf, maskValue=raw) como alternativa à máscara própria; validação matemática pela aplicação.</li><li><strong>Obrigatoriedade:</strong> Obrigatório.</li><li><strong>Placeholder:</strong> “000.000.000-00”.</li><li><strong>Máscara:</strong> 000.000.000-00; persistência e envio com 11 dígitos.</li><li><strong>Validações:</strong> Exigir exatamente 11 dígitos, rejeitar sequência repetida e aplicar dois dígitos verificadores do CPF; ignorar pontuação na validação.</li><li><strong>Mensagem obrigatório:</strong> “CPF é obrigatório.”</li><li><strong>Mensagem inválido:</strong> “CPF é inválido.”</li><li><strong>Comportamentos:</strong> Formatar enquanto digita; mostrar erro inline ao sair do campo e toast apenas em tentativa de envio inválido; CPF válido não implica cadastro no AUTH.</li></ul> |
-| <strong>Senha</strong> | <ul><li><strong>Label:</strong> “Senha”.</li><li><strong>Tipo:</strong> Campo de senha.</li><li><strong>Componente SIAGE-UI:</strong> SFieldComponent (s-field: error) e SInputComponent (s-input: type=password, maxlength=16), com mostrar/ocultar integrado.</li><li><strong>Obrigatoriedade:</strong> Obrigatório.</li><li><strong>Placeholder:</strong> “Digite sua senha”.</li><li><strong>Limite:</strong> 8 a 16 caracteres.</li><li><strong>Mensagem obrigatório:</strong> “Senha é obrigatória.”</li><li><strong>Mensagem limite:</strong> “A senha deve conter de 8 a 16 caracteres.”</li><li><strong>Comportamentos:</strong> Inicialmente oculta; permitir mostrar/ocultar sem alterar valor; validação abaixo do campo após saída ou envio; limpar senha em erro de credencial.</li></ul> |
+| <strong>Senha</strong> | <ul><li><strong>Label:</strong> “Senha”.</li><li><strong>Tipo:</strong> Campo de senha.</li><li><strong>Componente SIAGE-UI:</strong> SFieldComponent (s-field: error) e SInputComponent (s-input: type=password, maxlength=80), com mostrar/ocultar integrado.</li><li><strong>Obrigatoriedade:</strong> Obrigatório.</li><li><strong>Placeholder:</strong> “Digite sua senha”.</li><li><strong>Limite máximo:</strong> 80 caracteres.</li><li><strong>Mensagem obrigatório:</strong> “Senha é obrigatória.”</li><li><strong>Validação de limite:</strong> Impedir a digitação além de 80 caracteres; o login não exige a composição prevista para novas senhas.</li><li><strong>Comportamentos:</strong> Inicialmente oculta; permitir mostrar/ocultar sem alterar valor; validação abaixo do campo após saída ou envio; limpar senha em erro de credencial.</li></ul> |
 | <strong>Lembrar de mim</strong> | <ul><li><strong>Label:</strong> “Lembrar de mim”.</li><li><strong>Tipo:</strong> Checkbox opcional.</li><li><strong>Componente SIAGE-UI:</strong> SCheckboxComponent (s-checkbox).</li><li><strong>Valor inicial:</strong> Desmarcado.</li><li><strong>Comportamentos:</strong> Permite marcar ou desmarcar a preferência. O protótipo não contém persistência funcional de sessão vinculada ao controle; eventual comportamento de retenção deve ser integrado ao AUTH e não poderá armazenar senha em texto claro.</li></ul> |
 | <strong>Esqueceu a senha?</strong> | <ul><li><strong>Label:</strong> “Esqueceu a senha?”.</li><li><strong>Tipo:</strong> Link público.</li><li><strong>Componente SIAGE-UI:</strong> Navegação RouterLink própria do Angular; não se aplica componente específico da biblioteca.</li><li><strong>Destino:</strong> /login/esqueci-senha.</li><li><strong>Comportamentos:</strong> Inicia a RF002, sem autenticação prévia.</li></ul> |
 | <strong>Entrar no sistema</strong> | <ul><li><strong>Label:</strong> “Entrar no sistema”.</li><li><strong>Tipo:</strong> Botão primário.</li><li><strong>Componente SIAGE-UI:</strong> SButtonComponent (s-button: variant=primary, fullWidth, loading, loadingText).</li><li><strong>Habilitação:</strong> CPF e senha não vazios e fora de processamento; validação completa ocorre na ação, antes de consultar AUTH.</li><li><strong>Carregamento:</strong> “Entrando...”.</li><li><strong>Comportamentos:</strong> Revalidar CPF/senha; se válido, solicitar autenticação e aguardar resultado sem envio duplicado.</li></ul> |
@@ -111,13 +111,7 @@ Acesso à URL raiz do SIAGE-RH >> /login >> Primeiro Acesso (quando obrigatório
 | <strong>Configurações</strong> | <ul><li><strong>Conteúdo:</strong> “Gerencie as tabelas de referência e os parâmetros utilizados nos módulos do SIAGE-RH.”</li><li><strong>Comportamentos:</strong> Card informativo, não clicável.</li></ul> |
 | <strong>Rodapé institucional</strong> | <ul><li><strong>Tipo:</strong> Bloco informativo e navegação externa.</li><li><strong>Componente SIAGE-UI:</strong> Estrutura textual e imagens próprias da aplicação.</li><li><strong>Comportamentos:</strong> Exibe marca do Governo da Paraíba / Secretaria da Educação, link externo “Governo da Paraíba” e © 2026 SIAGE. Secretaria de Estado da Educação da Paraíba.; link abre nova aba com proteção rel=noopener noreferrer.</li></ul> |
 
-## 6) Modais
-
-| Modal | Quando exibir | Título/Mensagem | Ações/Regras | Imagens |
-| --- | --- | --- | --- | --- |
-| Não se aplica | Não há modal funcional nesta RF. | Não se aplica. | Os feedbacks previstos são apresentados por mensagem inline, toast ou estado de tela, conforme seu cenário. |  |
-
-## 7) Toast
+## 6) Toast
 
 | Toast | Quando exibir | Título/Mensagem | Ações/Regras | Imagens |
 | --- | --- | --- | --- | --- |
@@ -129,7 +123,7 @@ Acesso à URL raiz do SIAGE-RH >> /login >> Primeiro Acesso (quando obrigatório
 | <strong>Serviço indisponível</strong> | Falha de comunicação ou indisponibilidade do AUTH. | “Não foi possível concluir o acesso. Tente novamente.” | <ul><li><strong>Componente SIAGE-UI:</strong> SToastService (error).</li><li><strong>Comportamentos:</strong> Desativar carregamento e permitir nova tentativa.</li></ul> |  |
 | <strong>Senha alterada</strong> | Redirecionamento para Login após RF002 ou RF004 concluída. | “Senha alterada com sucesso. Entre no SIAGE-RH utilizando sua nova senha.” | <ul><li><strong>Componente SIAGE-UI:</strong> SToastService (success).</li><li><strong>Comportamentos:</strong> Exibir uma vez; não utilizar banner nem modal.</li></ul> |  |
 
-## 8) Protótipos
+## 7) Protótipos
 
 | Protótipo |
 | --- |
@@ -144,6 +138,6 @@ Acesso à URL raiz do SIAGE-RH >> /login >> Primeiro Acesso (quando obrigatório
 | <strong>Login — sucesso após alteração de senha</strong> |
 |  |
 
-## 9) Lacunas da biblioteca SIAGE-UI
+## 8) Lacunas da biblioteca SIAGE-UI
 
-Na versão 20.0.5, SInputComponent oferece mostrar/ocultar senha, e SMaskDirective oferece máscara de CPF; a validação matemática continua na aplicação. SCardComponent e SIconComponent são alternativas para os cards informativos próprios. Não foi identificada lacuna adicional para esta RF; LAC-001 e LAC-002 não se aplicam. A limitação de foco LAC-003 foi observada no controle de senha e é detalhada na RF004, que exige preservação do foco no campo.
+Não foi identificada lacuna adicional para esta RF.

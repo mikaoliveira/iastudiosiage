@@ -150,7 +150,7 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
         </button>
       } @else {
         <!-- Painel flutuante compacto que não interfere no formulário nem no card -->
-        <div class="bg-siage-surface/95 border border-siage-border rounded-xl shadow-xl p-3.5 text-xs w-76 sm:w-84 backdrop-blur-md animate-fadeIn transition-colors">
+        <div class="bg-siage-surface/95 border border-siage-border rounded-xl shadow-xl p-3.5 text-xs w-76 sm:w-84 max-h-[calc(100dvh-1.5rem)] overflow-y-auto backdrop-blur-md animate-fadeIn transition-colors">
           <div class="flex items-center justify-between pb-2 border-b border-siage-border/60 mb-2.5">
             <div class="flex items-center gap-1.5 text-siage-text-primary text-[11px] font-semibold">
               <span class="material-icons text-sm text-siage-primary" style="font-size: 15px; width: 15px; height: 15px;">science</span>
@@ -188,7 +188,7 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
                   type="button" 
                   (click)="simularCenario('credenciais-invalidas')" 
                   class="w-full text-left px-2.5 py-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 transition-colors cursor-pointer text-[11px] font-medium flex items-center justify-between"
-                  title="Simular CPF ou senha incorretos"
+                  title="Simular CPF sem cadastro ou senha incorreta"
                 >
                   <span>Credenciais inválidas</span>
                   <mat-icon style="font-size: 14px; width: 14px; height: 14px;">arrow_forward</mat-icon>
@@ -212,6 +212,28 @@ export function loginPasswordValidator(control: AbstractControl): ValidationErro
                   id="simulator-usuario-inativo"
                 >
                   <span>Usuário inativo</span>
+                  <mat-icon style="font-size: 14px; width: 14px; height: 14px;">arrow_forward</mat-icon>
+                </button>
+
+                <button
+                  type="button"
+                  (click)="simularCenario('situacao-inativa-unica')"
+                  class="w-full text-left px-2.5 py-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 transition-colors cursor-pointer text-[11px] font-medium flex items-center justify-between"
+                  title="Simular situação funcional inativa em matrícula única"
+                  id="simulator-situacao-inativa-unica"
+                >
+                  <span>Situação inativa (matrícula única)</span>
+                  <mat-icon style="font-size: 14px; width: 14px; height: 14px;">arrow_forward</mat-icon>
+                </button>
+
+                <button
+                  type="button"
+                  (click)="simularCenario('situacao-inativa-multipla')"
+                  class="w-full text-left px-2.5 py-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 transition-colors cursor-pointer text-[11px] font-medium flex items-center justify-between"
+                  title="Simular situação funcional inativa em todas as matrículas"
+                  id="simulator-situacao-inativa-multipla"
+                >
+                  <span>Situação inativa (múltiplas matrículas)</span>
                   <mat-icon style="font-size: 14px; width: 14px; height: 14px;">arrow_forward</mat-icon>
                 </button>
 
@@ -454,15 +476,9 @@ export class Login implements OnInit {
 
       // CENÁRIO 2: Usuário sem acesso ao SIAGE-RH
       if (cpfRaw === '10000000280') {
-        this.toastService.error('Seu usuário não possui permissão para acessar o SIAGE-RH.');
+        this.toastService.warning('Seu usuário não possui permissão para acessar o SIAGE-RH.');
         this.loginForm.controls.password.setValue('');
         this.loginForm.controls.password.markAsUntouched();
-        return;
-      }
-
-      // CENÁRIO: Cadastro não encontrado
-      if (cpfRaw === '00000000000') {
-        this.toastService.error('Cadastro não encontrado. Verifique os dados informados.');
         return;
       }
 
@@ -523,7 +539,7 @@ export class Login implements OnInit {
     }, 450);
   }
 
-  simularCenario(tipo: 'cpf-invalido' | 'credenciais-invalidas' | 'sem-acesso' | 'usuario-inativo' | 'servico-indisponivel' | 'sucesso-individual' | 'sucesso-multiplo' | 'primeiro-acesso') {
+  simularCenario(tipo: 'cpf-invalido' | 'credenciais-invalidas' | 'sem-acesso' | 'usuario-inativo' | 'situacao-inativa-unica' | 'situacao-inativa-multipla' | 'servico-indisponivel' | 'sucesso-individual' | 'sucesso-multiplo' | 'primeiro-acesso') {
     if (tipo === 'cpf-invalido') {
       this.loginForm.controls.cpf.setValue('111.111.111-11');
       this.loginForm.controls.password.setValue('Educacao@2026');
@@ -531,8 +547,7 @@ export class Login implements OnInit {
       this.loginForm.controls.cpf.updateValueAndValidity();
       this.toastService.error('CPF é inválido.');
     } else if (tipo === 'credenciais-invalidas') {
-      // CPF válido (Carlos Eduardo Lima) + Senha incorreta mas no formato válido (8 a 16 caracteres)
-      this.loginForm.controls.cpf.setValue('529.982.247-25');
+      this.loginForm.controls.cpf.setValue('123.456.789-09');
       this.loginForm.controls.password.setValue('Incorreta@1');
       this.loginForm.controls.cpf.markAsTouched();
       this.loginForm.controls.password.markAsTouched();
@@ -555,6 +570,10 @@ export class Login implements OnInit {
       this.loginForm.controls.cpf.updateValueAndValidity();
       this.loginForm.controls.password.updateValueAndValidity();
       this.executarAutenticacao();
+    } else if (tipo === 'situacao-inativa-unica') {
+      this.toastService.warning('Sua matrícula possui a situação funcional ‘Licença tratamento de saúde’, que não permite acesso ao SIAGE-RH.');
+    } else if (tipo === 'situacao-inativa-multipla') {
+      this.toastService.warning('Nenhuma das suas matrículas possui situação funcional que permita acesso ao SIAGE-RH.');
     } else if (tipo === 'servico-indisponivel') {
       this.loginForm.controls.cpf.setValue('100.000.004-42');
       this.loginForm.controls.password.setValue('Educacao@2026');
